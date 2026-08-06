@@ -198,6 +198,20 @@ const AdminVotersList: React.FC<{
                     </div>
                   </div>
 
+                  <div>
+                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Section</div>
+                    <div style={{ display: "inline-block", padding: "4px 12px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "13px", fontWeight: 600 }}>
+                      {s.section || "N/A"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Password</div>
+                    <div style={{ display: "inline-block", padding: "4px 12px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "13px", fontWeight: 600, fontFamily: "monospace" }}>
+                      {s.password || "N/A"}
+                    </div>
+                  </div>
+
                   <div style={{ minWidth: "100px" }}>
                     <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Status</div>
                     {s.has_voted ? (
