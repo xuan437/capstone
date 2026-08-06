@@ -229,7 +229,7 @@ const AdminSetup: React.FC<{
               name="position"
               value={form.position}
               onChange={handleInputChange}
-              style={{ padding: "12px", border: "1px solid var(--border-light)", borderRadius: "6px", background: "var(--bg-main)" }}
+              style={{ padding: "12px", border: "1px solid #0B1736", borderRadius: "6px", background: "#0B1736", color: "#FFFFFF" }}
             >
               {POSITIONS.map((pos) => (
                 <option key={pos} value={pos}>{pos}</option>

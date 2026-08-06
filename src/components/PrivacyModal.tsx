@@ -87,8 +87,8 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
             <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#FFFFFF" }}>
               Privacy & Data Policy Notice
             </h2>
-            <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#93C5FD" }}>
-              GUSELA Automated Election System
+            <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#FFFFFF" }}>
+              DLMHS Online Voting Election
             </p>
           </div>
         </div>
@@ -107,7 +107,7 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
           }}
         >
           <p style={{ margin: 0, fontWeight: 500 }}>
-            Welcome to the <strong>GUSELA Automated Student Election System</strong>. Before accessing the portal, please read and acknowledge our data privacy guidelines:
+            Welcome to the <strong>DLMHS Online Voting System</strong>. Before accessing the portal, please read and acknowledge our data privacy guidelines:
           </p>
 
           <div

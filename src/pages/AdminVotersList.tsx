@@ -205,7 +205,7 @@ const AdminVotersList: React.FC<{
         <select
           value={gradeFilter}
           onChange={(e) => setGradeFilter(e.target.value)}
-          style={{ padding: "8px 16px", border: "1px solid var(--border-light)", borderRadius: "6px", background: "var(--bg-main)", fontSize: "14px" }}
+          style={{ padding: "8px 16px", border: "1px solid #0B1736", borderRadius: "6px", background: "#0B1736", color: "#FFFFFF", fontSize: "14px" }}
         >
           <option value="All">All Grades</option>
           <option value="G7">Grade 7</option>

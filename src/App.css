@@ -64,11 +64,24 @@ span:not(.material-symbols-outlined),
 }
 
 input,
-textarea,
-select {
+textarea {
   color: #0F172A !important;
   font-weight: 500;
   font-size: 15px;
+}
+
+select {
+  background-color: #0B1736 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #0B1736 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+}
+
+select option {
+  background-color: #0B1736 !important;
+  color: #FFFFFF !important;
 }
 
 input::placeholder,

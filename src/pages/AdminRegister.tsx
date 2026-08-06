@@ -179,7 +179,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
                 <div>
                   <label style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)", marginBottom: "8px", display: "block" }}>Grade Level *</label>
-                  <select name="grade" value={form.grade} onChange={handleChange} style={{ width: "100%", padding: "14px", border: "1px solid var(--border-light)", borderRadius: "6px", background: "var(--bg-main)", fontSize: "14px", height: "50px" }}>
+                  <select name="grade" value={form.grade} onChange={handleChange} style={{ width: "100%", padding: "14px", border: "1px solid #0B1736", borderRadius: "6px", background: "#0B1736", color: "#FFFFFF", fontSize: "14px", height: "50px" }}>
                     <option value="G7">Grade 7</option>
                     <option value="G8">Grade 8</option>
                     <option value="G9">Grade 9</option>
