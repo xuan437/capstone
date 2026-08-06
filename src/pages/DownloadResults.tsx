@@ -75,10 +75,10 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) 
       filename: 'Official_Election_Results.pdf',
       image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in' as const, format: 'letter', orientation: 'portrait' as const }
+      jsPDF: { unit: 'in' as const, format: 'letter', orientation: 'landscape' as const }
     };
 
-    await html2pdf().set(opt).from(element).toPdf().save();
+    await (html2pdf as any)().set(opt).from(element).save();
   };
 
   if (loading) return <div className="screen-content flex-center">Preparing report...</div>;

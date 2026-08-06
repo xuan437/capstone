@@ -250,9 +250,11 @@ textarea::placeholder {
 }
 
 .content-max-width {
-  max-width: 1400px;
+  max-width: 100%;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
   margin: 0 auto;
-
 }
 
 .flex-center {

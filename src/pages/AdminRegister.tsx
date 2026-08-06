@@ -123,7 +123,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   return (
     <div className="screen-content content-max-width">
       <ReturnButton onClick={() => setPage("admin_setup")} />
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+      <div style={{ width: "100%", margin: "0 auto" }}>
         <h1 style={{ marginBottom: "8px" }}>Register New Student</h1>
         <p style={{ color: "#64748b", marginBottom: "32px" }}>Add a new student to the voters list</p>
 
