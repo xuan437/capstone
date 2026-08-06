@@ -4,6 +4,7 @@ import { POSITIONS } from "../types";
 import type { Candidate, Page } from "../types";
 import ReturnButton from "../components/ReturnButton";
 import { base64ToImageUrl } from "../utils/imageUtils";
+import BubbleLoader from "../components/BubbleLoader";
 
 const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) => {
   const [results, setResults] = useState<{ candidate: Candidate; count: number }[]>([]);
@@ -81,14 +82,14 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) 
     await (html2pdf as any)().set(opt).from(element).save();
   };
 
-  if (loading) return <div className="screen-content flex-center">Preparing report...</div>;
+  if (loading) return <div className="screen-content flex-center"><BubbleLoader message="Preparing report..." /></div>;
 
   return (
     <div className="screen-content content-max-width">
       <ReturnButton onClick={() => setPage("admin_setup")} />
 
-      <div className="no-print" style={{ marginBottom: "30px", textAlign: "center" }}>
-        <button className="btn-primary" onClick={handleDownloadPDF} style={{ padding: "14px 32px", fontSize: "16px" }}>
+      <div className="no-print" style={{ display: "flex", justifyContent: "center", marginBottom: "30px", width: "100%" }}>
+        <button className="btn-primary" onClick={handleDownloadPDF} style={{ width: "auto", padding: "14px 32px", fontSize: "16px", background: "#0B1736", color: "#FFFFFF" }}>
           <span className="material-symbols-outlined" style={{ marginRight: "8px" }}>picture_as_pdf</span>
           Download Results
         </button>

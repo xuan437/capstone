@@ -4,6 +4,7 @@ import "./AdminVotersList.css";
 import type { Student, Page } from "../types";
 import ReturnButton from "../components/ReturnButton";
 import { base64ToImageUrl } from "../utils/imageUtils";
+import BubbleLoader from "../components/BubbleLoader";
 
 const AdminVotersList: React.FC<{
   setPage: (p: Page) => void;
@@ -171,13 +172,14 @@ const AdminVotersList: React.FC<{
           <h1>Voters List Dashboard</h1>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
-          <button className="btn-light-blue" onClick={handleDownloadClick} style={{ width: "auto", padding: "8px 16px", background: "#0B1736", color: "#FFFFFF" }}>
+          <button className="btn-primary" onClick={handleDownloadClick} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>download</span>
             Download PDF
           </button>
-          <button className="btn-light-blue" onClick={() => setPage("results")} style={{ width: "auto", padding: "8px 16px" }}>
+          <button className="btn-primary" onClick={() => setPage("results")} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Live Results
           </button>
-          <button className="btn-outline-wide" onClick={fetchStudentsWithVotes} style={{ width: "auto", padding: "8px 16px" }}>
+          <button className="btn-primary" onClick={fetchStudentsWithVotes} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Refresh
           </button>
         </div>
@@ -232,10 +234,7 @@ const AdminVotersList: React.FC<{
         </div>
 
         {loading ? (
-          <div style={{ padding: "40px", textAlign: "center", color: "var(--text-muted)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "32px", animation: "spin 1s linear infinite" }}>sync</span>
-            <p style={{ marginTop: "12px", fontWeight: 600 }}>Loading registry...</p>
-          </div>
+          <BubbleLoader message="Loading registry..." />
         ) : filteredStudents.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", background: "#f8fafc", borderRadius: "16px", border: "2px dashed var(--border-light)" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "#cbd5e1", marginBottom: "12px" }}>search_off</span>
@@ -342,23 +341,25 @@ const AdminVotersList: React.FC<{
                 {pdfAuthError}
               </p>
             )}
-            <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+            <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
               <button
+                className="btn-primary"
                 onClick={() => setShowPdfAuth(false)}
                 style={{
-                  flex: 1, padding: "11px", borderRadius: "8px",
-                  border: "1px solid #E2E8F0", background: "#F8FAFC",
-                  color: "#64748b", fontWeight: 600, cursor: "pointer", fontSize: "14px"
+                  flex: 1, padding: "12px", borderRadius: "8px",
+                  background: "#0B1736", color: "#FFFFFF",
+                  fontWeight: 600, cursor: "pointer", fontSize: "14px", border: "1px solid #0B1736"
                 }}
               >
                 Cancel
               </button>
               <button
+                className="btn-primary"
                 onClick={handlePdfAuthSubmit}
                 style={{
-                  flex: 1, padding: "11px", borderRadius: "8px",
-                  border: "none", background: "#0B1736",
-                  color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: "14px"
+                  flex: 1, padding: "12px", borderRadius: "8px",
+                  background: "#0B1736", color: "#FFFFFF",
+                  fontWeight: 700, cursor: "pointer", fontSize: "14px", border: "none"
                 }}
               >
                 Download
