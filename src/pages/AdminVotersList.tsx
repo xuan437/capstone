@@ -20,23 +20,38 @@ const AdminVotersList: React.FC<{
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: studentsData, error: studentsError } = await supabase
         .from("students")
-        .select("id, name, grade, section, password, photo_url, has_voted")
+        .select("*")
         .order("name");
 
-      if (error) {
-        console.warn("Primary select error, trying fallback select(*):", error);
-        const { data: fallbackData } = await supabase
-          .from("students")
-          .select("*")
-          .order("name");
-        setStudents(fallbackData || []);
-      } else {
-        setStudents(data || []);
+      if (studentsError) {
+        console.error("Error fetching students:", studentsError);
+        setStudents([]);
+        return;
       }
+
+      const { data: votesData, error: votesError } = await supabase
+        .from("votes")
+        .select("student_id");
+
+      if (votesError) {
+        console.warn("Votes fetch warning:", votesError);
+      }
+
+      const votedSet = new Set(
+        (votesData || []).map((v: any) => String(v.student_id)).filter(Boolean)
+      );
+
+      const formatted: Student[] = (studentsData || []).map((s: any) => ({
+        ...s,
+        id: String(s.id),
+        has_voted: votedSet.has(String(s.id)) || !!s.has_voted,
+      }));
+
+      setStudents(formatted);
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error("Unexpected fetch error:", err);
       setStudents([]);
     } finally {
       setLoading(false);
