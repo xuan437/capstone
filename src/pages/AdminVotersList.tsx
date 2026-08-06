@@ -26,10 +26,10 @@ const AdminVotersList: React.FC<{
         .order("name");
 
       if (error) {
-        console.warn("Direct fast select error, trying fallback:", error);
+        console.warn("Primary select error, trying fallback select(*):", error);
         const { data: fallbackData } = await supabase
           .from("students")
-          .select("id, name, grade, section")
+          .select("*")
           .order("name");
         setStudents(fallbackData || []);
       } else {

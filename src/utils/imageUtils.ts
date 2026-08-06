@@ -17,8 +17,10 @@ export function fileToBase64(file: File): Promise<string> {
  */
 export function base64ToImageUrl(base64OrUrl: string | null | undefined): string | null {
   if (!base64OrUrl) return null;
-  if (base64OrUrl.startsWith("data:") || base64OrUrl.startsWith("http")) {
-    return base64OrUrl;
+  const cleaned = base64OrUrl.trim();
+  if (!cleaned) return null;
+  if (cleaned.startsWith("data:") || cleaned.startsWith("http")) {
+    return cleaned;
   }
-  return `data:image/jpeg;base64,${base64OrUrl}`;
+  return `data:image/jpeg;base64,${cleaned}`;
 }
