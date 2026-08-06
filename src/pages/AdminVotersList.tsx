@@ -50,29 +50,79 @@ const AdminVotersList: React.FC<{
     setLoading(false);
   };
 
-  const downloadCSV = () => {
-    const headers = ["LRN", "Name", "Grade", "Section", "Password", "Has Voted"];
-    const rows = filteredStudents.map((s) => [
-      s.id,
-      s.name,
-      s.grade,
-      s.section || "",
-      s.password || "",
-      s.has_voted ? "Yes" : "No",
-    ]);
+  const downloadPDF = async () => {
+    setLoading(true);
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      
+      const element = document.createElement("div");
+      element.style.padding = "40px";
+      element.style.fontFamily = "sans-serif";
+      
+      element.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b1736; padding-bottom: 16px; margin-bottom: 24px;">
+          <div>
+            <h1 style="color: #0b1736; margin: 0; font-size: 24px;">Voters Registry List</h1>
+            <p style="color: #64748b; margin: 4px 0 0 0; font-size: 13px;">GUSELA Online Voting System</p>
+          </div>
+          <div style="text-align: right;">
+            <p style="color: #64748b; margin: 0; font-size: 12px; font-weight: 600;">Date Generated:</p>
+            <p style="color: #0b1736; margin: 2px 0 0 0; font-size: 13px; font-weight: 700;">${new Date().toLocaleDateString()}</p>
+          </div>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <span style="font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase;">Filtered Grade:</span>
+          <span style="font-size: 13px; color: #0b1736; font-weight: 700; margin-left: 6px; padding: 3px 8px; background: #e2e8f0; border-radius: 4px;">${gradeFilter}</span>
+        </div>
+      `;
 
-    const csvContent =
-      "\uFEFF" + // UTF-8 BOM for Excel compatibility
-      [headers.join(","), ...rows.map((e) => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+      const table = document.createElement("table");
+      table.style.width = "100%";
+      table.style.borderCollapse = "collapse";
+      table.style.fontSize = "11px";
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `voters_list_${gradeFilter}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      table.innerHTML = `
+        <thead>
+          <tr style="background-color: #0b1736; text-align: left; color: #ffffff;">
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">LRN</th>
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Name</th>
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Grade</th>
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Section</th>
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Password</th>
+            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1; text-align: center;">Has Voted</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filteredStudents.map((s, idx) => `
+            <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <td style="padding: 8px 10px; font-family: monospace; border: 1px solid #e2e8f0;">${s.id}</td>
+              <td style="padding: 8px 10px; font-weight: 600; color: #0b1736; border: 1px solid #e2e8f0;">${s.name}</td>
+              <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${s.grade}</td>
+              <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${s.section || "N/A"}</td>
+              <td style="padding: 8px 10px; font-family: monospace; border: 1px solid #e2e8f0;">${s.password || "N/A"}</td>
+              <td style="padding: 8px 10px; text-align: center; border: 1px solid #e2e8f0; font-weight: 700; color: ${s.has_voted ? '#059669' : '#dc2626'};">
+                ${s.has_voted ? "Yes" : "No"}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+      element.appendChild(table);
+
+      const opt = {
+        margin: 0.5,
+        filename: `voters_list_${gradeFilter}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in' as const, format: 'letter', orientation: 'portrait' as const }
+      };
+
+      await html2pdf().set(opt).from(element).toPdf().save();
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -100,8 +150,8 @@ const AdminVotersList: React.FC<{
           <h1>Voters List Dashboard</h1>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
-          <button className="btn-light-blue" onClick={downloadCSV} style={{ width: "auto", padding: "8px 16px", background: "var(--accent-teal, #10B981)" }}>
-            Download CSV
+          <button className="btn-light-blue" onClick={downloadPDF} style={{ width: "auto", padding: "8px 16px", background: "#DC2626", color: "#FFFFFF" }}>
+            Download PDF
           </button>
           <button className="btn-light-blue" onClick={() => setPage("results")} style={{ width: "auto", padding: "8px 16px" }}>
             Live Results
