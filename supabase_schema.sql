@@ -106,3 +106,44 @@ CREATE POLICY "Enable read for everyone" ON election_settings FOR SELECT USING (
 CREATE POLICY "Enable insert for everyone" ON election_settings FOR INSERT WITH CHECK (true);
 CREATE POLICY "Enable update for everyone" ON election_settings FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Enable delete for everyone" ON election_settings FOR DELETE USING (true);
+
+-- 10. Automatic Password Hashing Extension, Trigger, and RPC Function
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Trigger function to automatically hash student password on insert or update
+CREATE OR REPLACE FUNCTION hash_student_password()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Hash password using bcrypt if it is not already hashed
+    IF NEW.password IS NOT NULL AND NEW.password !~ '^\$2[aby]\$' THEN
+        NEW.password := crypt(NEW.password, gen_salt('bf', 10));
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attach trigger to students table
+DROP TRIGGER IF EXISTS trigger_hash_student_password ON students;
+CREATE TRIGGER trigger_hash_student_password
+BEFORE INSERT OR UPDATE OF password ON students
+FOR EACH ROW
+EXECUTE FUNCTION hash_student_password();
+
+-- RPC Function to safely verify student login against hashed or plain text passwords
+CREATE OR REPLACE FUNCTION verify_student_login(student_lrn TEXT, input_password TEXT)
+RETURNS SETOF students AS $$
+BEGIN
+    RETURN QUERY
+    SELECT * FROM students
+    WHERE id = student_lrn
+      AND (
+        password = crypt(input_password, password)
+        OR password = input_password
+      );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Automatically hash any existing plaintext passwords in the database
+UPDATE students 
+SET password = password 
+WHERE password IS NOT NULL AND password !~ '^\$2[aby]\$';

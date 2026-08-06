@@ -70,12 +70,29 @@ const AuthForm: React.FC<{
       return;
     }
 
-    const { data: student, error: fetchError } = await supabase
-      .from("students")
-      .select("*")
-      .eq("id", identifier)
-      .eq("password", password)
-      .maybeSingle();
+    let student: any = null;
+    let fetchError: any = null;
+
+    // First attempt authentication using the RPC function (supports hashed passwords)
+    const { data: rpcData, error: rpcError } = await supabase.rpc("verify_student_login", {
+      student_lrn: identifier,
+      input_password: password,
+    });
+
+    if (!rpcError && rpcData && rpcData.length > 0) {
+      student = rpcData[0];
+    } else {
+      // Fallback to direct query
+      const { data: queryData, error: queryError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", identifier)
+        .eq("password", password)
+        .maybeSingle();
+
+      student = queryData;
+      fetchError = queryError;
+    }
 
     if (fetchError) {
       console.error("Student login error:", fetchError);
