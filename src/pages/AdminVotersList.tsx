@@ -19,55 +19,37 @@ const AdminVotersList: React.FC<{
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
 
-    let studentsData: any[] | null = null;
-    let studentsError: any = null;
+    try {
+      const [studentsRes, votesRes] = await Promise.all([
+        supabase
+          .from("students")
+          .select("id, name, grade, section, password, photo_url, has_voted")
+          .order("name"),
+        supabase.from("votes").select("student_id"),
+      ]);
 
-    const resFull = await supabase
-      .from("students")
-      .select("id, name, grade, section, password, photo_url, has_voted")
-      .order("name");
+      let studentsData = studentsRes.data;
 
-    if (!resFull.error && resFull.data) {
-      studentsData = resFull.data;
-    } else {
-      console.warn("Full select failed, attempting fallback select(*):", resFull.error);
-      const resBasic = await supabase
-        .from("students")
-        .select("*")
-        .order("name");
+      if (studentsRes.error || !studentsData) {
+        const fallbackRes = await supabase.from("students").select("*").order("name");
+        studentsData = fallbackRes.data || [];
+      }
 
-      studentsData = resBasic.data || [];
-      studentsError = resBasic.error;
-    }
+      const votedStudentIds = new Set(
+        (votesRes.data || []).map((v: any) => v.student_id).filter(Boolean)
+      );
 
-    if (studentsError || !studentsData) {
-      console.error("Error fetching students:", studentsError);
-      setStudents([]);
+      setStudents(
+        studentsData.map((s) => ({
+          ...s,
+          has_voted: votedStudentIds.has(s.id) || !!s.has_voted,
+        }))
+      );
+    } catch (err) {
+      console.error("Fast fetch failed:", err);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const { data: votesData, error: votesError } = await supabase
-      .from("votes")
-      .select("student_id");
-
-    if (votesError) {
-      setStudents(studentsData.map((s) => ({ ...s, has_voted: !!s.has_voted })));
-      setLoading(false);
-      return;
-    }
-
-    const votedStudentIds = new Set(
-      (votesData || []).map((v: any) => v.student_id).filter(Boolean)
-    );
-
-    setStudents(
-      studentsData.map((s) => ({
-        ...s,
-        has_voted: votedStudentIds.has(s.id) || !!s.has_voted,
-      }))
-    );
-    setLoading(false);
   };
 
   const handleDownloadClick = () => {
