@@ -253,59 +253,58 @@ const AdminVotersList: React.FC<{
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {filteredStudents.map((s) => (
-              <div key={s.id} style={{ padding: "20px 24px", background: "linear-gradient(145deg, #ffffff, #f8fafc)", borderRadius: "16px", border: "1px solid var(--border-light)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px", transition: "transform 0.2s ease, box-shadow 0.2s ease", flexWrap: "wrap" }} className="hover-lift">
-                <div style={{ display: "flex", alignItems: "center", gap: "20px", minWidth: "220px" }}>
+              <div key={s.id} style={{ padding: "18px 24px", background: "linear-gradient(145deg, #ffffff, #f8fafc)", borderRadius: "16px", border: "1px solid var(--border-light)", display: "grid", gridTemplateColumns: "minmax(220px, 2fr) minmax(80px, 1fr) minmax(100px, 1fr) minmax(120px, 1.2fr) minmax(100px, 1fr) auto", alignItems: "center", gap: "20px" }} className="hover-lift">
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                   <img
                     src={
                       base64ToImageUrl(s.photo_url) ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=E8F0FE&color=0B1736`
                     }
                     alt={s.name}
-                    style={{ width: "56px", height: "56px", borderRadius: "16px", objectFit: "cover", border: "2px solid white", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+                    style={{ width: "50px", height: "50px", borderRadius: "14px", objectFit: "cover", border: "2px solid white", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
                     onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=E8F0FE&color=0B1736`; }}
                   />
                   <div>
-                    <h4 style={{ margin: "0 0 6px 0", fontSize: "16px", color: "var(--primary-navy)", fontWeight: 700 }}>{s.name}</h4>
-                    <div style={{ fontFamily: "monospace", fontSize: "13px", color: "var(--text-muted)" }}>LRN: {s.id}</div>
+                    <h4 style={{ margin: "0 0 4px 0", fontSize: "15px", color: "var(--primary-navy)", fontWeight: 700 }}>{s.name}</h4>
+                    <div style={{ fontFamily: "monospace", fontSize: "12px", color: "var(--text-muted)" }}>LRN: {s.id}</div>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "32px", flexWrap: "wrap", flex: 1, justifyContent: "flex-end" }}>
-                  <div>
-                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Grade</div>
-                    <div style={{ display: "inline-block", padding: "4px 12px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "13px", fontWeight: 600 }}>
-                      {s.grade}
-                    </div>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "4px" }}>Grade</div>
+                  <div style={{ display: "inline-block", padding: "4px 10px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
+                    {s.grade}
                   </div>
+                </div>
 
-                  <div>
-                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Section</div>
-                    <div style={{ display: "inline-block", padding: "4px 12px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "13px", fontWeight: 600 }}>
-                      {s.section || "N/A"}
-                    </div>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "4px" }}>Section</div>
+                  <div style={{ display: "inline-block", padding: "4px 10px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
+                    {s.section || "N/A"}
                   </div>
+                </div>
 
-                  <div>
-                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Password</div>
-                    <div style={{ display: "inline-block", padding: "4px 12px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "13px", fontWeight: 600, fontFamily: "monospace" }}>
-                      {s.password || "N/A"}
-                    </div>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "4px" }}>Password</div>
+                  <div style={{ display: "inline-block", padding: "4px 10px", background: "#f1f5f9", color: "#334155", borderRadius: "6px", fontSize: "12px", fontWeight: 600, fontFamily: "monospace" }}>
+                    {s.password || "N/A"}
                   </div>
+                </div>
 
-                  <div style={{ minWidth: "100px" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "6px" }}>Status</div>
-                    {s.has_voted ? (
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 12px", background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#059669", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>check_circle</span>
-                        Voted
-                      </div>
-                    ) : (
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 12px", background: "white", border: "1px solid var(--border-light)", color: "#64748b", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pending</span>
-                        Pending
-                      </div>
-                    )}
-                  </div>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#94a3b8", marginBottom: "4px" }}>Status</div>
+                  {s.has_voted ? (
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#059669", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>check_circle</span>
+                      Voted
+                    </div>
+                  ) : (
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 10px", background: "white", border: "1px solid var(--border-light)", color: "#64748b", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pending</span>
+                      Pending
+                    </div>
+                  )}
+                </div>
 
                   <button className="btn-light-blue" onClick={() => onViewProfile(s.id)} style={{ width: "auto", padding: "10px 20px", fontSize: "13px", height: "fit-content", borderRadius: "8px" }}>
                     View Profile
