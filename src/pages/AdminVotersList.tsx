@@ -19,12 +19,29 @@ const AdminVotersList: React.FC<{
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
 
-    const { data: studentsData, error: studentsError } = await supabase
+    let studentsData: any[] | null = null;
+    let studentsError: any = null;
+
+    const resFull = await supabase
       .from("students")
       .select("id, name, grade, section, password, photo_url, has_voted")
       .order("name");
 
+    if (!resFull.error && resFull.data) {
+      studentsData = resFull.data;
+    } else {
+      console.warn("Full select failed, attempting fallback select(*):", resFull.error);
+      const resBasic = await supabase
+        .from("students")
+        .select("*")
+        .order("name");
+
+      studentsData = resBasic.data || [];
+      studentsError = resBasic.error;
+    }
+
     if (studentsError || !studentsData) {
+      console.error("Error fetching students:", studentsError);
       setStudents([]);
       setLoading(false);
       return;
@@ -253,7 +270,7 @@ const AdminVotersList: React.FC<{
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {filteredStudents.map((s) => (
-              <div key={s.id} style={{ padding: "18px 24px", background: "linear-gradient(145deg, #ffffff, #f8fafc)", borderRadius: "16px", border: "1px solid var(--border-light)", display: "grid", gridTemplateColumns: "minmax(220px, 2fr) minmax(80px, 1fr) minmax(100px, 1fr) minmax(120px, 1.2fr) minmax(100px, 1fr) auto", alignItems: "center", gap: "20px" }} className="hover-lift">
+              <div key={s.id} style={{ padding: "18px 24px", background: "linear-gradient(145deg, #ffffff, #f8fafc)", borderRadius: "16px", border: "1px solid var(--border-light)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "20px", flexWrap: "wrap" }} className="hover-lift">
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                   <img
                     src={
