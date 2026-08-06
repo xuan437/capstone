@@ -19,7 +19,7 @@ CREATE TABLE students (
     has_voted BOOLEAN DEFAULT FALSE,
     voted_at TIMESTAMPTZ,
     vote_location TEXT,
-    photo_url TEXT,
+    photo_url TEXT, -- Standard image URL or Data URL string (no binary BYTEA conversion)
     mobile_number TEXT,
     otp_code TEXT,
     otp_expires_at TIMESTAMPTZ,
@@ -31,7 +31,7 @@ CREATE TABLE candidates (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     name TEXT NOT NULL,
     position TEXT NOT NULL,
-    image_url TEXT,
+    image_url TEXT, -- Standard image URL or Data URL string (no binary BYTEA conversion)
     campaign_text TEXT,
     age INTEGER,
     section TEXT,
