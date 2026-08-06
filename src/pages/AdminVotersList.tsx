@@ -12,6 +12,9 @@ const AdminVotersList: React.FC<{
   const [students, setStudents] = useState<Student[]>([]);
   const [gradeFilter, setGradeFilter] = useState<string>("All");
   const [loading, setLoading] = useState(true);
+  const [showPdfAuth, setShowPdfAuth] = useState(false);
+  const [pdfAuthInput, setPdfAuthInput] = useState("");
+  const [pdfAuthError, setPdfAuthError] = useState("");
 
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
@@ -48,6 +51,22 @@ const AdminVotersList: React.FC<{
       }))
     );
     setLoading(false);
+  };
+
+  const handleDownloadClick = () => {
+    setPdfAuthInput("");
+    setPdfAuthError("");
+    setShowPdfAuth(true);
+  };
+
+  const handlePdfAuthSubmit = async () => {
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (pdfAuthInput !== ADMIN_PASSWORD) {
+      setPdfAuthError("Incorrect password. Access denied.");
+      return;
+    }
+    setShowPdfAuth(false);
+    downloadPDF();
   };
 
   const downloadPDF = async () => {
@@ -150,7 +169,7 @@ const AdminVotersList: React.FC<{
           <h1>Voters List Dashboard</h1>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
-          <button className="btn-light-blue" onClick={downloadPDF} style={{ width: "auto", padding: "8px 16px", background: "#DC2626", color: "#FFFFFF" }}>
+          <button className="btn-light-blue" onClick={handleDownloadClick} style={{ width: "auto", padding: "8px 16px", background: "#DC2626", color: "#FFFFFF" }}>
             Download PDF
           </button>
           <button className="btn-light-blue" onClick={() => setPage("results")} style={{ width: "auto", padding: "8px 16px" }}>
@@ -286,7 +305,70 @@ const AdminVotersList: React.FC<{
           </div>
         )}
       </div>
+      </div>
     </div>
+
+    {/* PDF Password Auth Modal */}
+    {showPdfAuth && (
+      <div style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 99999, backdropFilter: "blur(4px)"
+      }}>
+        <div style={{
+          background: "#fff", borderRadius: "16px", padding: "32px",
+          width: "100%", maxWidth: "380px", boxShadow: "0 20px 60px rgba(0,0,0,0.2)"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "#DC2626" }}>lock</span>
+            <h3 style={{ margin: 0, color: "#0b1736", fontSize: "18px", fontWeight: 800 }}>Confirm PDF Download</h3>
+          </div>
+          <p style={{ margin: "0 0 20px 0", color: "#64748b", fontSize: "13px" }}>
+            Enter the faculty admin password to download the voters list PDF. This file contains sensitive student credentials.
+          </p>
+          <input
+            type="password"
+            placeholder="Enter admin password"
+            value={pdfAuthInput}
+            onChange={(e) => { setPdfAuthInput(e.target.value); setPdfAuthError(""); }}
+            onKeyDown={(e) => e.key === "Enter" && handlePdfAuthSubmit()}
+            autoFocus
+            style={{
+              width: "100%", padding: "12px 14px", border: `1px solid ${pdfAuthError ? "#DC2626" : "#E2E8F0"}`,
+              borderRadius: "8px", fontSize: "14px", boxSizing: "border-box",
+              outline: "none", marginBottom: "8px", background: "#F8FAFC"
+            }}
+          />
+          {pdfAuthError && (
+            <p style={{ margin: "0 0 12px 0", color: "#DC2626", fontSize: "12px", fontWeight: 600 }}>
+              {pdfAuthError}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: "10px", marginTop: "16px" }}>
+            <button
+              onClick={() => setShowPdfAuth(false)}
+              style={{
+                flex: 1, padding: "11px", borderRadius: "8px",
+                border: "1px solid #E2E8F0", background: "#F8FAFC",
+                color: "#64748b", fontWeight: 600, cursor: "pointer", fontSize: "14px"
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handlePdfAuthSubmit}
+              style={{
+                flex: 1, padding: "11px", borderRadius: "8px",
+                border: "none", background: "#DC2626",
+                color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: "14px"
+              }}
+            >
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 };
 
