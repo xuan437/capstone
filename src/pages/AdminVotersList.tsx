@@ -18,7 +18,7 @@ const AdminVotersList: React.FC<{
 
     const { data: studentsData, error: studentsError } = await supabase
       .from("students")
-      .select("id, name, grade, photo_url, has_voted")
+      .select("id, name, grade, section, password, photo_url, has_voted")
       .order("name");
 
     if (studentsError || !studentsData) {
@@ -50,6 +50,31 @@ const AdminVotersList: React.FC<{
     setLoading(false);
   };
 
+  const downloadCSV = () => {
+    const headers = ["LRN", "Name", "Grade", "Section", "Password", "Has Voted"];
+    const rows = filteredStudents.map((s) => [
+      s.id,
+      s.name,
+      s.grade,
+      s.section || "",
+      s.password || "",
+      s.has_voted ? "Yes" : "No",
+    ]);
+
+    const csvContent =
+      "\uFEFF" + // UTF-8 BOM for Excel compatibility
+      [headers.join(","), ...rows.map((e) => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `voters_list_${gradeFilter}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchStudentsWithVotes();
   }, []);
@@ -75,6 +100,9 @@ const AdminVotersList: React.FC<{
           <h1>Voters List Dashboard</h1>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
+          <button className="btn-light-blue" onClick={downloadCSV} style={{ width: "auto", padding: "8px 16px", background: "var(--accent-teal, #10B981)" }}>
+            Download CSV
+          </button>
           <button className="btn-light-blue" onClick={() => setPage("results")} style={{ width: "auto", padding: "8px 16px" }}>
             Live Results
           </button>
