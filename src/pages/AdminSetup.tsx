@@ -317,7 +317,7 @@ const AdminSetup: React.FC<{
                   {savingTimer ? "Saving..." : "Set Deadline"}
                 </button>
                 {electionEndTime && (
-                  <button className="btn-outline-wide" onClick={handleClearTimer} disabled={savingTimer} style={{ padding: "12px 20px", color: "#D92D20", borderColor: "#FEE4E2" }}>
+                  <button className="btn-outline-wide" onClick={handleClearTimer} disabled={savingTimer} style={{ padding: "12px 20px" }}>
                     Clear Timer
                   </button>
                 )}
@@ -423,7 +423,7 @@ const AdminSetup: React.FC<{
                         <button className="btn-outline-wide" onClick={() => handleEdit(c)} style={{ padding: "9px 18px", fontSize: "13px" }}>
                           Edit
                         </button>
-                        <button className="btn-outline-wide" onClick={() => handleDelete(c.id)} style={{ padding: "9px 18px", fontSize: "13px", color: "#D92D20", borderColor: "#FEE4E2" }}>
+                        <button className="btn-outline-wide" onClick={() => handleDelete(c.id)} style={{ padding: "9px 18px", fontSize: "13px" }}>
                           Delete
                         </button>
                       </div>
