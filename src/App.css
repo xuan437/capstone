@@ -77,11 +77,20 @@ select {
   font-weight: 600 !important;
   font-size: 14px !important;
   cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23FFFFFF' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+  border-radius: 8px !important;
 }
 
 select option {
   background-color: #0B1736 !important;
   color: #FFFFFF !important;
+  padding: 10px !important;
 }
 
 input::placeholder,
