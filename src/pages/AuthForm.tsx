@@ -61,7 +61,8 @@ const AuthForm: React.FC<{
     }
     setLoading(true);
     setError("");
-    const { identifier, password } = form;
+    const identifier = form.identifier.trim();
+    const password = form.password.trim();
 
     if (!/^\d{12}$/.test(identifier)) {
       setError("LRN must be exactly 12 digits (numbers only).");
@@ -74,17 +75,29 @@ const AuthForm: React.FC<{
       .select("*")
       .eq("id", identifier)
       .eq("password", password)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !student) {
+    if (fetchError) {
+      console.error("Student login error:", fetchError);
+      setError(`Login failed: ${fetchError.message}`);
+      setLoading(false);
+      return;
+    }
+
+    if (!student) {
       setError("Invalid LRN credentials. Please try again.");
       setLoading(false);
       return;
     }
 
-    localStorage.setItem("currentUser", JSON.stringify(student));
-    setCurrentUser(student as Student);
-    setPage((student as Student).has_voted ? "confirm" : "ballot");
+    const studentUser: Student = {
+      ...student,
+      id: String(student.id)
+    };
+
+    localStorage.setItem("currentUser", JSON.stringify(studentUser));
+    setCurrentUser(studentUser);
+    setPage(studentUser.has_voted ? "confirm" : "ballot");
     setLoading(false);
   };
 

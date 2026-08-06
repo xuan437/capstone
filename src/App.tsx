@@ -47,12 +47,16 @@ const AppShell: React.FC = () => {
             .from("students")
             .select("*")
             .eq("id", user.id)
-            .single();
+            .maybeSingle();
 
           if (data) {
-            setCurrentUser(data as Student);
-            setPage((data as Student).has_voted ? "confirm" : "ballot");
-            localStorage.setItem("currentUser", JSON.stringify(data));
+            const studentUser: Student = {
+              ...data,
+              id: String(data.id)
+            };
+            setCurrentUser(studentUser);
+            setPage(studentUser.has_voted ? "confirm" : "ballot");
+            localStorage.setItem("currentUser", JSON.stringify(studentUser));
           } else {
             handleLogout();
           }
