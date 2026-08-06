@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { Page } from "../types";
 import ReturnButton from "../components/ReturnButton";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
+import PasswordGenerator from "../components/PasswordGenerator";
 
 const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) => {
   const [form, setForm] = useState({
@@ -199,10 +200,12 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
               </div>
 
               {/* Password Input */}
-              <div style={{ marginBottom: "32px" }}>
+              <div style={{ marginBottom: "20px" }}>
                 <label style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-muted)", marginBottom: "8px", display: "block" }}>Password *</label>
-                <input name="password" type="password" placeholder="Enter login password" value={form.password} onChange={handleChange} onCopy={blockClipboard} onCut={blockClipboard} onPaste={blockClipboard} autoComplete="off" style={{ width: "100%", padding: "14px", border: "1px solid var(--border-light)", borderRadius: "6px", background: "var(--bg-main)", fontSize: "14px" }} />
+                <input name="password" type="text" placeholder="Enter login password" value={form.password} onChange={handleChange} onCopy={blockClipboard} onCut={blockClipboard} onPaste={blockClipboard} autoComplete="off" style={{ width: "100%", padding: "14px", border: "1px solid var(--border-light)", borderRadius: "6px", background: "var(--bg-main)", fontSize: "14px" }} />
               </div>
+
+              <PasswordGenerator onGenerate={(pw) => setForm(f => ({ ...f, password: pw }))} />
 
               <div style={{ marginTop: "auto", paddingTop: "20px", borderTop: "1px solid var(--border-light)" }}>
                 <button className="btn-primary" onClick={handleSubmit} disabled={loading} style={{ width: "100%", padding: "16px", fontSize: "16px", fontWeight: 700 }}>
