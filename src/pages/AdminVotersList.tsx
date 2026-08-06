@@ -71,12 +71,19 @@ const AdminVotersList: React.FC<{
 
   const downloadPDF = async () => {
     setLoading(true);
+    let element: HTMLDivElement | null = null;
     try {
+      // @ts-ignore
       const html2pdf = (await import("html2pdf.js")).default;
       
-      const element = document.createElement("div");
+      element = document.createElement("div");
+      element.style.position = "absolute";
+      element.style.left = "-9999px";
+      element.style.top = "-9999px";
+      element.style.width = "750px";
       element.style.padding = "40px";
       element.style.fontFamily = "sans-serif";
+      element.style.background = "#ffffff";
       
       element.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b1736; padding-bottom: 16px; margin-bottom: 24px;">
@@ -127,19 +134,23 @@ const AdminVotersList: React.FC<{
         </tbody>
       `;
       element.appendChild(table);
+      document.body.appendChild(element);
 
       const opt = {
         margin: 0.4,
         filename: `voter_slips_${gradeFilter}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in' as const, format: 'letter', orientation: 'portrait' as const }
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
-      await html2pdf().set(opt).from(element).toPdf().save();
+      await (html2pdf as any)().set(opt).from(element).save();
     } catch (err) {
       console.error("PDF generation failed:", err);
     } finally {
+      if (element && element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
       setLoading(false);
     }
   };
