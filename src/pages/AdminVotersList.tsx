@@ -310,7 +310,6 @@ const AdminVotersList: React.FC<{
                     View Profile
                   </button>
                 </div>
-              </div>
             ))}
           </div>
         )}
