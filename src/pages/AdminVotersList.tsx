@@ -17,7 +17,7 @@ const AdminVotersList: React.FC<{
   const [pdfAuthInput, setPdfAuthInput] = useState("");
   const [pdfAuthError, setPdfAuthError] = useState("");
 
-  const fetchStudentsWithVotes = async () => {
+  const fetchStudentsWithVotes = async (_?: any) => {
     setLoading(true);
     try {
       const { data: studentsData, error: studentsError } = await supabase

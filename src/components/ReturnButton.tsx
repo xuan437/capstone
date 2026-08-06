@@ -1,6 +1,6 @@
 
 
-const ReturnButton = ({ onClick }: { onClick: () => void }) => (
+const ReturnButton = ({ onClick }: { onClick: (e?: any) => void }) => (
   <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "24px" }}>
     <button
       className="btn-outline-wide touch-animate"
