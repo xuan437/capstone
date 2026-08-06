@@ -17,6 +17,7 @@ import StudentProfile from "./pages/StudentProfile";
 import CandidateProfile from "./pages/CandidateProfile";
 import DownloadResults from "./pages/DownloadResults";
 import AdminRegister from "./pages/AdminRegister";
+import PrivacyModal from "./components/PrivacyModal";
 
 const AppShell: React.FC = () => {
   const [page, setPage] = useState<Page>("login");
@@ -24,6 +25,7 @@ const AppShell: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasAgreedPrivacy, setHasAgreedPrivacy] = useState<boolean>(false);
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
@@ -73,6 +75,8 @@ const AppShell: React.FC = () => {
 
   return (
     <div className="app-container" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {!hasAgreedPrivacy && <PrivacyModal onAgree={() => setHasAgreedPrivacy(true)} />}
+
       {page !== "login" && <Header currentUser={currentUser} handleLogout={handleLogout} />}
 
       {page === "login" && <AuthForm setPage={setPage} setCurrentUser={setCurrentUser} />}
