@@ -20,20 +20,32 @@ const AdminVotersList: React.FC<{
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 3000)
+      );
+
+      const fetchPromise = supabase
         .from("students")
-        .select("*")
+        .select("id, name, grade, section, password, has_voted")
         .order("name");
 
-      if (error) {
-        console.error("Error fetching students:", error);
-        setStudents([]);
-      } else {
-        setStudents(data || []);
+      const res: any = await Promise.race([fetchPromise, timeoutPromise]);
+
+      if (res && res.data) {
+        setStudents(res.data);
+      } else if (res && res.error) {
+        console.error("Error fetching students:", res.error);
+        const { data: fallbackData } = await supabase.from("students").select("id, name, grade, section").order("name");
+        setStudents(fallbackData || []);
       }
     } catch (err) {
-      console.error("Unexpected fetch error:", err);
-      setStudents([]);
+      console.warn("Fetch timeout/error, attempting quick fallback:", err);
+      try {
+        const { data: fallbackData } = await supabase.from("students").select("id, name, grade, section").order("name");
+        setStudents(fallbackData || []);
+      } catch (e) {
+        setStudents([]);
+      }
     } finally {
       setLoading(false);
     }
