@@ -192,7 +192,7 @@ const AdminVotersList: React.FC<{
           <button className="btn-primary" onClick={() => setPage("results")} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Live Results
           </button>
-          <button className="btn-primary" onClick={() => fetchStudentsWithVotes(true)} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
+          <button className="btn-primary" onClick={fetchStudentsWithVotes} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Refresh
           </button>
         </div>
