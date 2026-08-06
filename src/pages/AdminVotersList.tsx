@@ -10,55 +10,30 @@ const AdminVotersList: React.FC<{
   setPage: (p: Page) => void;
   onViewProfile: (id: string) => void;
 }> = ({ setPage, onViewProfile }) => {
-  const [students, setStudents] = useState<Student[]>(() => {
-    try {
-      const cached = sessionStorage.getItem("gusela_voters_cache");
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [students, setStudents] = useState<Student[]>([]);
   const [gradeFilter, setGradeFilter] = useState<string>("All");
-  const [loading, setLoading] = useState<boolean>(() => {
-    try {
-      return !sessionStorage.getItem("gusela_voters_cache");
-    } catch {
-      return true;
-    }
-  });
+  const [loading, setLoading] = useState(true);
   const [showPdfAuth, setShowPdfAuth] = useState(false);
   const [pdfAuthInput, setPdfAuthInput] = useState("");
   const [pdfAuthError, setPdfAuthError] = useState("");
 
-  const fetchStudentsWithVotes = async (showLoading = false) => {
-    if (showLoading) setLoading(true);
-
+  const fetchStudentsWithVotes = async () => {
+    setLoading(true);
     try {
-      const { data: studentsData, error: studentsError } = await supabase
+      const { data, error } = await supabase
         .from("students")
-        .select("id, name, grade, section, password, photo_url, has_voted")
+        .select("*")
         .order("name");
 
-      let finalData = studentsData;
-
-      if (studentsError || !finalData) {
-        console.warn("Fast query notice, attempting fallback select(*):", studentsError);
-        const { data: fallbackData } = await supabase
-          .from("students")
-          .select("*")
-          .order("name");
-
-        finalData = fallbackData || [];
-      }
-
-      setStudents(finalData);
-      try {
-        sessionStorage.setItem("gusela_voters_cache", JSON.stringify(finalData));
-      } catch (e) {
-        // quota ignore
+      if (error) {
+        console.error("Error fetching students:", error);
+        setStudents([]);
+      } else {
+        setStudents(data || []);
       }
     } catch (err) {
-      console.error("Fast fetch error:", err);
+      console.error("Unexpected fetch error:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
@@ -198,7 +173,7 @@ const AdminVotersList: React.FC<{
           <button className="btn-primary" onClick={() => setPage("results")} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Live Results
           </button>
-          <button className="btn-primary" onClick={() => fetchStudentsWithVotes(true)} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
+          <button className="btn-primary" onClick={fetchStudentsWithVotes} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Refresh
           </button>
         </div>
