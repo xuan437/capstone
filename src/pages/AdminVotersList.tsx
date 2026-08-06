@@ -169,7 +169,7 @@ const AdminVotersList: React.FC<{
           <h1>Voters List Dashboard</h1>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px" }}>
-          <button className="btn-light-blue" onClick={handleDownloadClick} style={{ width: "auto", padding: "8px 16px", background: "#DC2626", color: "#FFFFFF" }}>
+          <button className="btn-light-blue" onClick={handleDownloadClick} style={{ width: "auto", padding: "8px 16px", background: "#0B1736", color: "#FFFFFF" }}>
             Download PDF
           </button>
           <button className="btn-light-blue" onClick={() => setPage("results")} style={{ width: "auto", padding: "8px 16px" }}>
@@ -357,7 +357,7 @@ const AdminVotersList: React.FC<{
                 onClick={handlePdfAuthSubmit}
                 style={{
                   flex: 1, padding: "11px", borderRadius: "8px",
-                  border: "none", background: "#DC2626",
+                  border: "none", background: "#0B1736",
                   color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: "14px"
                 }}
               >

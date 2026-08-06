@@ -338,12 +338,12 @@ input:focus {
 }
 
 .btn-primary {
-  background: var(--primary-navy);
+  background: #0B1736;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--secondary-navy);
+  background: #1C2B4F;
   transform: translateY(-1px);
 }
 
@@ -354,22 +354,22 @@ input:focus {
 }
 
 .btn-light-blue {
-  background: var(--accent-blue);
-  color: #0044CC;
+  background: #0B1736;
+  color: white;
 }
 
 .btn-light-blue:hover {
-  background: #d0dffd;
+  background: #1C2B4F;
 }
 
 .btn-outline-wide {
-  background: transparent;
-  border: 1px solid var(--border-light);
-  color: var(--text-main);
+  background: #0B1736;
+  border: 1px solid #0B1736;
+  color: white;
 }
 
 .btn-outline-wide:hover {
-  background: var(--bg-gray);
+  background: #1C2B4F;
 }
 
 .button-stack {
