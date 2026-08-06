@@ -22,7 +22,7 @@ const AdminVotersList: React.FC<{
     try {
       const { data: studentsData, error: studentsError } = await supabase
         .from("students")
-        .select("id, name, grade, section, password, has_voted")
+        .select("id, name, grade, section, password, photo_url, has_voted")
         .order("name");
 
       if (studentsError || !studentsData) {
