@@ -20,32 +20,24 @@ const AdminVotersList: React.FC<{
   const fetchStudentsWithVotes = async () => {
     setLoading(true);
     try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Request timeout")), 3000)
-      );
-
-      const fetchPromise = supabase
+      const { data, error } = await supabase
         .from("students")
         .select("id, name, grade, section, password, has_voted")
         .order("name");
 
-      const res: any = await Promise.race([fetchPromise, timeoutPromise]);
-
-      if (res && res.data) {
-        setStudents(res.data);
-      } else if (res && res.error) {
-        console.error("Error fetching students:", res.error);
-        const { data: fallbackData } = await supabase.from("students").select("id, name, grade, section").order("name");
+      if (error) {
+        console.warn("Direct fast select error, trying fallback:", error);
+        const { data: fallbackData } = await supabase
+          .from("students")
+          .select("id, name, grade, section")
+          .order("name");
         setStudents(fallbackData || []);
+      } else {
+        setStudents(data || []);
       }
     } catch (err) {
-      console.warn("Fetch timeout/error, attempting quick fallback:", err);
-      try {
-        const { data: fallbackData } = await supabase.from("students").select("id, name, grade, section").order("name");
-        setStudents(fallbackData || []);
-      } catch (e) {
-        setStudents([]);
-      }
+      console.error("Fetch error:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
@@ -185,7 +177,7 @@ const AdminVotersList: React.FC<{
           <button className="btn-primary" onClick={() => setPage("results")} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Live Results
           </button>
-          <button className="btn-primary" onClick={fetchStudentsWithVotes} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
+          <button className="btn-primary" onClick={() => fetchStudentsWithVotes(true)} style={{ width: "auto", padding: "10px 18px", fontSize: "14px", background: "#0B1736", color: "#FFFFFF" }}>
             Refresh
           </button>
         </div>

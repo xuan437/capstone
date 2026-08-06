@@ -147,3 +147,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 UPDATE students 
 SET password = password 
 WHERE password IS NOT NULL AND password !~ '^\$2[aby]\$';
+
+-- 11. Database Performance Indexes for Ultra-Fast Querying
+CREATE INDEX IF NOT EXISTS idx_students_name ON students(name);
+CREATE INDEX IF NOT EXISTS idx_students_grade ON students(grade);
