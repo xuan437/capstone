@@ -56,62 +56,68 @@ const AdminVotersList: React.FC<{
       const html2pdf = (await import("html2pdf.js")).default;
       
       const element = document.createElement("div");
-      element.style.padding = "40px";
-      element.style.fontFamily = "sans-serif";
+      element.style.padding = "20px";
+      element.style.fontFamily = "system-ui, -apple-system, sans-serif";
       
-      element.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0b1736; padding-bottom: 16px; margin-bottom: 24px;">
+      // Title header for the PDF document
+      const docHeader = document.createElement("div");
+      docHeader.innerHTML = `
+        <div style="border-bottom: 2px solid #0b1736; padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h1 style="color: #0b1736; margin: 0; font-size: 24px;">Voters Registry List</h1>
-            <p style="color: #64748b; margin: 4px 0 0 0; font-size: 13px;">GUSELA Online Voting System</p>
+            <h1 style="color: #0b1736; margin: 0; font-size: 20px; font-weight: 800;">Voter Credential Slips</h1>
+            <p style="color: #64748b; margin: 4px 0 0 0; font-size: 11px;">Cut along the dotted lines to distribute credentials to students.</p>
           </div>
-          <div style="text-align: right;">
-            <p style="color: #64748b; margin: 0; font-size: 12px; font-weight: 600;">Date Generated:</p>
-            <p style="color: #0b1736; margin: 2px 0 0 0; font-size: 13px; font-weight: 700;">${new Date().toLocaleDateString()}</p>
+          <div style="text-align: right; font-size: 11px; color: #64748b;">
+            <span>Generated: ${new Date().toLocaleDateString()}</span>
           </div>
         </div>
-        <div style="margin-bottom: 20px;">
-          <span style="font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase;">Filtered Grade:</span>
-          <span style="font-size: 13px; color: #0b1736; font-weight: 700; margin-left: 6px; padding: 3px 8px; background: #e2e8f0; border-radius: 4px;">${gradeFilter}</span>
+      `;
+      element.appendChild(docHeader);
+
+      // Create container for cards
+      const cardsContainer = document.createElement("div");
+      cardsContainer.style.display = "grid";
+      cardsContainer.style.gridTemplateColumns = "1fr 1fr";
+      cardsContainer.style.gap = "20px";
+
+      // Populate cards for each student
+      cardsContainer.innerHTML = filteredStudents.map((s) => `
+        <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 18px; background: #ffffff; box-sizing: border-box; display: flex; flexDirection: column; justify-content: space-between; min-height: 180px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div>
+                <span style="font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em;">VOTER CREDENTIALS</span>
+                <h4 style="margin: 2px 0 0 0; color: #0b1736; font-size: 15px; font-weight: 700;">${s.name}</h4>
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">
+                ${s.grade} - ${s.section || "N/A"}
+              </span>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px;">
+                <span style="color: #64748b; font-weight: 600;">Student LRN:</span>
+                <span style="font-family: monospace; font-weight: 700; color: #0f172a; letter-spacing: 0.05em;">${s.id}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                <span style="color: #64748b; font-weight: 600;">Password:</span>
+                <span style="font-family: monospace; font-weight: 700; color: #0f172a; letter-spacing: 0.05em;">${s.password || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #94a3b8;">
+            <span>GUSELA Online Voting System</span>
+            <span style="font-weight: 600; color: #64748b;">Keep Confidential</span>
+          </div>
         </div>
-      `;
+      `).join("");
 
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      table.style.fontSize = "11px";
-
-      table.innerHTML = `
-        <thead>
-          <tr style="background-color: #0b1736; text-align: left; color: #ffffff;">
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">LRN</th>
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Name</th>
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Grade</th>
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Section</th>
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1;">Password</th>
-            <th style="padding: 10px; font-weight: 700; border: 1px solid #cbd5e1; text-align: center;">Has Voted</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filteredStudents.map((s, idx) => `
-            <tr style="background-color: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-              <td style="padding: 8px 10px; font-family: monospace; border: 1px solid #e2e8f0;">${s.id}</td>
-              <td style="padding: 8px 10px; font-weight: 600; color: #0b1736; border: 1px solid #e2e8f0;">${s.name}</td>
-              <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${s.grade}</td>
-              <td style="padding: 8px 10px; border: 1px solid #e2e8f0;">${s.section || "N/A"}</td>
-              <td style="padding: 8px 10px; font-family: monospace; border: 1px solid #e2e8f0;">${s.password || "N/A"}</td>
-              <td style="padding: 8px 10px; text-align: center; border: 1px solid #e2e8f0; font-weight: 700; color: ${s.has_voted ? '#059669' : '#dc2626'};">
-                ${s.has_voted ? "Yes" : "No"}
-              </td>
-            </tr>
-          `).join("")}
-        </tbody>
-      `;
-      element.appendChild(table);
+      element.appendChild(cardsContainer);
 
       const opt = {
-        margin: 0.5,
-        filename: `voters_list_${gradeFilter}.pdf`,
+        margin: 0.4,
+        filename: `voter_slips_${gradeFilter}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'in' as const, format: 'letter', orientation: 'portrait' as const }
