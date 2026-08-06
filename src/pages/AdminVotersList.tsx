@@ -20,33 +20,25 @@ const AdminVotersList: React.FC<{
     setLoading(true);
 
     try {
-      const [studentsRes, votesRes] = await Promise.all([
-        supabase
+      const { data: studentsData, error: studentsError } = await supabase
+        .from("students")
+        .select("id, name, grade, section, password, has_voted")
+        .order("name");
+
+      if (studentsError || !studentsData) {
+        console.warn("Fast query notice, attempting fallback select(*):", studentsError);
+        const { data: fallbackData } = await supabase
           .from("students")
-          .select("id, name, grade, section, password, photo_url, has_voted")
-          .order("name"),
-        supabase.from("votes").select("student_id"),
-      ]);
+          .select("*")
+          .order("name");
 
-      let studentsData = studentsRes.data;
-
-      if (studentsRes.error || !studentsData) {
-        const fallbackRes = await supabase.from("students").select("*").order("name");
-        studentsData = fallbackRes.data || [];
+        setStudents(fallbackData || []);
+      } else {
+        setStudents(studentsData);
       }
-
-      const votedStudentIds = new Set(
-        (votesRes.data || []).map((v: any) => v.student_id).filter(Boolean)
-      );
-
-      setStudents(
-        studentsData.map((s) => ({
-          ...s,
-          has_voted: votedStudentIds.has(s.id) || !!s.has_voted,
-        }))
-      );
     } catch (err) {
-      console.error("Fast fetch failed:", err);
+      console.error("Fast fetch error:", err);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
