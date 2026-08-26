@@ -1,0 +1,232 @@
+/* ==========================================================================
+   CENTRAL DESIGN SYSTEM TOKENS & RESET
+   Project: Capstone React Application
+   Palette: Core Navy Blue (#0A192F) & Sub White (#FFFFFF)
+   Grid: 8px Architectural Grid System
+   ========================================================================== */
+
+/* --- Google Fonts & Material Symbols Imports --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  /* --- Typography Tokens --- */
+  --font-sans: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+
+  /* --- Brand Color Tokens --- */
+  --primary-navy: #0A192F;
+  --navy-hover: #112240;
+  --secondary-navy: #1A2B4C;
+  --navy-muted: #233554;
+  
+  /* --- Surface & Background Tokens --- */
+  --bg-main: #FFFFFF;
+  --bg-surface: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #F1F5F9;
+
+  /* --- Text & Contrast Tokens (WCAG Compliant) --- */
+  --text-main: #0F172A;
+  --text-muted: #334155;
+  --text-light: #64748B;
+  --text-white: #FFFFFF;
+
+  /* --- Border & Divider Tokens --- */
+  --border-light: #E2E8F0;
+  --border-subtle: #CBD5E1;
+  --border-blue: #BFDBFE;
+  --accent-blue: #E8F0FE;
+
+  /* --- Semantic Status Colors --- */
+  --color-success: #059669;
+  --color-success-bg: #ECFDF5;
+  --color-success-border: #A7F3D0;
+
+  --color-danger: #DC2626;
+  --color-danger-bg: #FEF2F2;
+  --color-danger-border: #FECACA;
+
+  --color-warning: #D97706;
+  --color-warning-bg: #FEF3C7;
+  --color-warning-border: #FDE68A;
+
+  --color-info: #0284C7;
+  --color-info-bg: #E0F2FE;
+  --color-info-border: #BAE6FD;
+
+  --color-purple: #7C3AED;
+  --color-purple-bg: #F3E8FF;
+  --color-purple-border: #DDD6FE;
+
+  /* --- 8px Grid Spacing Tokens --- */
+  --space-0-5: 4px;
+  --space-1: 8px;
+  --space-1-5: 12px;
+  --space-2: 16px;
+  --space-2-5: 20px;
+  --space-3: 24px;
+  --space-3-5: 28px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  /* --- Border Radius Scale --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* --- Geometry & Sizing Tokens --- */
+  --height-btn-top: 42px;
+  --height-btn-inner: 36px;
+  --card-padding-desktop: 32px;
+  --card-padding-mobile: 20px;
+  --card-radius: 16px;
+  --item-radius: 12px;
+
+  /* --- Elevation & Shadows --- */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 40px rgba(10, 25, 47, 0.15);
+  --shadow-modal: 0 25px 70px rgba(10, 25, 47, 0.28);
+}
+
+[data-theme="dark"] {
+  /* --- Brand Color Tokens (Dark Mode) --- */
+  --primary-navy: #38BDF8;
+  --navy-hover: #0284C7;
+  --secondary-navy: #1E293B;
+  --navy-muted: #334155;
+  
+  /* --- Surface & Background Tokens (Dark Mode) --- */
+  --bg-main: #0F172A;
+  --bg-surface: #0B132B;
+  --bg-card: #1E293B;
+  --bg-subtle: #334155;
+
+  /* --- Text & Contrast Tokens (Dark Mode) --- */
+  --text-main: #F8FAFC;
+  --text-muted: #CBD5E1;
+  --text-light: #94A3B8;
+  --text-white: #FFFFFF;
+
+  /* --- Border & Divider Tokens (Dark Mode) --- */
+  --border-light: #334155;
+  --border-subtle: #475569;
+  --border-blue: #1E293B;
+  --accent-blue: #1E293B;
+
+  /* --- Semantic Status Colors (Dark Mode) --- */
+  --color-success: #10B981;
+  --color-success-bg: rgba(16, 185, 129, 0.15);
+  --color-success-border: #059669;
+
+  --color-danger: #EF4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.15);
+  --color-danger-border: #B91C1C;
+
+  --color-warning: #F59E0B;
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-warning-border: #D97706;
+
+  /* --- Elevation & Shadows (Dark Mode) --- */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 25px 70px rgba(0, 0, 0, 0.7);
+}
+
+/* --- Universal Reset --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* --- Global Outlined Thick-Stroke Icon System --- */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 600,
+    'GRAD' 0,
+    'opsz' 24 !important;
+  vertical-align: middle;
+}
+
+/* Icon Size Scale Tokens */
+.icon-sm {
+  font-size: 16px !important;
+}
+
+.icon-md {
+  font-size: 20px !important;
+}
+
+.icon-lg {
+  font-size: 24px !important;
+}
+
+.icon-xl {
+  font-size: 32px !important;
+}
+
+/* --- Global Stationary UI Reset (No Hover Movement / Shifting) --- */
+button:hover,
+button:active,
+a:hover,
+a:active,
+.admin-nav-item:hover,
+.admin-nav-item:active,
+.admin-user-badge-sidebar:hover,
+.admin-user-badge-sidebar:active,
+.sidebar-theme-toggle-row:hover,
+.sidebar-theme-toggle-row:active,
+.theme-switch-track:hover,
+.theme-switch-track:active,
+.card-box:hover,
+.candidate-card-box:hover,
+.hover-lift:hover {
+  transform: none !important;
+}

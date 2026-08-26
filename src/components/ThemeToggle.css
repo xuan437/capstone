@@ -1,0 +1,107 @@
+/* ==========================================================================
+   CUSTOM ANIMATED SUN / MOON THEME SWITCH (SYSTEM NAVY COLORWAY)
+   ========================================================================== */
+
+.theme-switch-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+/* Light Mode Track: Core System Navy (#0A192F / #1E3A8A) */
+.theme-switch-track {
+  position: relative;
+  width: 58px;
+  height: 30px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #0A192F 0%, #1E3A8A 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(10, 25, 47, 0.15);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: all 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Dark Mode Track: Electric Cyan/Blue Accent (#38BDF8 / #0284C7) */
+.theme-switch-track.dark {
+  background: linear-gradient(135deg, #0284C7 0%, #38BDF8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+/* Background Stars / Cloud Accents */
+.theme-switch-bg-stars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.theme-switch-track.dark .theme-switch-bg-stars {
+  opacity: 1;
+}
+
+.star-dot {
+  width: 2px;
+  height: 2px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #FFFFFF;
+}
+
+/* Sliding Circular Knob */
+.theme-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.38s ease;
+  z-index: 2;
+}
+
+/* Dark Mode Knob Position & Dark Navy Fill */
+.theme-switch-track.dark .theme-switch-knob {
+  transform: translateX(28px);
+  background: #0A192F;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Sun / Moon Icon Animation */
+.theme-switch-icon {
+  font-size: 15px !important;
+  color: #F59E0B;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+}
+
+.theme-switch-track.dark .theme-switch-icon {
+  color: #FDE047;
+  transform: rotate(360deg);
+}
+
+/* Hover & Focus Micro-Interactions */
+.theme-switch-track:hover,
+.theme-switch-track:active {
+  transform: none;
+}
+
+.theme-switch-label-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: color 0.2s ease;
+}

@@ -1,0 +1,503 @@
+/* ==========================================================================
+   POLICY & ABOUT MODAL STYLES
+   Custom Checkbox, Policy Agreement, and FAQ / Timeline Modal Component
+   ========================================================================== */
+
+/* Custom Checkbox for Policy Agreement */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  cursor: pointer;
+  margin-bottom: var(--space-2-5);
+  user-select: none;
+}
+
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-custom {
+  position: relative;
+  height: 22px;
+  width: 22px;
+  background-color: var(--bg-main);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkbox-label:hover .checkbox-custom {
+  border-color: var(--primary-navy);
+  background-color: var(--bg-surface);
+}
+
+.checkbox-input:checked ~ .checkbox-custom {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.15);
+}
+
+.checkbox-custom .check-icon {
+  font-size: 16px !important;
+  color: var(--text-white) !important;
+  font-weight: 900;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.checkbox-input:checked ~ .checkbox-custom .check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkbox-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-muted) !important;
+  font-weight: 500;
+}
+
+/* Modal and Policy specific classes */
+.policy-modal-container {
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  background: var(--bg-main);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--border-light);
+}
+
+@keyframes modalScaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.policy-modal-header {
+  padding: var(--space-3) var(--space-3-5) var(--space-2-5);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.policy-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  margin: 0;
+}
+
+.policy-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--accent-blue);
+  color: var(--primary-navy);
+}
+
+.policy-modal-body {
+  padding: var(--space-2-5) var(--space-3-5);
+  overflow-y: auto;
+  flex-grow: 1;
+  max-height: 450px;
+}
+
+.policy-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.policy-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.policy-modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+.policy-modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--border-subtle);
+}
+
+.policy-intro {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-muted) !important;
+  margin-bottom: var(--space-3);
+}
+
+.policy-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  margin: var(--space-2-5) 0 var(--space-1-5);
+}
+
+.policy-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.policy-section-list {
+  margin-left: var(--space-2-5);
+  margin-bottom: var(--space-2);
+}
+
+.policy-section-list li {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted) !important;
+  margin-bottom: var(--space-1);
+}
+
+.policy-section-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted) !important;
+  margin-bottom: var(--space-2);
+}
+
+.policy-footer {
+  padding: var(--space-2-5) var(--space-3-5) var(--space-3);
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.policy-accept-btn {
+  width: 100%;
+  padding: var(--space-1-5) var(--space-3);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  background: var(--primary-navy);
+  color: var(--text-white);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.policy-accept-btn:hover:not(:disabled) {
+  background: var(--navy-hover);
+}
+
+.policy-accept-btn:disabled {
+  background: var(--border-light);
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
+.policy-divider {
+  height: 1px;
+  background-color: var(--border-light);
+  margin: var(--space-3) 0;
+  border: none;
+}
+
+.policy-modal-body p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted) !important;
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+  font-weight: 400 !important;
+}
+
+.policy-modal-body h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1-5);
+}
+
+.policy-modal-body ul,
+.policy-modal-body ol {
+  margin-top: 0;
+  margin-bottom: var(--space-2-5);
+  margin-left: var(--space-2-5);
+  padding: 0;
+}
+
+.policy-modal-body li {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted) !important;
+  margin-bottom: 10px;
+  font-weight: 400 !important;
+}
+
+.policy-modal-body strong {
+  color: var(--primary-navy) !important;
+  font-weight: 600;
+}
+
+/* ====================== ABOUT MODAL STYLES ====================== */
+.about-modal-body {
+  padding: var(--space-3) var(--space-3-5) var(--space-4);
+}
+
+.about-intro {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-muted) !important;
+  margin-bottom: var(--space-2-5);
+  font-weight: 400 !important;
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--bg-surface);
+  border-left: 3px solid var(--primary-navy);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.about-faq-item {
+  padding: 18px var(--space-2-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+}
+
+.about-faq-item:last-child {
+  margin-bottom: 0;
+}
+
+.about-faq-q {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  margin-bottom: var(--space-1-5);
+  line-height: 1.4;
+}
+
+.about-faq-icon {
+  font-size: 20px !important;
+  color: var(--primary-navy) !important;
+  flex-shrink: 0;
+}
+
+.about-faq-a {
+  font-size: 13.5px !important;
+  line-height: 1.7;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+  margin: 0 0 var(--space-1-5) 0 !important;
+  padding-left: 30px;
+}
+
+.about-privacy-list {
+  margin: 0 0 0 30px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.about-privacy-list li {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+}
+
+.about-privacy-list strong {
+  color: var(--primary-navy) !important;
+  font-weight: 600;
+}
+
+.about-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s ease;
+}
+
+.about-timeline-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.about-timeline-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.about-timeline-badge .material-symbols-outlined {
+  font-size: 22px !important;
+}
+
+.about-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-timeline-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light) !important;
+  margin-bottom: 2px;
+}
+
+.about-timeline-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  line-height: 1.3;
+}
+
+.about-timeline-date {
+  font-size: 13px;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.about-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-rule-card {
+  display: flex;
+  gap: var(--space-2-5);
+  align-items: flex-start;
+  padding: 18px var(--space-2-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s ease;
+}
+
+.about-rule-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.about-rule-card--danger {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+}
+
+.about-rule-number {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--border-light) !important;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+  padding-top: 3px;
+}
+
+.about-rule-card--danger .about-rule-number {
+  color: var(--color-danger-border) !important;
+}
+
+.about-rule-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.about-rule-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  line-height: 1.3;
+}
+
+.about-rule-body p {
+  font-size: 13.5px !important;
+  line-height: 1.7;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+}
+
+.about-terms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-term-item {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 18px var(--space-2-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s ease;
+}
+
+.about-term-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.about-term-icon {
+  font-size: 24px !important;
+  color: var(--primary-navy) !important;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.about-term-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-navy) !important;
+  margin-bottom: var(--space-1);
+  line-height: 1.3;
+}
+
+.about-term-item p {
+  font-size: 13.5px !important;
+  line-height: 1.7;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+  margin: 0 !important;
+}
