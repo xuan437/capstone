@@ -14,32 +14,41 @@
   --font-sans: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   --font-mono: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
 
-  /* --- Brand Color Tokens --- */
-  --primary-navy: #0A192F;
-  --navy-hover: #112240;
-  --secondary-navy: #1A2B4C;
-  --navy-muted: #233554;
+  /* --- Brand Color Tokens (Domingo Ledesma Mapa High School Seal Palette) --- */
+  --primary-navy: #0D7A3E;        /* Deep Emerald Forest Green from logo scalloped border */
+  --navy-hover: #0A5E2F;          /* Darker Forest Green on hover */
+  --secondary-navy: #064E2E;       /* Deep Navy Forest Green */
+  --navy-muted: #15803D;          /* Leaf Emerald Green */
   
+  /* --- Logo Secondary Accent Tokens --- */
+  --primary-magenta: #C026D3;     /* Logo Circular Ring Pink/Magenta */
+  --magenta-hover: #A21CAF;       /* Darker Magenta */
+  --magenta-light: #FDF4FF;       /* Soft Pink Tint */
+  --magenta-border: #F0ABFC;
+
+  --primary-gold: #F59E0B;        /* Logo Torch Flame Warm Gold */
+  --gold-light: #FEF3C7;
+
   /* --- Surface & Background Tokens --- */
   --bg-main: #FFFFFF;
-  --bg-surface: #F8FAFC;
+  --bg-surface: #F4F9F5;          /* Light fresh surface with mint hue */
   --bg-card: #FFFFFF;
-  --bg-subtle: #F1F5F9;
+  --bg-subtle: #E8F5EB;
 
   /* --- Text & Contrast Tokens (WCAG Compliant) --- */
-  --text-main: #0F172A;
+  --text-main: #0F172A;           /* Deep Blue Navy from Logo Text/Stars */
   --text-muted: #334155;
   --text-light: #64748B;
   --text-white: #FFFFFF;
 
   /* --- Border & Divider Tokens --- */
-  --border-light: #E2E8F0;
-  --border-subtle: #CBD5E1;
-  --border-blue: #BFDBFE;
-  --accent-blue: #E8F0FE;
+  --border-light: #D1E7DD;
+  --border-subtle: #A3D9C9;
+  --border-blue: #C026D3;
+  --accent-blue: #FDF4FF;
 
   /* --- Semantic Status Colors --- */
-  --color-success: #059669;
+  --color-success: #0D7A3E;
   --color-success-bg: #ECFDF5;
   --color-success-border: #A7F3D0;
 
@@ -55,9 +64,9 @@
   --color-info-bg: #E0F2FE;
   --color-info-border: #BAE6FD;
 
-  --color-purple: #7C3AED;
-  --color-purple-bg: #F3E8FF;
-  --color-purple-border: #DDD6FE;
+  --color-purple: #C026D3;
+  --color-purple-bg: #FDF4FF;
+  --color-purple-border: #F0ABFC;
 
   /* --- 8px Grid Spacing Tokens --- */
   --space-0-5: 4px;
@@ -88,37 +97,45 @@
   --item-radius: 12px;
 
   /* --- Elevation & Shadows --- */
-  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 20px 40px rgba(10, 25, 47, 0.15);
-  --shadow-modal: 0 25px 70px rgba(10, 25, 47, 0.28);
+  --shadow-xs: 0 1px 2px rgba(13, 122, 62, 0.05);
+  --shadow-sm: 0 4px 12px rgba(13, 122, 62, 0.06);
+  --shadow-md: 0 10px 30px rgba(13, 122, 62, 0.10);
+  --shadow-lg: 0 20px 40px rgba(13, 122, 62, 0.18);
+  --shadow-modal: 0 25px 70px rgba(13, 122, 62, 0.32);
 }
 
 [data-theme="dark"] {
   /* --- Brand Color Tokens (Dark Mode) --- */
-  --primary-navy: #38BDF8;
-  --navy-hover: #0284C7;
-  --secondary-navy: #1E293B;
-  --navy-muted: #334155;
+  --primary-navy: #10B981;        /* Crisp Mint Emerald for dark mode */
+  --navy-hover: #059669;
+  --secondary-navy: #064E2E;
+  --navy-muted: #047857;
   
+  --primary-magenta: #E0249C;
+  --magenta-hover: #C026D3;
+  --magenta-light: rgba(224, 36, 156, 0.18);
+  --magenta-border: #C026D3;
+
+  --primary-gold: #F59E0B;
+  --gold-light: rgba(245, 158, 11, 0.15);
+
   /* --- Surface & Background Tokens (Dark Mode) --- */
-  --bg-main: #0F172A;
-  --bg-surface: #0B132B;
-  --bg-card: #1E293B;
-  --bg-subtle: #334155;
+  --bg-main: #061A10;             /* Dark Emerald Deep Slate */
+  --bg-surface: #04120B;
+  --bg-card: #0D281B;
+  --bg-subtle: #143A26;
 
   /* --- Text & Contrast Tokens (Dark Mode) --- */
-  --text-main: #F8FAFC;
-  --text-muted: #CBD5E1;
-  --text-light: #94A3B8;
+  --text-main: #F0FDF4;
+  --text-muted: #A7F3D0;
+  --text-light: #6EE7B7;
   --text-white: #FFFFFF;
 
   /* --- Border & Divider Tokens (Dark Mode) --- */
-  --border-light: #334155;
-  --border-subtle: #475569;
-  --border-blue: #1E293B;
-  --accent-blue: #1E293B;
+  --border-light: #18452E;
+  --border-subtle: #246343;
+  --border-blue: #059669;
+  --accent-blue: #0D281B;
 
   /* --- Semantic Status Colors (Dark Mode) --- */
   --color-success: #10B981;

@@ -26,7 +26,7 @@ CREATE TABLE students (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. Create 'candidates' table
+-- 4. Create 'candidates' table (Positions: President, Vice President, Secretary, Treasurer, PIO, Public Officer, Gr 8-12 Representatives)
 CREATE TABLE candidates (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     name TEXT NOT NULL,

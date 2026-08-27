@@ -234,7 +234,7 @@
 /* Right Timer Section */
 .split-right-section {
   flex: 1;
-  background: linear-gradient(135deg, var(--primary-navy, #0A192F) 0%, #1E293B 100%);
+  background: linear-gradient(135deg, #0D7A3E 0%, #064E2E 55%, #A21CAF 100%);
   padding: 40px 32px;
   display: flex;
   flex-direction: column;

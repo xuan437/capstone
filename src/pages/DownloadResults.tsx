@@ -192,9 +192,8 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
           boxSizing: "border-box",
           fontFamily: "var(--font-sans)",
         }}
-      >
-        <div style={{ textAlign: "center", borderBottom: "3px solid #0A192F", paddingBottom: "18px", marginBottom: "24px" }}>
-          <h1 style={{ color: "#0A192F", margin: "0 0 6px 0", fontSize: "24px", fontWeight: 800, letterSpacing: "-0.02em" }}>
+      >        <div style={{ textAlign: "center", borderBottom: "3px solid #0D7A3E", paddingBottom: "18px", marginBottom: "24px" }}>
+          <h1 style={{ color: "#0D7A3E", margin: "0 0 6px 0", fontSize: "24px", fontWeight: 800, letterSpacing: "-0.02em" }}>
             Official Student Election Results Report
           </h1>
           <p style={{ color: "#64748B", margin: 0, fontSize: "13px", fontWeight: 500 }}>
@@ -202,10 +201,10 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
           </p>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "28px", padding: "16px", background: "#F8FAFC", border: "1px solid #CBD5E1", borderRadius: "8px", fontSize: "13px" }}>
-          <div><strong style={{ color: "#64748B" }}>Total Registered Voters:</strong> <span style={{ color: "#0A192F", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{stats.totalRegistered}</span></div>
-          <div><strong style={{ color: "#64748B" }}>Total Votes Cast:</strong> <span style={{ color: "#0A192F", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{stats.totalVotesCast}</span></div>
-          <div><strong style={{ color: "#64748B" }}>Voter Turnout:</strong> <span style={{ color: "#059669", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{turnout}%</span></div>
+        <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "28px", padding: "16px", background: "#F4F9F5", border: "1px solid #A3D9C9", borderRadius: "8px", fontSize: "13px" }}>
+          <div><strong style={{ color: "#64748B" }}>Total Registered Voters:</strong> <span style={{ color: "#0D7A3E", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{stats.totalRegistered}</span></div>
+          <div><strong style={{ color: "#64748B" }}>Total Votes Cast:</strong> <span style={{ color: "#0D7A3E", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{stats.totalVotesCast}</span></div>
+          <div><strong style={{ color: "#64748B" }}>Voter Turnout:</strong> <span style={{ color: "#0D7A3E", fontSize: "16px", fontWeight: 800, marginLeft: "6px" }}>{turnout}%</span></div>
         </div>
 
         {POSITIONS.map((positionName) => {
@@ -215,18 +214,18 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
 
           return (
             <div key={positionName} style={{ marginBottom: "28px", pageBreakInside: "avoid" }}>
-              <h2 style={{ color: "#ffffff", background: "#0A192F", padding: "10px 14px", margin: "0 0 12px 0", fontSize: "14px", fontWeight: 800, textTransform: "uppercase", borderRadius: "4px", letterSpacing: "0.05em", display: "flex", justifyContent: "space-between" }}>
+              <h2 style={{ color: "#ffffff", background: "linear-gradient(90deg, #0D7A3E 0%, #C026D3 100%)", padding: "10px 14px", margin: "0 0 12px 0", fontSize: "14px", fontWeight: 800, textTransform: "uppercase", borderRadius: "4px", letterSpacing: "0.05em", display: "flex", justifyContent: "space-between" }}>
                 <span>{positionName}</span>
                 <span style={{ fontSize: "12px", opacity: 0.85, fontWeight: 600 }}>Total Position Votes: {posTotalVotes}</span>
               </h2>
 
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", marginBottom: "8px" }}>
                 <thead>
-                  <tr style={{ background: "#E2E8F0", textAlign: "left", color: "#0A192F" }}>
-                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #CBD5E1", width: "45%" }}>Candidate Name</th>
-                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #CBD5E1", width: "25%" }}>Section</th>
-                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #CBD5E1", textAlign: "right", width: "15%" }}>Votes</th>
-                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #CBD5E1", textAlign: "right", width: "15%" }}>Share</th>
+                  <tr style={{ background: "#E8F5EB", textAlign: "left", color: "#0D7A3E" }}>
+                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #A3D9C9", width: "45%" }}>Candidate Name</th>
+                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #A3D9C9", width: "25%" }}>Section</th>
+                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #A3D9C9", textAlign: "right", width: "15%" }}>Votes</th>
+                    <th style={{ padding: "8px 12px", fontWeight: 700, border: "1px solid #A3D9C9", textAlign: "right", width: "15%" }}>Share</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -234,17 +233,17 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
                     const percentage = posTotalVotes > 0 ? Math.round((r.count / posTotalVotes) * 100) : 0;
                     const isWinner = idx === 0 && r.count > 0;
                     return (
-                      <tr key={r.candidate.id} style={{ backgroundColor: isWinner ? "#ECFDF5" : (idx % 2 === 0 ? "#FFFFFF" : "#F8FAFC") }}>
-                        <td style={{ padding: "10px 12px", fontWeight: 700, color: "#0A192F", border: "1px solid #CBD5E1" }}>
-                          {r.candidate.name} {isWinner ? <span style={{ color: "#059669", fontSize: "11px", marginLeft: "6px" }}>★ Leading</span> : ""}
+                      <tr key={r.candidate.id} style={{ backgroundColor: isWinner ? "#ECFDF5" : (idx % 2 === 0 ? "#FFFFFF" : "#F4F9F5") }}>
+                        <td style={{ padding: "10px 12px", fontWeight: 700, color: "#0F172A", border: "1px solid #D1E7DD" }}>
+                          {r.candidate.name} {isWinner ? <span style={{ color: "#0D7A3E", fontSize: "11px", marginLeft: "6px" }}>★ Leading</span> : ""}
                         </td>
-                        <td style={{ padding: "10px 12px", color: "#475569", border: "1px solid #CBD5E1", fontWeight: 600 }}>
+                        <td style={{ padding: "10px 12px", color: "#475569", border: "1px solid #D1E7DD", fontWeight: 600 }}>
                           {r.candidate.section ? `Section: ${r.candidate.section}` : "N/A"}
                         </td>
-                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#0A192F", border: "1px solid #CBD5E1", fontSize: "14px" }}>
+                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, color: "#0D7A3E", border: "1px solid #D1E7DD", fontSize: "14px" }}>
                           {r.count}
                         </td>
-                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#2563EB", border: "1px solid #CBD5E1" }}>
+                        <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#C026D3", border: "1px solid #D1E7DD" }}>
                           {percentage}%
                         </td>
                       </tr>
