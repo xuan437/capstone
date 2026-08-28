@@ -40,7 +40,8 @@ export type Page =
   | "download_results"
   | "admin_register"
   | "admin_add_candidate"
-  | "admin_election_settings";
+  | "admin_election_settings"
+  | "admin_audit_logs";
 
 export const POSITIONS = [
   "President",

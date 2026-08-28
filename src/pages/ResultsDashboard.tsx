@@ -3,12 +3,14 @@ import { supabase } from "../supabase";
 import { POSITIONS } from "../types";
 import type { Candidate, User, Page } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
+import { useLanguage } from "../context/LanguageContext";
 
 const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) => void; searchTerm?: string }> = ({
   currentUser,
   setPage,
   searchTerm,
 }) => {
+  const { t } = useLanguage();
   const [results, setResults] = useState<{ candidate: Candidate; count: number }[]>([]);
   const [positionTotals, setPositionTotals] = useState<Record<string, number>>({});
   const [stats, setStats] = useState({ totalRegistered: 0, totalVotesCast: 0, uniqueVoters: 0 });
@@ -130,7 +132,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
           }}
         >
           <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-light)" }}>
-            Registered Voters
+            {t.totalVoters || "Registered Voters"}
           </span>
           <div style={{ fontSize: "32px", fontWeight: 800, color: "var(--primary-navy)", marginTop: "4px", lineHeight: 1 }}>
             {stats.totalRegistered}
@@ -147,7 +149,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
           }}
         >
           <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-light)" }}>
-            Voter Turnout Rate
+            {t.turnoutLabel || "Voter Turnout Rate"}
           </span>
           <div style={{ fontSize: "32px", fontWeight: 800, color: "var(--primary-navy)", marginTop: "4px", lineHeight: 1 }}>
             {turnoutPercent}%
@@ -248,7 +250,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                   value={selectedPositionFilter}
                   onChange={(e) => setSelectedPositionFilter(e.target.value)}
                   style={{
-                    padding: "6px 12px",
+                    padding: "6px 36px 6px 14px",
                     borderRadius: "8px",
                     fontSize: "12.5px",
                     fontWeight: 600,

@@ -5,15 +5,15 @@ import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "..
 
 import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { useLanguage } from "../context/LanguageContext";
 
 import "./AuthForm.css";
-
-
 
 const AuthForm: React.FC<{
   setPage: (p: Page) => void;
   setCurrentUser: (u: User) => void;
 }> = ({ setPage, setCurrentUser }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"student" | "faculty">("student");
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [facultyForm, setFacultyForm] = useState({ email: "", password: "" });
@@ -185,7 +185,7 @@ const AuthForm: React.FC<{
                   <input
                     name="identifier"
                     aria-label="LRN Identifier"
-                    placeholder="LRN"
+                    placeholder={t.lrnPlaceholder || "LRN"}
                     className="split-input-field"
                     value={form.identifier}
                     onChange={handleChange}
@@ -200,7 +200,7 @@ const AuthForm: React.FC<{
                     name="password"
                     type={showPassword ? "text" : "password"}
                     aria-label="Student Password"
-                    placeholder="Password"
+                    placeholder={t.passwordPlaceholder || "Password"}
                     className="split-input-field"
                     style={{ paddingRight: "40px" }}
                     value={form.password}

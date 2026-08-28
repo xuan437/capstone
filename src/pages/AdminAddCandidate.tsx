@@ -224,7 +224,7 @@ const AdminAddCandidate: React.FC<{
                 name="position"
                 value={form.position}
                 onChange={handleInputChange}
-                style={{ width: "100%", padding: "12px" }}
+                style={{ width: "100%", padding: "12px 36px 12px 14px" }}
               >
                 {POSITIONS.map((pos) => (
                   <option key={pos} value={pos}>{pos}</option>

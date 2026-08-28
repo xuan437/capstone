@@ -6,6 +6,7 @@ import "./AdminVotersList.css";
 import type { Student, Page } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
+import { useLanguage } from "../context/LanguageContext";
 
 const AdminVotersList: React.FC<{
   setPage: (p: Page) => void;
@@ -13,6 +14,7 @@ const AdminVotersList: React.FC<{
   searchTerm?: string;
   setSearchTerm?: (term: string) => void;
 }> = ({ setPage: _setPage, onViewProfile, searchTerm: propSearchTerm, setSearchTerm: propSetSearchTerm }) => {
+  const { t } = useLanguage();
   const [students, setStudents] = useState<Student[]>([]);
   const [localSearchTerm, setLocalSearchTerm] = useState<string>("");
   const [gradeFilter, setGradeFilter] = useState<string>("All");
@@ -245,7 +247,7 @@ const AdminVotersList: React.FC<{
             value={gradeFilter}
             onChange={(e) => setGradeFilter(e.target.value)}
           >
-            <option value="All">All Grades</option>
+            <option value="All">{t.allGradesOption || "All Grades"}</option>
             <option value="G7">Grade 7</option>
             <option value="G8">Grade 8</option>
             <option value="G9">Grade 9</option>
@@ -259,9 +261,9 @@ const AdminVotersList: React.FC<{
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="All">All Statuses</option>
-            <option value="voted">Voted Only</option>
-            <option value="pending">Pending Only</option>
+            <option value="All">{t.allStatusesOption || "All Statuses"}</option>
+            <option value="voted">{t.votedOnlyOption || "Voted Only"}</option>
+            <option value="pending">{t.pendingOnlyOption || "Pending Only"}</option>
           </select>
 
           <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-muted)", padding: "0 6px" }}>

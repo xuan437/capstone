@@ -17,6 +17,7 @@ import DownloadResults from "./pages/DownloadResults";
 import AdminRegister from "./pages/AdminRegister";
 import AdminAddCandidate from "./pages/AdminAddCandidate";
 import AdminElectionSettings from "./pages/AdminElectionSettings";
+import { AdminAuditLogs } from "./pages/AdminAuditLogs";
 import PrivacyModal from "./components/PrivacyModal";
 import AdminLayout from "./components/AdminLayout";
 import VoterLayout from "./components/VoterLayout";
@@ -84,6 +85,7 @@ const AppShell: React.FC = () => {
     "admin_register",
     "admin_add_candidate",
     "admin_election_settings",
+    "admin_audit_logs",
     "results",
     "download_results",
     "student_profile",
@@ -131,6 +133,9 @@ const AppShell: React.FC = () => {
 
       case "admin_election_settings":
         return <AdminElectionSettings setPage={setPage} />;
+
+      case "admin_audit_logs":
+        return <AdminAuditLogs />;
 
       case "ballot":
         return currentUser && !("isAdmin" in currentUser) ? (

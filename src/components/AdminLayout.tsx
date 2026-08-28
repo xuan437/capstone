@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Page, User } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
-import { translations, LanguageCode } from "../utils/translations";
+import { LanguageCode } from "../utils/translations";
+import { useLanguage } from "../context/LanguageContext";
 import "./AdminLayout.css";
 
 interface AdminLayoutProps {
@@ -25,13 +26,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   searchTerm,
   setSearchTerm,
 }) => {
+  const { lang, setLanguage, t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const [lang, setLang] = useState<LanguageCode>(() => {
-    const saved = localStorage.getItem("app_lang");
-    return (saved === "en" || saved === "tl" || saved === "ceb" ? saved : "en") as LanguageCode;
-  });
 
   const [activeModalType, setActiveModalType] = useState<ModalType | null>(null);
   const [isModalRendered, setIsModalRendered] = useState(false);
@@ -39,11 +36,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
 
-  const changeLanguage = (newLang: LanguageCode) => {
-    setLang(newLang);
-    localStorage.setItem("app_lang", newLang);
-    window.dispatchEvent(new Event("languageChange"));
-  };
 
   useEffect(() => {
     if (activeModalType) {
@@ -97,8 +89,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     setIsModalRendered(false);
     setTimeout(() => setActiveModalType(null), 200);
   };
-
-  const t = translations[lang] || {};
 
   const modalConfig: Record<ModalType, { title: string; content: string; icon: string }> = {
     process: {
@@ -199,13 +189,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const navItems: { label: string; page: Page; icon: string }[] = [
-    { label: "Dashboard", page: "admin_setup", icon: "dashboard" },
-    { label: "Voters List", page: "admin_voters", icon: "groups" },
-    { label: "Add Candidate", page: "admin_add_candidate", icon: "person_add" },
-    { label: "Register Student", page: "admin_register", icon: "how_to_reg" },
-    { label: "Election Countdown", page: "admin_election_settings", icon: "timer" },
-    { label: "Live Results", page: "results", icon: "bar_chart" },
-    { label: "Download PDF", page: "download_results", icon: "picture_as_pdf" },
+    { label: t.navDashboard, page: "admin_setup", icon: "dashboard" },
+    { label: t.navVotersList, page: "admin_voters", icon: "groups" },
+    { label: t.navAddCandidate, page: "admin_add_candidate", icon: "person_add" },
+    { label: t.navRegisterStudent, page: "admin_register", icon: "how_to_reg" },
+    { label: t.navCountdown, page: "admin_election_settings", icon: "timer" },
+    { label: t.navAuditLogs, page: "admin_audit_logs", icon: "security" },
+    { label: t.navLiveResults, page: "results", icon: "bar_chart" },
+    { label: t.navDownloadPdf, page: "download_results", icon: "picture_as_pdf" },
   ];
 
   const activeModalDetails = activeModalType ? modalConfig[activeModalType] : null;
@@ -286,7 +277,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
                     <button
                       key={l}
                       className={`admin-lang-btn ${lang === l ? "active" : ""}`}
-                      onClick={() => changeLanguage(l)}
+                      onClick={() => setLanguage(l)}
                     >
                       {l === "en" ? "English" : l === "tl" ? "Tagalog" : "Bisaya"}
                     </button>

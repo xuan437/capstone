@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { Candidate, Page, POSITIONS } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
+import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 
 const AdminSetup: React.FC<{
   setPage: (p: Page) => void;
@@ -14,10 +15,19 @@ const AdminSetup: React.FC<{
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchCandidates = async () => {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("candidates")
       .select("id, position, name, image_url, campaign_text, age, section")
       .order("position");
+
+    if (!error && (!data || data.length === 0)) {
+      await seedSampleCandidatesIfEmpty();
+      const reFetch = await supabase
+        .from("candidates")
+        .select("id, position, name, image_url, campaign_text, age, section")
+        .order("position");
+      data = reFetch.data || [];
+    }
 
     if (error || !data) {
       setCandidates([]);

@@ -56,7 +56,7 @@
 
 .filter-select {
   height: var(--height-btn-top) !important;
-  padding: 0 var(--space-3) 0 var(--space-2) !important;
+  padding: 0 36px 0 14px !important;
   font-size: 13.5px !important;
   font-weight: 600 !important;
   border-radius: var(--radius-md) !important;
@@ -64,6 +64,17 @@
   background-color: var(--bg-main) !important;
   color: var(--primary-navy) !important;
   cursor: pointer;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%230D7A3E' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 18px 18px !important;
+}
+
+[data-theme="dark"] .filter-select {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2310B981' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
 }
 
 .filter-select:hover {

@@ -3,6 +3,7 @@ import { User } from "../types";
 import { translations, LanguageCode } from "../utils/translations";
 import "./DropdownMenu.css";
 import "./PolicyModal.css";
+import { ReceiptVerificationModal } from "./ReceiptVerificationModal";
 
 interface MenuProps {
   currentUser: User | null;
@@ -13,6 +14,7 @@ type ModalType = "process" | "rules" | "privacy" | "terms";
 
 const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [lang, setLang] = useState<LanguageCode>(() => {
     const saved = localStorage.getItem("app_lang");
     return (saved === "en" || saved === "tl" || saved === "ceb" ? saved : "en") as LanguageCode;
@@ -298,6 +300,10 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
         <div className="dropdown-section">
           <div className="dropdown-section-label">{t.aboutSectionTitle || "About Platform"}</div>
           <div className="dropdown-list">
+            <button onClick={() => setIsVerifyModalOpen(true)} className="dropdown-item">
+              <span className="material-symbols-outlined dropdown-item-icon" style={{ color: "var(--color-success)" }}>verified_user</span>
+              <span style={{ fontWeight: 700, color: "var(--primary-navy)" }}>Verify Ballot Receipt</span>
+            </button>
             <button onClick={() => handleAboutClick("process")} className="dropdown-item">
               <span className="material-symbols-outlined dropdown-item-icon">how_to_vote</span>
               <span>{t.electionProcess || "Election Process"}</span>
@@ -429,6 +435,8 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
           </div>
         </div>
       )}
+
+      <ReceiptVerificationModal isOpen={isVerifyModalOpen} onClose={() => setIsVerifyModalOpen(false)} />
     </div>
   );
 };

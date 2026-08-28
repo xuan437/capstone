@@ -3,11 +3,16 @@ import { supabase } from "../supabase";
 import { Student, Candidate, Page, POSITIONS } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
 import { CountdownTimer } from "../components/CountdownTimer";
+import { generateReceiptCode, saveVoteReceipt } from "../utils/receiptVerifier";
+import { logAuditAction } from "../utils/auditLogger";
+import { useLanguage } from "../context/LanguageContext";
+import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 
 const BallotPage: React.FC<{
   setPage: (p: Page) => void;
   currentUser: Student;
 }> = ({ setPage, currentUser }) => {
+  const { t } = useLanguage();
   const [selectedCandidates, setSelectedCandidates] = useState<Record<string, string>>({});
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
@@ -45,9 +50,15 @@ const BallotPage: React.FC<{
         return;
       }
 
-      const { data, error: fetchError } = await supabase
+      let { data, error: fetchError } = await supabase
         .from("candidates")
         .select("*");
+
+      if (!fetchError && (!data || data.length === 0)) {
+        await seedSampleCandidatesIfEmpty();
+        const reFetch = await supabase.from("candidates").select("*");
+        data = reFetch.data || [];
+      }
 
       if (fetchError) {
         setError("Error fetching candidates: " + fetchError.message);
@@ -182,12 +193,16 @@ const BallotPage: React.FC<{
           .eq("id", currentUser.id);
       }
 
-      // ── Insert receipt: try with metadata, fall back to base ──
-      const receiptId = Math.random().toString(36).substr(2, 12).toUpperCase();
+      // ── Insert cryptographic receipt ──
+      const receiptId = generateReceiptCode(currentUser.id, votedAt);
+      await saveVoteReceipt(currentUser.id, receiptId, POSITIONS.length);
+      await logAuditAction("VOTE_SUBMITTED", currentUser.name, `Cast ballot for ${POSITIONS.length} positions. Receipt: ${receiptId}`);
+
       const { error: receiptError } = await supabase.from("receipts").insert([
         {
           student_id: currentUser.id,
           receipt_id: receiptId,
+          receipt_data: JSON.stringify({ receipt_code: receiptId, positions_voted: POSITIONS.length, voted_at: votedAt }),
           timestamp: votedAt,
           student_name: currentUser.name,
           grade: currentUser.grade,
@@ -197,14 +212,11 @@ const BallotPage: React.FC<{
       ]);
 
       if (receiptError) {
-        // Columns may not exist yet — retry without new fields
+        // Fallback retry
         await supabase.from("receipts").insert([
           {
             student_id: currentUser.id,
-            receipt_id: receiptId,
-            timestamp: votedAt,
-            student_name: currentUser.name,
-            grade: currentUser.grade,
+            receipt_data: JSON.stringify({ receipt_code: receiptId, positions_voted: POSITIONS.length }),
           },
         ]);
       }
@@ -241,7 +253,7 @@ const BallotPage: React.FC<{
       {/* Real-time Countdown Banner */}
       <CountdownTimer
         onExpire={() => setIsTimerExpired(true)}
-        onTimerLoaded={(endTime) => {
+        onTimerLoaded={(endTime: string | null) => {
           if (endTime) {
             setIsTimerExpired(new Date() >= new Date(endTime));
           } else {
@@ -572,7 +584,7 @@ const BallotPage: React.FC<{
               : isTimerExpired
               ? "Election Deadline Closed"
               : allSelected
-              ? "Submit Official Ballot"
+              ? (t.reviewConfirmBtn || "Submit Official Ballot")
               : `Select All Positions (${selectedCount}/${totalPositions})`}
           </span>
         </button>
