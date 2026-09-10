@@ -5,7 +5,6 @@ import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "..
 
 import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
-import { useLanguage } from "../context/LanguageContext";
 
 import "./AuthForm.css";
 
@@ -13,7 +12,6 @@ const AuthForm: React.FC<{
   setPage: (p: Page) => void;
   setCurrentUser: (u: User) => void;
 }> = ({ setPage, setCurrentUser }) => {
-  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"student" | "faculty">("student");
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [facultyForm, setFacultyForm] = useState({ email: "", password: "" });
@@ -119,23 +117,6 @@ const AuthForm: React.FC<{
       setLoading(false);
     }
   };
-
-  const tabStyle = (isActive: boolean): React.CSSProperties => ({
-    flex: 1,
-    padding: "12px 0",
-    border: "none",
-    borderBottom: isActive ? "3px solid var(--primary-navy, #0A192F)" : "3px solid transparent",
-    background: "transparent",
-    color: isActive ? "var(--primary-navy, #0A192F)" : "#94A3B8",
-    fontWeight: isActive ? 700 : 500,
-    fontSize: "14px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-  });
 
 
 
