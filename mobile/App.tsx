@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { registerRootComponent } from 'expo';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
 import { User, Student } from './src/types';
 import { AuthScreen } from './src/screens/AuthScreen';
@@ -213,3 +214,5 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 });
+
+registerRootComponent(App);
