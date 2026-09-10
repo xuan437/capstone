@@ -14,6 +14,7 @@ import { Student } from '../types';
 export const AdminVotersScreen: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'voted' | 'pending'>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,12 +33,19 @@ export const AdminVotersScreen: React.FC = () => {
     }
   };
 
-  const filtered = students.filter(
-    (s) =>
+  const filtered = students.filter((s) => {
+    const matchesSearch =
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.id.includes(searchQuery) ||
-      (s.grade && s.grade.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      (s.grade && s.grade.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'voted' && s.has_voted) ||
+      (statusFilter === 'pending' && !s.has_voted);
+
+    return matchesSearch && matchesStatus;
+  });
 
   const totalVoted = students.filter((s) => s.has_voted).length;
 
@@ -56,17 +64,51 @@ export const AdminVotersScreen: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.title}>Voter Registry Dashboard</Text>
         <Text style={styles.subtitle}>
-          Total Registered: {students.length} • Voted: {totalVoted}
+          Total Registered: <Text style={styles.highlightText}>{students.length}</Text> • Voted:{' '}
+          <Text style={styles.highlightGreenText}>{totalVoted}</Text>
         </Text>
 
         {/* Search Bar */}
         <TextInput
           style={styles.searchInput}
           placeholder="Search by Name, LRN, or Grade..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor="#64748B"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+
+        {/* Status Filter Switcher */}
+        <View style={styles.filterRow}>
+          <TouchableOpacity
+            style={[styles.filterChip, statusFilter === 'all' && styles.filterChipActive]}
+            onPress={() => setStatusFilter('all')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.filterChipText, statusFilter === 'all' && styles.filterChipTextActive]}>
+              All ({students.length})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterChip, statusFilter === 'voted' && styles.filterChipActive]}
+            onPress={() => setStatusFilter('voted')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.filterChipText, statusFilter === 'voted' && styles.filterChipTextActive]}>
+              Voted ({totalVoted})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterChip, statusFilter === 'pending' && styles.filterChipActive]}
+            onPress={() => setStatusFilter('pending')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.filterChipText, statusFilter === 'pending' && styles.filterChipTextActive]}>
+              Pending ({students.length - totalVoted})
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Voters List */}
@@ -74,12 +116,14 @@ export const AdminVotersScreen: React.FC = () => {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.voterCard}>
             <View style={styles.voterInfo}>
               <Text style={styles.voterName}>{item.name}</Text>
               <Text style={styles.voterMeta}>
-                LRN: {item.id} • Grade {item.grade || 'N/A'} {item.section ? `(${item.section})` : ''}
+                LRN: {item.id} • Grade {item.grade || 'N/A'}{' '}
+                {item.section ? `(${item.section})` : ''}
               </Text>
             </View>
             <View
@@ -118,11 +162,12 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#94A3B8',
     marginTop: 12,
+    fontSize: 14,
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
@@ -130,22 +175,58 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
   subtitle: {
     color: '#94A3B8',
     fontSize: 13,
     marginTop: 4,
-    marginBottom: 14,
+    marginBottom: 12,
+    fontWeight: '500',
+  },
+  highlightText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  highlightGreenText: {
+    color: '#10B981',
+    fontWeight: '700',
   },
   searchInput: {
     backgroundColor: '#112240',
     borderWidth: 1,
     borderColor: '#233554',
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     color: '#FFFFFF',
     fontSize: 14,
+    marginBottom: 10,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: '#112240',
+    borderWidth: 1,
+    borderColor: '#233554',
+  },
+  filterChipActive: {
+    backgroundColor: '#0D7A3E',
+    borderColor: '#10B981',
+  },
+  filterChipText: {
+    color: '#94A3B8',
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   listContent: {
     padding: 16,
@@ -154,12 +235,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#112240',
+    backgroundColor: 'rgba(17, 34, 64, 0.85)',
     padding: 14,
     borderRadius: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   voterInfo: {
     flex: 1,
@@ -192,6 +273,7 @@ const styles = StyleSheet.create({
   statusBadgeText: {
     fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 0.4,
   },
   votedBadgeText: {
     color: '#10B981',

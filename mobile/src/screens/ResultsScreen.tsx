@@ -70,6 +70,8 @@ export const ResultsScreen: React.FC = () => {
   const turnoutPercent =
     stats.totalRegistered > 0 ? Math.round((stats.uniqueVoters / stats.totalRegistered) * 100) : 0;
 
+  const topCandidate = results[0]?.count > 0 ? results[0] : null;
+
   const positionsToDisplay =
     selectedPosFilter === 'All'
       ? POSITIONS.filter((p) => results.some((r) => r.candidate.position === p))
@@ -82,8 +84,9 @@ export const ResultsScreen: React.FC = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />
         }
+        showsVerticalScrollIndicator={false}
       >
-        {/* Title Badge */}
+        {/* Title & Live Status */}
         <View style={styles.header}>
           <View style={styles.liveBadge}>
             <View style={styles.liveDot} />
@@ -108,11 +111,27 @@ export const ResultsScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Filter Horizontal Scroll */}
+        {/* Top Overall Leader Spotlight */}
+        {topCandidate ? (
+          <View style={styles.topLeaderSpotlight}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.spotlightTag}>🏆 OVERALL VOTE LEADER</Text>
+              <Text style={styles.spotlightName}>{topCandidate.candidate.name}</Text>
+              <Text style={styles.spotlightPos}>{topCandidate.candidate.position}</Text>
+            </View>
+            <View style={styles.spotlightVotePill}>
+              <Text style={styles.spotlightVoteCount}>{topCandidate.count}</Text>
+              <Text style={styles.spotlightVoteLabel}>Votes</Text>
+            </View>
+          </View>
+        ) : null}
+
+        {/* Position Filter Horizontal Scroll */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
           <TouchableOpacity
             style={[styles.filterChip, selectedPosFilter === 'All' && styles.filterChipActive]}
             onPress={() => setSelectedPosFilter('All')}
+            activeOpacity={0.8}
           >
             <Text style={[styles.filterChipText, selectedPosFilter === 'All' && styles.filterChipTextActive]}>
               All Positions
@@ -123,6 +142,7 @@ export const ResultsScreen: React.FC = () => {
               key={pos}
               style={[styles.filterChip, selectedPosFilter === pos && styles.filterChipActive]}
               onPress={() => setSelectedPosFilter(pos)}
+              activeOpacity={0.8}
             >
               <Text style={[styles.filterChipText, selectedPosFilter === pos && styles.filterChipTextActive]}>
                 {pos}
@@ -163,9 +183,15 @@ export const ResultsScreen: React.FC = () => {
                       ) : null}
                     </View>
 
-                    {/* Vote Bar */}
+                    {/* Vote Progress Bar */}
                     <View style={styles.voteBarBg}>
-                      <View style={[styles.voteBarFill, { width: `${votePercent}%` }]} />
+                      <View
+                        style={[
+                          styles.voteBarFill,
+                          { width: `${votePercent}%` },
+                          isLeading && styles.voteBarFillLeading,
+                        ]}
+                      />
                     </View>
                   </View>
                 );
@@ -196,21 +222,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 50,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderRadius: 6,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   liveDot: {
     width: 6,
@@ -223,25 +251,27 @@ const styles = StyleSheet.create({
     color: '#10B981',
     fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 0.5,
   },
   title: {
     color: '#FFFFFF',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
   kpiRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   kpiCard: {
     flex: 1,
-    backgroundColor: '#112240',
-    padding: 14,
+    backgroundColor: 'rgba(17, 34, 64, 0.85)',
+    padding: 12,
     borderRadius: 10,
     marginHorizontal: 3,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
   },
   kpiValue: {
@@ -252,18 +282,64 @@ const styles = StyleSheet.create({
   kpiLabel: {
     color: '#94A3B8',
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 2,
     textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  topLeaderSpotlight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(13, 122, 62, 0.2)',
+    borderWidth: 1,
+    borderColor: '#10B981',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 18,
+  },
+  spotlightTag: {
+    color: '#10B981',
+    fontSize: 9.5,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    marginBottom: 2,
+  },
+  spotlightName: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  spotlightPos: {
+    color: '#94A3B8',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  spotlightVotePill: {
+    backgroundColor: '#0D7A3E',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  spotlightVoteCount: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  spotlightVoteLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 9,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   filterScroll: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   filterChip: {
     backgroundColor: '#112240',
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 8,
     marginRight: 8,
     borderWidth: 1,
     borderColor: '#233554',
@@ -282,11 +358,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   positionSection: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   positionHeading: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     marginBottom: 10,
     borderLeftWidth: 3,
@@ -294,12 +370,12 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   candidateResultCard: {
-    backgroundColor: '#112240',
+    backgroundColor: 'rgba(17, 34, 64, 0.85)',
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   candidateHeader: {
     flexDirection: 'row',
@@ -318,10 +394,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   leadingBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#10B981',
   },
@@ -329,16 +405,20 @@ const styles = StyleSheet.create({
     color: '#10B981',
     fontSize: 9,
     fontWeight: '800',
+    letterSpacing: 0.4,
   },
   voteBarBg: {
-    height: 6,
+    height: 7,
     backgroundColor: '#0A192F',
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   voteBarFill: {
     height: '100%',
+    backgroundColor: '#64748B',
+    borderRadius: 4,
+  },
+  voteBarFillLeading: {
     backgroundColor: '#10B981',
-    borderRadius: 3,
   },
 });

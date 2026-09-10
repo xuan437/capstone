@@ -114,11 +114,14 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Banner Header */}
         <View style={styles.banner}>
           <Text style={styles.bannerTitle}>Official SSLG Ballot</Text>
-          <Text style={styles.bannerSubtitle}>Voter LRN: {currentUser.id} • Grade {currentUser.grade}</Text>
+          <Text style={styles.bannerSubtitle}>
+            Voter LRN: <Text style={styles.boldWhite}>{currentUser.id}</Text> • Grade{' '}
+            <Text style={styles.boldWhite}>{currentUser.grade}</Text>
+          </Text>
         </View>
 
         {/* Position Sections */}
@@ -143,7 +146,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
                     onPress={() => handleSelectCandidate(position, candidate.id)}
                     activeOpacity={0.8}
                   >
-                    <View style={styles.candidateRadio}>
+                    <View style={[styles.candidateRadio, isSelected && styles.selectedRadio]}>
                       <View style={[styles.radioDot, isSelected && styles.radioDotActive]} />
                     </View>
 
@@ -169,6 +172,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
           style={styles.submitBallotBtn}
           onPress={handleSubmitBallot}
           disabled={submitting}
+          activeOpacity={0.85}
         >
           {submitting ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -199,29 +203,37 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingTop: 50,
+    paddingTop: 16,
     paddingBottom: 40,
   },
   banner: {
-    backgroundColor: '#112240',
+    backgroundColor: 'rgba(13, 122, 62, 0.2)',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#0D7A3E',
+    borderLeftColor: '#10B981',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   bannerTitle: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
   bannerSubtitle: {
     color: '#94A3B8',
-    fontSize: 13,
+    fontSize: 12.5,
     marginTop: 4,
+    fontWeight: '500',
+  },
+  boldWhite: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   positionCard: {
-    backgroundColor: '#112240',
+    backgroundColor: 'rgba(17, 34, 64, 0.85)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -241,8 +253,10 @@ const styles = StyleSheet.create({
   },
   positionSubtitle: {
     color: '#94A3B8',
-    fontSize: 12,
+    fontSize: 11.5,
     marginTop: 2,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   candidateItem: {
     flexDirection: 'row',
@@ -256,7 +270,7 @@ const styles = StyleSheet.create({
   },
   selectedCandidateItem: {
     borderColor: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
   },
   candidateRadio: {
     width: 20,
@@ -267,6 +281,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+  },
+  selectedRadio: {
+    borderColor: '#10B981',
   },
   radioDot: {
     width: 10,
@@ -282,11 +299,12 @@ const styles = StyleSheet.create({
   },
   candidateName: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '700',
   },
   selectedText: {
     color: '#10B981',
+    fontWeight: '800',
   },
   platformText: {
     color: '#94A3B8',
@@ -296,14 +314,20 @@ const styles = StyleSheet.create({
   },
   submitBallotBtn: {
     backgroundColor: '#0D7A3E',
-    borderRadius: 12,
+    borderRadius: 10,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 8,
+    shadowColor: '#0D7A3E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   submitBallotBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });
