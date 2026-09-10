@@ -12,6 +12,8 @@ import {
 import { supabase } from '../supabase';
 import { Candidate, POSITIONS, Student } from '../types';
 import { CandidateProfileScreen } from './CandidateProfileScreen';
+import { CountdownTimer } from '../components/CountdownTimer';
+import { PhotoViewerModal } from '../components/PhotoViewerModal';
 
 interface BallotScreenProps {
   currentUser: Student;
@@ -24,6 +26,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [activeProfileCandidate, setActiveProfileCandidate] = useState<Candidate | null>(null);
+  const [viewerPhotoCandidate, setViewerPhotoCandidate] = useState<Candidate | null>(null);
 
   useEffect(() => {
     fetchCandidates();
@@ -74,6 +77,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
               const voteRows = Object.entries(selectedVotes).map(([pos, candidateId]) => ({
                 student_id: currentUser.id,
                 candidate_id: candidateId,
+                position: pos,
                 created_at: new Date().toISOString(),
               }));
 
@@ -83,7 +87,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
               // Update student has_voted status
               const { error: studentErr } = await supabase
                 .from('students')
-                .update({ has_voted: true })
+                .update({ has_voted: true, voted_at: new Date().toISOString() })
                 .eq('id', currentUser.id);
 
               if (studentErr) throw studentErr;
@@ -127,6 +131,9 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
           </Text>
         </View>
 
+        {/* Election Countdown Timer */}
+        <CountdownTimer compact />
+
         {/* Position Sections */}
         {positionsWithCandidates.map((position) => {
           const posCandidates = candidates.filter((c) => c.position === position);
@@ -157,9 +164,9 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
                         <Text style={[styles.candidateName, isSelected && styles.selectedText]}>
                           {candidate.name}
                         </Text>
-                        {candidate.platform ? (
+                        {(candidate.campaign_text || candidate.platform) ? (
                           <Text style={styles.platformText} numberOfLines={2}>
-                            "{candidate.platform}"
+                            "{candidate.campaign_text || candidate.platform}"
                           </Text>
                         ) : null}
                       </View>
@@ -171,7 +178,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
                       onPress={() => setActiveProfileCandidate(candidate)}
                       activeOpacity={0.7}
                     >
-                      <Text style={styles.profileInfoBtnText}>Profile</Text>
+                      <Text style={styles.profileInfoBtnText}>Bio</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -204,6 +211,14 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
           />
         )}
       </Modal>
+
+      {/* Photo Viewer Modal */}
+      <PhotoViewerModal
+        visible={!!viewerPhotoCandidate}
+        imageUrl={viewerPhotoCandidate?.image_url || viewerPhotoCandidate?.photo_url}
+        candidateName={viewerPhotoCandidate?.name}
+        onClose={() => setViewerPhotoCandidate(null)}
+      />
     </View>
   );
 };
@@ -233,7 +248,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(13, 122, 62, 0.2)',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 12,
     borderLeftWidth: 4,
     borderLeftColor: '#10B981',
     borderWidth: 1,

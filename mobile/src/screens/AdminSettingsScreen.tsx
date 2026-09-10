@@ -5,12 +5,15 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  FlatList,
   ActivityIndicator,
   Alert,
 } from 'react-native';
 import { supabase, logAuditAction, fetchAuditLogs } from '../supabase';
 import { AuditLog } from '../types';
+import { CountdownTimer } from '../components/CountdownTimer';
+import { PrivacyModal } from '../components/PrivacyModal';
+import { ReceiptVerificationModal } from '../components/ReceiptVerificationModal';
+import { AdminRegisterVoterModal } from '../components/AdminRegisterVoterModal';
 
 interface AdminSettingsScreenProps {
   onOpenAddCandidate: () => void;
@@ -24,6 +27,11 @@ export const AdminSettingsScreen: React.FC<AdminSettingsScreenProps> = ({
   const [electionStatus, setElectionStatus] = useState<'OPEN' | 'PAUSED' | 'CLOSED'>('OPEN');
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
+
+  // Modal Visibility States
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+  const [registerVoterModalVisible, setRegisterVoterModalVisible] = useState(false);
 
   useEffect(() => {
     loadAuditData();
@@ -73,6 +81,9 @@ export const AdminSettingsScreen: React.FC<AdminSettingsScreenProps> = ({
           <Text style={styles.subtitle}>System configuration, election toggles & audit history</Text>
         </View>
 
+        {/* Live Election Countdown Timer Component */}
+        <CountdownTimer />
+
         {/* Election Status Control */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Election Status Control</Text>
@@ -118,7 +129,8 @@ export const AdminSettingsScreen: React.FC<AdminSettingsScreenProps> = ({
 
         {/* Quick Admin Actions */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Administrative Management</Text>
+          <Text style={styles.cardTitle}>Administrative Tools</Text>
+
           <TouchableOpacity
             style={styles.actionRowBtn}
             onPress={onOpenAddCandidate}
@@ -128,6 +140,45 @@ export const AdminSettingsScreen: React.FC<AdminSettingsScreenProps> = ({
             <View style={{ flex: 1 }}>
               <Text style={styles.actionRowTitle}>Register New SSLG Candidate</Text>
               <Text style={styles.actionRowSub}>Add candidate details, platform & photo</Text>
+            </View>
+            <Text style={styles.actionRowArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionRowBtn}
+            onPress={() => setRegisterVoterModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.actionRowIcon}>👤</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.actionRowTitle}>Register New Student Voter</Text>
+              <Text style={styles.actionRowSub}>Create new 12-digit LRN voter credentials</Text>
+            </View>
+            <Text style={styles.actionRowArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionRowBtn}
+            onPress={() => setVerifyModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.actionRowIcon}>🛡️</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.actionRowTitle}>Verify Ballot Receipt Code</Text>
+              <Text style={styles.actionRowSub}>Check cryptographic vote receipt authenticity</Text>
+            </View>
+            <Text style={styles.actionRowArrow}>›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionRowBtn}
+            onPress={() => setPrivacyModalVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.actionRowIcon}>📜</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.actionRowTitle}>Privacy & Election Guidelines</Text>
+              <Text style={styles.actionRowSub}>Review DepEd & SSLG voter policy</Text>
             </View>
             <Text style={styles.actionRowArrow}>›</Text>
           </TouchableOpacity>
@@ -174,6 +225,23 @@ export const AdminSettingsScreen: React.FC<AdminSettingsScreenProps> = ({
           <Text style={styles.logoutBtnText}>Sign Out of Admin Console</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Modals */}
+      <PrivacyModal
+        visible={privacyModalVisible}
+        onClose={() => setPrivacyModalVisible(false)}
+      />
+
+      <ReceiptVerificationModal
+        visible={verifyModalVisible}
+        onClose={() => setVerifyModalVisible(false)}
+      />
+
+      <AdminRegisterVoterModal
+        visible={registerVoterModalVisible}
+        onClose={() => setRegisterVoterModalVisible(false)}
+        onVoterAdded={loadAuditData}
+      />
     </View>
   );
 };
@@ -189,7 +257,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   title: {
     color: '#FFFFFF',
@@ -268,7 +336,7 @@ const styles = StyleSheet.create({
     borderColor: '#233554',
   },
   actionRowIcon: {
-    fontSize: 20,
+    fontSize: 18,
     marginRight: 12,
   },
   actionRowTitle: {
@@ -278,7 +346,7 @@ const styles = StyleSheet.create({
   },
   actionRowSub: {
     color: '#94A3B8',
-    fontSize: 12,
+    fontSize: 11.5,
     marginTop: 2,
   },
   actionRowArrow: {
