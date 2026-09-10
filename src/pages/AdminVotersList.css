@@ -10,10 +10,12 @@
   flex-wrap: wrap;
   margin-bottom: var(--space-3);
   padding: var(--space-2) var(--space-2-5);
-  background: var(--bg-main);
-  border: 1px solid var(--border-light);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--glass-shadow);
 }
 
 .search-input-wrapper {

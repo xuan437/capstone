@@ -23,51 +23,56 @@ const BallotPage: React.FC<{
 
   useEffect(() => {
     const checkVotingStatus = async () => {
-      if (currentUser.has_voted) {
-        setPage("confirm");
-        return;
+      try {
+        if (currentUser.has_voted) {
+          setPage("confirm");
+          return;
+        }
+
+        const { data: studentData } = await supabase
+          .from("students")
+          .select("has_voted")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+
+        if (studentData?.has_voted) {
+          setPage("confirm");
+          return;
+        }
+
+        const { data: existingVotes } = await supabase
+          .from("votes")
+          .select("id")
+          .eq("student_id", currentUser.id)
+          .limit(1);
+
+        if (existingVotes && existingVotes.length > 0) {
+          setPage("confirm");
+          return;
+        }
+
+        let { data, error: fetchError } = await supabase
+          .from("candidates")
+          .select("*");
+
+        if (!fetchError && (!data || data.length === 0)) {
+          await seedSampleCandidatesIfEmpty();
+          const reFetch = await supabase.from("candidates").select("*");
+          data = reFetch.data || [];
+        }
+
+        if (fetchError) {
+          setError("Unable to load ballot: " + fetchError.message);
+          setCandidates([]);
+        } else {
+          setCandidates((data || []) as Candidate[]);
+        }
+      } catch (err: any) {
+        console.error("Ballot loading error:", err);
+        setError("Network connection issue. Please check your connection and refresh.");
+      } finally {
+        setLoading(false);
       }
-
-      const { data: studentData } = await supabase
-        .from("students")
-        .select("has_voted")
-        .eq("id", currentUser.id)
-        .single();
-
-      if (studentData?.has_voted) {
-        setPage("confirm");
-        return;
-      }
-
-      const { data: existingVotes } = await supabase
-        .from("votes")
-        .select("id")
-        .eq("student_id", currentUser.id)
-        .limit(1);
-
-      if (existingVotes && existingVotes.length > 0) {
-        setPage("confirm");
-        return;
-      }
-
-      let { data, error: fetchError } = await supabase
-        .from("candidates")
-        .select("*");
-
-      if (!fetchError && (!data || data.length === 0)) {
-        await seedSampleCandidatesIfEmpty();
-        const reFetch = await supabase.from("candidates").select("*");
-        data = reFetch.data || [];
-      }
-
-      if (fetchError) {
-        setError("Error fetching candidates: " + fetchError.message);
-        setCandidates([]);
-      } else {
-        setCandidates((data || []) as Candidate[]);
-      }
-
-      setLoading(false);
     };
 
     checkVotingStatus();

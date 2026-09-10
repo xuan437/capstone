@@ -150,163 +150,190 @@ const AuthForm: React.FC<{
         <div className="split-left-section">
           {/* Header */}
           <div className="split-form-header">
-            <h2 className="split-form-title">LOGIN</h2>
+            <h2 className="split-form-title">PORTAL LOGIN</h2>
+            <p className="split-form-subtitle">Enter your credentials to access your voting ballot</p>
           </div>
 
-          {/* Login Tabs */}
-          <div style={{ display: "flex", width: "100%", borderBottom: "2px solid #E2E8F0", marginBottom: "20px" }}>
-            <button style={tabStyle(activeTab === "student")} onClick={() => switchTab("student")}>
+          {/* Clean Segmented Pill Tabs */}
+          <div className="login-tab-pill-container">
+            <button
+              type="button"
+              className={`login-tab-btn ${activeTab === "student" ? "active" : ""}`}
+              onClick={() => switchTab("student")}
+            >
               <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>school</span>
-              Student
+              <span>Student</span>
             </button>
-            <button style={tabStyle(activeTab === "faculty")} onClick={() => switchTab("faculty")}>
+            <button
+              type="button"
+              className={`login-tab-btn ${activeTab === "faculty" ? "active" : ""}`}
+              onClick={() => switchTab("faculty")}
+            >
               <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>badge</span>
-              Faculty
+              <span>Faculty</span>
             </button>
           </div>
 
           {error && (
-            <div style={{ color: "#D92D20", background: "#FEF3F2", padding: "10px 14px", borderRadius: "8px", fontSize: "12.5px", marginBottom: "16px", fontWeight: 600, border: "1px solid #FEE2E2", width: "100%", boxSizing: "border-box" }}>
-              {error}
+            <div className="login-error-alert">
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>error</span>
+              <span>{error}</span>
             </div>
           )}
 
-          {activeTab === "student" ? (
-            <>
-              {isTimerExpired && (
-                <div style={{ color: "#EF4444", background: "#FEF2F2", border: "1px solid #FEE2E2", borderRadius: "8px", padding: "10px 14px", fontSize: "13px", fontWeight: 600, textAlign: "center", marginBottom: "16px", width: "100%", boxSizing: "border-box" }}>
-                  Student voting has ended. Login is closed.
-                </div>
-              )}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              activeTab === "student" ? handleStudentLogin() : handleFacultyLogin();
+            }}
+            style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}
+          >
+            {activeTab === "student" ? (
+              <>
+                {isTimerExpired && (
+                  <div className="login-expired-alert">
+                    Student voting has ended. Login is closed.
+                  </div>
+                )}
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px", width: "100%", marginBottom: "16px" }}>
-                <div className="input-with-icon-wrapper">
-                  <span className="material-symbols-outlined input-icon-prefix">person</span>
-                  <input
-                    name="identifier"
-                    aria-label="LRN Identifier"
-                    placeholder={t.lrnPlaceholder || "LRN"}
-                    className="split-input-field"
-                    value={form.identifier}
-                    onChange={handleChange}
-                    disabled={isTimerExpired}
-                    autoComplete="off"
-                  />
-                </div>
+                <div className="login-fields-stack">
+                  <div className="login-field-group">
+                    <label className="login-field-label">Learner Reference Number (LRN)</label>
+                    <div className="input-with-icon-wrapper">
+                      <span className="material-symbols-outlined input-icon-prefix">person</span>
+                      <input
+                        name="identifier"
+                        aria-label="LRN Identifier"
+                        placeholder="Enter 12-digit LRN"
+                        className="split-input-field"
+                        value={form.identifier}
+                        onChange={handleChange}
+                        disabled={isTimerExpired}
+                        autoComplete="off"
+                        maxLength={12}
+                      />
+                    </div>
+                  </div>
 
-                <div className="input-with-icon-wrapper">
-                  <span className="material-symbols-outlined input-icon-prefix">lock</span>
-                  <input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    aria-label="Student Password"
-                    placeholder={t.passwordPlaceholder || "Password"}
-                    className="split-input-field"
-                    style={{ paddingRight: "40px" }}
-                    value={form.password}
-                    onChange={handleChange}
-                    disabled={isTimerExpired}
-                    onCopy={blockClipboard}
-                    onCut={blockClipboard}
-                    onPaste={blockClipboard}
-                    autoComplete="off"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#64748B", display: "flex", alignItems: "center" }}
-                    title={showPassword ? "Hide Password" : "Show Password"}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                      {showPassword ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Login Now Pill Button matching screenshot */}
-              <button
-                className="btn-login-now-pill"
-                onClick={handleStudentLogin}
-                disabled={loading || isTimerExpired}
-              >
-                {loading ? "Authenticating..." : "Login Now"}
-              </button>
-            </>
-          ) : (
-            <>
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px", width: "100%", marginBottom: "16px" }}>
-                <div className="input-with-icon-wrapper">
-                  <span className="material-symbols-outlined input-icon-prefix">mail</span>
-                  <input
-                    name="email"
-                    aria-label="Faculty Email"
-                    placeholder="Email"
-                    className="split-input-field"
-                    value={facultyForm.email}
-                    onChange={handleFacultyChange}
-                    autoComplete="off"
-                  />
+                  <div className="login-field-group">
+                    <label className="login-field-label">Password</label>
+                    <div className="input-with-icon-wrapper">
+                      <span className="material-symbols-outlined input-icon-prefix">lock</span>
+                      <input
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        aria-label="Student Password"
+                        placeholder="Enter your password"
+                        className="split-input-field"
+                        value={form.password}
+                        onChange={handleChange}
+                        disabled={isTimerExpired}
+                        onCopy={blockClipboard}
+                        onCut={blockClipboard}
+                        onPaste={blockClipboard}
+                        autoComplete="off"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="password-toggle-btn"
+                        title={showPassword ? "Hide Password" : "Show Password"}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="input-with-icon-wrapper">
-                  <span className="material-symbols-outlined input-icon-prefix">lock</span>
-                  <input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    aria-label="Faculty Password"
-                    placeholder="Password"
-                    className="split-input-field"
-                    style={{ paddingRight: "40px" }}
-                    value={facultyForm.password}
-                    onChange={handleFacultyChange}
-                    onCopy={blockClipboard}
-                    onCut={blockClipboard}
-                    onPaste={blockClipboard}
-                    autoComplete="off"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#64748B", display: "flex", alignItems: "center" }}
-                    title={showPassword ? "Hide Password" : "Show Password"}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                      {showPassword ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
+                <button
+                  type="submit"
+                  className="btn-login-now-pill"
+                  disabled={loading || isTimerExpired}
+                >
+                  <span>{loading ? "Authenticating..." : "Login Now"}</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="login-fields-stack">
+                  <div className="login-field-group">
+                    <label className="login-field-label">Faculty / Admin Email</label>
+                    <div className="input-with-icon-wrapper">
+                      <span className="material-symbols-outlined input-icon-prefix">mail</span>
+                      <input
+                        name="email"
+                        aria-label="Faculty Email"
+                        placeholder="Enter admin email"
+                        className="split-input-field"
+                        value={facultyForm.email}
+                        onChange={handleFacultyChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="login-field-group">
+                    <label className="login-field-label">Password</label>
+                    <div className="input-with-icon-wrapper">
+                      <span className="material-symbols-outlined input-icon-prefix">lock</span>
+                      <input
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        aria-label="Faculty Password"
+                        placeholder="Enter admin password"
+                        className="split-input-field"
+                        value={facultyForm.password}
+                        onChange={handleFacultyChange}
+                        onCopy={blockClipboard}
+                        onCut={blockClipboard}
+                        onPaste={blockClipboard}
+                        autoComplete="off"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="password-toggle-btn"
+                        title={showPassword ? "Hide Password" : "Show Password"}
+                      >
+                        <span className="material-symbols-outlined">
+                          {showPassword ? "visibility_off" : "visibility"}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Login Now Pill Button matching screenshot */}
-              <button
-                className="btn-login-now-pill"
-                onClick={handleFacultyLogin}
-                disabled={loading}
-              >
-                {loading ? "Authenticating..." : "Login Now"}
-              </button>
-            </>
-          )}
+                <button
+                  type="submit"
+                  className="btn-login-now-pill"
+                  disabled={loading}
+                >
+                  <span>{loading ? "Authenticating..." : "Login Now"}</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
+                </button>
+              </>
+            )}
+          </form>
 
-          {/* Status Banner UNDER Login Now button as requested */}
+          {/* Status Banner UNDER Login Now button */}
           <div className={isTimerExpired ? "under-login-status-banner closed" : "under-login-status-banner open"}>
-            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-              {isTimerExpired ? "block" : "how_to_vote"}
-            </span>
-            <span>{isTimerExpired ? "ELECTION CLOSED" : "ELECTION IS OPEN - VOTE NOW!"}</span>
+            <span className="status-live-dot" />
+            <span>{isTimerExpired ? "ELECTION CLOSED" : "ELECTION IS OPEN — VOTE NOW"}</span>
           </div>
 
-          {/* Links Below */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+          {/* Secondary Actions Row */}
+          <div className="login-footer-actions">
             <button
               type="button"
+              className="login-help-link"
               onClick={() => setShowForgotPasswordModal(true)}
-              style={{ background: "none", border: "none", color: "var(--primary-navy, #0A192F)", fontSize: "12.5px", fontWeight: 600, cursor: "pointer" }}
             >
               Forgot Password / Help
             </button>
-            <span style={{ color: "#CBD5E1" }}>•</span>
+            <span className="login-footer-divider">•</span>
             <ThemeToggle compact />
           </div>
         </div>

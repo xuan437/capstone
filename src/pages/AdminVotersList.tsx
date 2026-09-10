@@ -458,10 +458,10 @@ const AdminVotersList: React.FC<{
           fontFamily: "var(--font-sans)",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: "20px", borderBottom: "2px solid #0F3870", paddingBottom: "12px" }}>
+        <div style={{ textAlign: "center", marginBottom: "20px", borderBottom: "2px solid #0D7A3E", paddingBottom: "12px" }}>
           <h1
             style={{
-              color: "#0F3870",
+              color: "#0D7A3E",
               margin: "0 0 4px 0",
               fontSize: "20px",
               fontWeight: 800,
@@ -500,12 +500,12 @@ const AdminVotersList: React.FC<{
                 {/* Cut Line Indicator Header */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", borderBottom: "1px solid #E2E8F0", paddingBottom: "8px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#0F3870" }}>✂</span>
+                    <span style={{ fontSize: "14px", fontWeight: 700, color: "#0D7A3E" }}>✂</span>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       SSLG OFFICIAL VOTING PASS
                     </span>
                   </div>
-                  <span style={{ fontSize: "10px", background: "#0F3870", color: "#FFFFFF", padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
+                  <span style={{ fontSize: "10px", background: "#0D7A3E", color: "#FFFFFF", padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
                     {sectionStr}
                   </span>
                 </div>
@@ -523,18 +523,18 @@ const AdminVotersList: React.FC<{
                 {/* Password / Access Key Ticket Stub Box */}
                 <div
                   style={{
-                    background: "#EFF6FF",
-                    border: "1.5px solid #3B82F6",
+                    background: "#ECFDF5",
+                    border: "1.5px solid #10B981",
                     borderRadius: "8px",
                     padding: "8px 12px",
                     textAlign: "center",
                     marginBottom: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "9px", color: "#1E40AF", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "2px" }}>
+                  <span style={{ fontSize: "9px", color: "#065F46", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "2px" }}>
                     PASSWORD / ACCESS KEY
                   </span>
-                  <span style={{ fontSize: "16px", fontWeight: 800, color: "#0F3870", letterSpacing: "0.12em" }}>
+                  <span style={{ fontSize: "16px", fontWeight: 800, color: "#0D7A3E", letterSpacing: "0.12em" }}>
                     {displayPw}
                   </span>
                 </div>

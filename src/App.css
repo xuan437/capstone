@@ -7,16 +7,21 @@
 h1,
 h2,
 h3,
+h4,
 .card-title,
-.section-title {
+.section-title,
+.split-form-title,
+.admin-brand-title {
+  font-family: var(--font-heading);
   color: var(--text-main);
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 h1 {
   font-size: clamp(20px, 4vw, 26px);
   margin-bottom: var(--space-1-5);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
@@ -266,12 +271,14 @@ select option {
 .status-card,
 .audit-receipt,
 #add-candidate-form {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-light);
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--card-radius);
   padding: var(--card-padding-desktop);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--glass-shadow);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .auth-wrapper {
@@ -313,10 +320,11 @@ select option {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-1-5) var(--space-2-5);
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-light);
-  box-shadow: var(--shadow-xs);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   gap: var(--space-2);
 }
 

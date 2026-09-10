@@ -6,13 +6,14 @@
    ========================================================================== */
 
 /* --- Google Fonts & Material Symbols Imports --- */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 :root {
   /* --- Typography Tokens --- */
-  --font-sans: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  --font-mono: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* --- Brand Color Tokens (Domingo Ledesma Mapa High School Seal Palette) --- */
   --primary-navy: #0D7A3E;        /* Deep Emerald Forest Green from logo scalloped border */
@@ -29,32 +30,32 @@
   --primary-gold: #F59E0B;        /* Logo Torch Flame Warm Gold */
   --gold-light: #FEF3C7;
 
-  /* --- Surface & Background Tokens --- */
+  /* --- Surface & Background Tokens (Light Mode) --- */
   --bg-main: #FFFFFF;
-  --bg-surface: #F4F9F5;          /* Light fresh surface with mint hue */
+  --bg-surface: #F8FAFC;          /* Clean, fresh slate-mint neutral background */
   --bg-card: #FFFFFF;
-  --bg-subtle: #E8F5EB;
+  --bg-subtle: #F1F5F9;
 
-  /* --- Text & Contrast Tokens (WCAG Compliant) --- */
-  --text-main: #0F172A;           /* Deep Blue Navy from Logo Text/Stars */
+  /* --- Text & Contrast Tokens (WCAG AA/AAA Compliant) --- */
+  --text-main: #0F172A;           /* Deep Slate Navy */
   --text-muted: #334155;
   --text-light: #64748B;
   --text-white: #FFFFFF;
 
-  /* --- Border & Divider Tokens --- */
-  --border-light: #D1E7DD;
-  --border-subtle: #A3D9C9;
+  /* --- Border & Divider Tokens (Light Mode) --- */
+  --border-light: #E2E8F0;
+  --border-subtle: #CBD5E1;
   --border-blue: #C026D3;
   --accent-blue: #FDF4FF;
 
-  /* --- Semantic Status Colors --- */
+  /* --- Semantic Status Colors (Light Mode) --- */
   --color-success: #0D7A3E;
   --color-success-bg: #ECFDF5;
   --color-success-border: #A7F3D0;
 
   --color-danger: #DC2626;
-  --color-danger-bg: #FEF2F2;
-  --color-danger-border: #FECACA;
+  --color-danger-bg: #FEF3F2;
+  --color-danger-border: #FEE2E2;
 
   --color-warning: #D97706;
   --color-warning-bg: #FEF3C7;
@@ -80,12 +81,12 @@
   --space-5: 40px;
   --space-6: 48px;
 
-  /* --- Border Radius Scale --- */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* --- Border Radius Scale (Sleek Modern Architecture) --- */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
   --radius-full: 9999px;
 
   /* --- Geometry & Sizing Tokens --- */
@@ -93,69 +94,99 @@
   --height-btn-inner: 36px;
   --card-padding-desktop: 32px;
   --card-padding-mobile: 20px;
-  --card-radius: 16px;
-  --item-radius: 12px;
+  --card-radius: 12px;
+  --item-radius: 8px;
 
-  /* --- Elevation & Shadows --- */
-  --shadow-xs: 0 1px 2px rgba(13, 122, 62, 0.05);
-  --shadow-sm: 0 4px 12px rgba(13, 122, 62, 0.06);
-  --shadow-md: 0 10px 30px rgba(13, 122, 62, 0.10);
-  --shadow-lg: 0 20px 40px rgba(13, 122, 62, 0.18);
-  --shadow-modal: 0 25px 70px rgba(13, 122, 62, 0.32);
+  /* --- Elevation & Shadows (Light Mode) --- */
+  --shadow-xs: 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 10px 28px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+  --shadow-modal: 0 25px 70px rgba(15, 23, 42, 0.22);
+
+  /* --- Glassmorphism Design Tokens (Light Mode) --- */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(16px) saturate(180%);
+  --glass-shadow: 0 12px 32px 0 rgba(15, 23, 42, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="dark"] {
   /* --- Brand Color Tokens (Dark Mode) --- */
-  --primary-navy: #10B981;        /* Crisp Mint Emerald for dark mode */
+  --primary-navy: #10B981;        /* Vibrant Mint Emerald */
   --navy-hover: #059669;
   --secondary-navy: #064E2E;
   --navy-muted: #047857;
   
   --primary-magenta: #E0249C;
   --magenta-hover: #C026D3;
-  --magenta-light: rgba(224, 36, 156, 0.18);
+  --magenta-light: rgba(224, 36, 156, 0.22);
   --magenta-border: #C026D3;
 
   --primary-gold: #F59E0B;
-  --gold-light: rgba(245, 158, 11, 0.15);
+  --gold-light: rgba(245, 158, 11, 0.18);
 
-  /* --- Surface & Background Tokens (Dark Mode) --- */
-  --bg-main: #061A10;             /* Dark Emerald Deep Slate */
-  --bg-surface: #04120B;
-  --bg-card: #0D281B;
-  --bg-subtle: #143A26;
+  /* --- Surface & Background Tokens (Rich Midnight Dark Mode) --- */
+  --bg-main: #0B1320;             /* Deep Midnight Slate */
+  --bg-surface: #070D18;          /* Rich Dark Surface */
+  --bg-card: #111C2E;             /* High-Contrast Card Background */
+  --bg-subtle: #1E293B;
 
-  /* --- Text & Contrast Tokens (Dark Mode) --- */
-  --text-main: #F0FDF4;
-  --text-muted: #A7F3D0;
-  --text-light: #6EE7B7;
+  /* --- Text & Contrast Tokens (Dark Mode - High Contrast) --- */
+  --text-main: #F8FAFC;           /* Crisp Pure Slate White */
+  --text-muted: #CBD5E1;          /* Soft Sky Slate */
+  --text-light: #94A3B8;
   --text-white: #FFFFFF;
 
   /* --- Border & Divider Tokens (Dark Mode) --- */
-  --border-light: #18452E;
-  --border-subtle: #246343;
-  --border-blue: #059669;
-  --accent-blue: #0D281B;
+  --border-light: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-blue: #10B981;
+  --accent-blue: #1E293B;
 
   /* --- Semantic Status Colors (Dark Mode) --- */
   --color-success: #10B981;
-  --color-success-bg: rgba(16, 185, 129, 0.15);
+  --color-success-bg: rgba(16, 185, 129, 0.18);
   --color-success-border: #059669;
 
-  --color-danger: #EF4444;
-  --color-danger-bg: rgba(239, 68, 68, 0.15);
+  --color-danger: #F87171;
+  --color-danger-bg: rgba(239, 68, 68, 0.18);
   --color-danger-border: #B91C1C;
 
-  --color-warning: #F59E0B;
-  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-warning: #FBBF24;
+  --color-warning-bg: rgba(245, 158, 11, 0.18);
   --color-warning-border: #D97706;
 
   /* --- Elevation & Shadows (Dark Mode) --- */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
-  --shadow-modal: 0 25px 70px rgba(0, 0, 0, 0.7);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.65);
+  --shadow-modal: 0 25px 70px rgba(0, 0, 0, 0.85);
+
+  /* --- Glassmorphism Design Tokens (Dark Mode) --- */
+  --glass-bg: rgba(17, 28, 46, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-blur: blur(16px) saturate(180%);
+  --glass-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+/* --- Hide Native Browser Password Reveal & Auto-Fill Icons --- */
+input::-ms-reveal,
+input::-ms-clear,
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 0 !important;
 }
 
 /* --- Universal Reset --- */
@@ -171,8 +202,9 @@
 }
 
 html {
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -180,11 +212,44 @@ body,
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   background-color: var(--bg-surface);
   color: var(--text-main);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* --- Fallbacks for Older Devices & Mobile Browsers without Backdrop-Filter --- */
+@supports not (backdrop-filter: blur(1px)) {
+  .card-box,
+  .top-header,
+  .admin-top-header,
+  .split-card-wrapper,
+  .voters-controls-bar {
+    background: var(--bg-card) !important;
+  }
+}
+
+/* --- Mobile iOS Auto-Zoom Prevention & Touch Target Optimization --- */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  button,
+  .btn-top-nav,
+  .btn-primary,
+  .btn-inner-action {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
 }
 
 /* --- Global Outlined Thick-Stroke Icon System --- */
