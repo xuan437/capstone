@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Modal,
 } from 'react-native';
 import { supabase } from '../supabase';
 import { Candidate, POSITIONS, Student } from '../types';
+import { CandidateProfileScreen } from './CandidateProfileScreen';
 
 interface BallotScreenProps {
   currentUser: Student;
@@ -21,6 +23,7 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
   const [selectedVotes, setSelectedVotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [activeProfileCandidate, setActiveProfileCandidate] = useState<Candidate | null>(null);
 
   useEffect(() => {
     fetchCandidates();
@@ -140,27 +143,37 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
                 const isSelected = currentSelected === candidate.id;
 
                 return (
-                  <TouchableOpacity
-                    key={candidate.id}
-                    style={[styles.candidateItem, isSelected && styles.selectedCandidateItem]}
-                    onPress={() => handleSelectCandidate(position, candidate.id)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={[styles.candidateRadio, isSelected && styles.selectedRadio]}>
-                      <View style={[styles.radioDot, isSelected && styles.radioDotActive]} />
-                    </View>
+                  <View key={candidate.id} style={[styles.candidateItem, isSelected && styles.selectedCandidateItem]}>
+                    <TouchableOpacity
+                      style={styles.candidateSelectTouchable}
+                      onPress={() => handleSelectCandidate(position, candidate.id)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={[styles.candidateRadio, isSelected && styles.selectedRadio]}>
+                        <View style={[styles.radioDot, isSelected && styles.radioDotActive]} />
+                      </View>
 
-                    <View style={styles.candidateInfo}>
-                      <Text style={[styles.candidateName, isSelected && styles.selectedText]}>
-                        {candidate.name}
-                      </Text>
-                      {candidate.platform ? (
-                        <Text style={styles.platformText} numberOfLines={2}>
-                          "{candidate.platform}"
+                      <View style={styles.candidateInfo}>
+                        <Text style={[styles.candidateName, isSelected && styles.selectedText]}>
+                          {candidate.name}
                         </Text>
-                      ) : null}
-                    </View>
-                  </TouchableOpacity>
+                        {candidate.platform ? (
+                          <Text style={styles.platformText} numberOfLines={2}>
+                            "{candidate.platform}"
+                          </Text>
+                        ) : null}
+                      </View>
+                    </TouchableOpacity>
+
+                    {/* View Profile Action */}
+                    <TouchableOpacity
+                      style={styles.profileInfoBtn}
+                      onPress={() => setActiveProfileCandidate(candidate)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.profileInfoBtnText}>Profile</Text>
+                    </TouchableOpacity>
+                  </View>
                 );
               })}
             </View>
@@ -181,6 +194,16 @@ export const BallotScreen: React.FC<BallotScreenProps> = ({ currentUser, onVoteS
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Candidate Profile Modal */}
+      <Modal visible={!!activeProfileCandidate} animationType="slide" onRequestClose={() => setActiveProfileCandidate(null)}>
+        {activeProfileCandidate && (
+          <CandidateProfileScreen
+            candidate={activeProfileCandidate}
+            onBack={() => setActiveProfileCandidate(null)}
+          />
+        )}
+      </Modal>
     </View>
   );
 };
@@ -261,8 +284,9 @@ const styles = StyleSheet.create({
   candidateItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#0A192F',
-    padding: 14,
+    padding: 12,
     borderRadius: 10,
     marginBottom: 8,
     borderWidth: 1,
@@ -271,6 +295,11 @@ const styles = StyleSheet.create({
   selectedCandidateItem: {
     borderColor: '#10B981',
     backgroundColor: 'rgba(16, 185, 129, 0.12)',
+  },
+  candidateSelectTouchable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   candidateRadio: {
     width: 20,
@@ -296,6 +325,7 @@ const styles = StyleSheet.create({
   },
   candidateInfo: {
     flex: 1,
+    paddingRight: 8,
   },
   candidateName: {
     color: '#FFFFFF',
@@ -311,6 +341,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: 'italic',
     marginTop: 2,
+  },
+  profileInfoBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  profileInfoBtnText: {
+    color: '#10B981',
+    fontSize: 11,
+    fontWeight: '700',
   },
   submitBallotBtn: {
     backgroundColor: '#0D7A3E',

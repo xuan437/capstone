@@ -8,6 +8,7 @@ import { AuthScreen } from './src/screens/AuthScreen';
 import { BallotScreen } from './src/screens/BallotScreen';
 import { ResultsScreen } from './src/screens/ResultsScreen';
 import { AdminVotersScreen } from './src/screens/AdminVotersScreen';
+import { VotingPassTicket } from './src/components/VotingPassTicket';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -65,10 +66,11 @@ export default function App() {
               studentUser.has_voted ? (
                 <View style={styles.votedNoticeBox}>
                   <Text style={styles.votedNoticeIcon}>✓</Text>
-                  <Text style={styles.votedNoticeTitle}>Vote Received!</Text>
+                  <Text style={styles.votedNoticeTitle}>Vote Recorded & Verified!</Text>
                   <Text style={styles.votedNoticeDesc}>
-                    Your SSLG election ballot has been securely submitted and counted. Check the Live Results tab to monitor real-time tallying.
+                    Your SSLG election ballot has been securely submitted and counted. Below is your official digital pass stub:
                   </Text>
+                  <VotingPassTicket student={studentUser} />
                 </View>
               ) : (
                 <BallotScreen
