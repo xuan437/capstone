@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { registerRootComponent } from 'expo';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { User, Student } from './src/types';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { BallotScreen } from './src/screens/BallotScreen';
@@ -12,6 +13,15 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<'ballot' | 'results' | 'voters'>('ballot');
 
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    if ('isAdmin' in user && user.isAdmin) {
+      setActiveTab('results');
+    } else {
+      setActiveTab('ballot');
+    }
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     setActiveTab('ballot');
@@ -19,10 +29,10 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <>
+      <SafeAreaProvider>
         <StatusBar style="light" />
-        <AuthScreen onLoginSuccess={(user) => setCurrentUser(user)} />
-      </>
+        <AuthScreen onLoginSuccess={handleLoginSuccess} />
+      </SafeAreaProvider>
     );
   }
 
@@ -31,91 +41,93 @@ export default function App() {
   const studentUser = currentUser as Student;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
 
-      {/* Top Header Bar */}
-      <View style={styles.topHeader}>
-        <View>
-          <Text style={styles.headerTitle}>SSLG Voting System</Text>
-          <Text style={styles.headerUserText}>
-            Logged in: <Text style={styles.boldText}>{currentUser.name}</Text> ({isAdmin ? 'Admin' : `LRN: ${currentUser.id}`})
-          </Text>
+        {/* Top Header Bar */}
+        <View style={styles.topHeader}>
+          <View>
+            <Text style={styles.headerTitle}>SSLG Voting System</Text>
+            <Text style={styles.headerUserText}>
+              Logged in: <Text style={styles.boldText}>{currentUser.name}</Text> ({isAdmin ? 'Admin' : `LRN: ${currentUser.id}`})
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <Text style={styles.logoutBtnText}>Logout</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutBtnText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Main Active Screen */}
-      <View style={styles.screenContent}>
-        {activeTab === 'ballot' && (
-          isStudent ? (
-            studentUser.has_voted ? (
+        {/* Main Active Screen */}
+        <View style={styles.screenContent}>
+          {activeTab === 'ballot' && (
+            isStudent ? (
+              studentUser.has_voted ? (
+                <View style={styles.votedNoticeBox}>
+                  <Text style={styles.votedNoticeIcon}>✓</Text>
+                  <Text style={styles.votedNoticeTitle}>Vote Received!</Text>
+                  <Text style={styles.votedNoticeDesc}>
+                    Your SSLG election ballot has been securely submitted and counted. Check the Live Results tab to monitor real-time tallying.
+                  </Text>
+                </View>
+              ) : (
+                <BallotScreen
+                  currentUser={studentUser}
+                  onVoteSuccess={() => {
+                    setCurrentUser({ ...studentUser, has_voted: true });
+                    setActiveTab('results');
+                  }}
+                />
+              )
+            ) : (
               <View style={styles.votedNoticeBox}>
-                <Text style={styles.votedNoticeIcon}>✓</Text>
-                <Text style={styles.votedNoticeTitle}>Vote Received!</Text>
+                <Text style={styles.votedNoticeTitle}>Faculty Admin View</Text>
                 <Text style={styles.votedNoticeDesc}>
-                  Your SSLG election ballot has been securely submitted and counted. Check the Live Results tab to monitor real-time tallying.
+                  Use the Live Results tab to monitor election tabulation, or the Voters List tab to view registered student status.
                 </Text>
               </View>
-            ) : (
-              <BallotScreen
-                currentUser={studentUser}
-                onVoteSuccess={() => {
-                  setCurrentUser({ ...studentUser, has_voted: true });
-                  setActiveTab('results');
-                }}
-              />
             )
-          ) : (
-            <View style={styles.votedNoticeBox}>
-              <Text style={styles.votedNoticeTitle}>Faculty Admin View</Text>
-              <Text style={styles.votedNoticeDesc}>
-                Use the Live Results tab to monitor election tabulation, or the Voters List tab to view registered student status.
+          )}
+
+          {activeTab === 'results' && <ResultsScreen />}
+          {activeTab === 'voters' && <AdminVotersScreen />}
+        </View>
+
+        {/* Navigation Bar */}
+        <View style={styles.bottomNav}>
+          {isStudent && !studentUser.has_voted && (
+            <TouchableOpacity
+              style={[styles.navTab, activeTab === 'ballot' && styles.activeNavTab]}
+              onPress={() => setActiveTab('ballot')}
+            >
+              <Text style={[styles.navTabText, activeTab === 'ballot' && styles.activeNavTabText]}>
+                Vote Ballot
               </Text>
-            </View>
-          )
-        )}
+            </TouchableOpacity>
+          )}
 
-        {activeTab === 'results' && <ResultsScreen />}
-        {activeTab === 'voters' && <AdminVotersScreen />}
-      </View>
-
-      {/* Navigation Bar */}
-      <View style={styles.bottomNav}>
-        {isStudent && !studentUser.has_voted && (
           <TouchableOpacity
-            style={[styles.navTab, activeTab === 'ballot' && styles.activeNavTab]}
-            onPress={() => setActiveTab('ballot')}
+            style={[styles.navTab, activeTab === 'results' && styles.activeNavTab]}
+            onPress={() => setActiveTab('results')}
           >
-            <Text style={[styles.navTabText, activeTab === 'ballot' && styles.activeNavTabText]}>
-              Vote Ballot
+            <Text style={[styles.navTabText, activeTab === 'results' && styles.activeNavTabText]}>
+              Live Results
             </Text>
           </TouchableOpacity>
-        )}
 
-        <TouchableOpacity
-          style={[styles.navTab, activeTab === 'results' && styles.activeNavTab]}
-          onPress={() => setActiveTab('results')}
-        >
-          <Text style={[styles.navTabText, activeTab === 'results' && styles.activeNavTabText]}>
-            Live Results
-          </Text>
-        </TouchableOpacity>
-
-        {isAdmin && (
-          <TouchableOpacity
-            style={[styles.navTab, activeTab === 'voters' && styles.activeNavTab]}
-            onPress={() => setActiveTab('voters')}
-          >
-            <Text style={[styles.navTabText, activeTab === 'voters' && styles.activeNavTabText]}>
-              Voters Registry
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+          {isAdmin && (
+            <TouchableOpacity
+              style={[styles.navTab, activeTab === 'voters' && styles.activeNavTab]}
+              onPress={() => setActiveTab('voters')}
+            >
+              <Text style={[styles.navTabText, activeTab === 'voters' && styles.activeNavTabText]}>
+                Voters Registry
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
