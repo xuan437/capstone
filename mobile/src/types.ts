@@ -46,3 +46,6 @@ export const POSITIONS = [
 ] as const;
 
 export type Position = typeof POSITIONS[number];
+
+export const ADMIN_IDENTIFIER = "admin@gmail.com";
+export const ADMIN_PASSWORD = "admin123";
