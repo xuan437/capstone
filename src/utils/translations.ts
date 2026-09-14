@@ -158,7 +158,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
     privacyPolicyContent: "1. Absolute Voter Anonymity: Your identity is cryptographically decoupled from your specific candidate selections to preserve 100% ballot secrecy.\n2. Essential Data Collection Only: We collect only basic administrative records (LRN, Full Name, Grade Level, and Section) required for voter eligibility verification.\n3. End-to-End Encryption & Security: All election data, password hashes, and receipts are stored using encrypted protocols with row-level security policies.\n4. Immutable Security Audit Trails: Administrative actions and system updates are logged in a tamper-proof audit trail to maintain total operational transparency.",
 
     termsOfServiceTitle: "Terms of Platform Service & Compliance",
-    termsOfServiceContent: "1. Authorized Institutional Use: This voting platform is reserved exclusively for official Domingo Ledesma Mapa High School SSG elections.\n2. Prohibition of Malicious Actions: Users are strictly forbidden from attempting SQL injections, reverse engineering, script bots, or denial-of-service attacks.\n3. Automated Election Cutoff Compliance: All voting activities automatically cease when the official countdown timer reaches 00:00:00.\n4. DepEd Regulatory Adherence: All electoral proceedings adhere strictly to Department of Education Supreme Student Government election guidelines.",
+    termsOfServiceContent: "1. Authorized Institutional Use: This voting platform is reserved exclusively for official Domingo Ledesma Mapa High School SSLG elections.\n2. Prohibition of Malicious Actions: Users are strictly forbidden from attempting SQL injections, reverse engineering, script bots, or denial-of-service attacks.\n3. Automated Election Cutoff Compliance: All voting activities automatically cease when the official countdown timer reaches 00:00:00.\n4. DepEd Regulatory Adherence: All electoral proceedings adhere strictly to Department of Education Supreme Secondary Learner Government (SSLG) election guidelines.",
 
     closeButton: "Close",
 
@@ -234,7 +234,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     // Add Candidate
     addCandidateTitle: "Candidate Registration",
-    addCandidateSubtitle: "Enroll official candidates for the Supreme Student Learners Government election.",
+    addCandidateSubtitle: "Enroll official candidates for the Supreme Secondary Learner Government election.",
     candidateNameLabel: "Candidate Full Name",
     candidatePositionLabel: "Target Position",
     campaignPlatformLabel: "Campaign Platform & Manifesto",
@@ -371,7 +371,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     // Add Candidate
     addCandidateTitle: "Pagpaparehistro ng Kandidato",
-    addCandidateSubtitle: "Magrehistro ng opisyal na kandidato para sa halalan ng Supreme Student Learners Government.",
+    addCandidateSubtitle: "Magrehistro ng opisyal na kandidato para sa halalan ng Supreme Secondary Learner Government.",
     candidateNameLabel: "Buong Pangalan ng Kandidato",
     candidatePositionLabel: "Posisyong Inaasim",
     campaignPlatformLabel: "Platorma at Layunin",
@@ -508,7 +508,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     // Add Candidate
     addCandidateTitle: "Pagparehistro sa Kandidato",
-    addCandidateSubtitle: "Magrehistro og opisyal nga kandidato alang sa eleksyon sa Supreme Student Learners Government.",
+    addCandidateSubtitle: "Magrehistro og opisyal nga kandidato alang sa eleksyon sa Supreme Secondary Learner Government.",
     candidateNameLabel: "Tibuok Ngalan sa Kandidato",
     candidatePositionLabel: "Posisyon",
     campaignPlatformLabel: "Platorma ug Manifesto",

@@ -274,7 +274,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
               DOMINGO LEDESMA MAPA HIGH SCHOOL
             </h2>
             <div style={{ fontSize: "11.5px", fontWeight: 600, color: "var(--accent-primary)", letterSpacing: "0.03em", marginTop: "2px" }}>
-              SUPREME STUDENT LEARNERS GOVERNMENT ELECTIONS
+              SUPREME SECONDARY LEARNER GOVERNMENT ELECTIONS
             </div>
             <h3 style={{ margin: "10px 0 0", fontSize: "13.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.02em" }}>
               Official Certificate of Canvass & Declaration of Winners
@@ -343,7 +343,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             Official Student Election Results Report
           </h1>
           <p style={{ color: "#64748B", margin: 0, fontSize: "13px" }}>
-            Supreme Student Learners Government • Generated on {new Date().toLocaleString()}
+            Supreme Secondary Learner Government • Generated on {new Date().toLocaleString()}
           </p>
         </div>
 
@@ -379,7 +379,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             DOMINGO LEDESMA MAPA HIGH SCHOOL
           </h2>
           <div style={{ fontSize: "14px", fontWeight: 800, color: "#C026D3", letterSpacing: "0.08em", marginTop: "6px" }}>
-            SUPREME STUDENT LEARNERS GOVERNMENT ELECTIONS
+            SUPREME SECONDARY LEARNER GOVERNMENT ELECTIONS
           </div>
           <h3 style={{ margin: "14px 0 0", fontSize: "18px", fontWeight: 900, color: "#0F172A", textTransform: "uppercase" }}>
             Official Certificate of Canvass & Declaration of Winners
@@ -387,7 +387,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
         </div>
 
         <p style={{ fontSize: "13px", color: "0F172A", lineHeight: 1.6, marginBottom: "24px" }}>
-          WE, THE UNDERSIGNED MEMBERS of the Electoral Board of Canvassers, hereby certify that we have officially canvassed the votes cast in the Supreme Student Learners Government Elections held on <strong>{new Date().toLocaleDateString()}</strong>. Total turnout recorded: <strong>{stats.uniqueVoters}</strong> out of <strong>{stats.totalRegistered}</strong> enrolled voters (<strong>{turnout}% Turnout</strong>).
+          WE, THE UNDERSIGNED MEMBERS of the Electoral Board of Canvassers, hereby certify that we have officially canvassed the votes cast in the Supreme Secondary Learner Government Elections held on <strong>{new Date().toLocaleDateString()}</strong>. Total turnout recorded: <strong>{stats.uniqueVoters}</strong> out of <strong>{stats.totalRegistered}</strong> enrolled voters (<strong>{turnout}% Turnout</strong>).
         </p>
 
         <h4 style={{ fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.05em", color: "#0D7A3E", marginBottom: "14px", paddingBottom: "6px", borderBottom: "2px solid #0D7A3E" }}>

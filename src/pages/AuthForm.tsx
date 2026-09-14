@@ -431,7 +431,7 @@ const AuthForm: React.FC<{
             
             <div className="linear-info-heading">
               <h2 className="linear-info-title">Student Voting System</h2>
-              <p className="linear-info-subtitle">Official SSLG Supreme Student Government</p>
+              <p className="linear-info-subtitle">Official SSLG Supreme Secondary Learner Government</p>
             </div>
 
             {/* Glass Timer Card Container */}

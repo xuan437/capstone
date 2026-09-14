@@ -328,7 +328,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
               Analytics Summary
             </div>
             <p style={{ fontSize: "12px", lineHeight: 1.45, color: "var(--text-muted)", margin: "0 0 10px 0" }}>
-              Real-time tabulation tracking voter participation and standings across Supreme Student Government candidates.
+              Real-time tabulation tracking voter participation and standings across Supreme Secondary Learner Government candidates.
             </p>
             <p style={{ fontSize: "12px", lineHeight: 1.45, color: "var(--text-muted)", margin: 0 }}>
               Turnout rate is currently <strong style={{ color: "var(--primary-navy)" }}>{turnoutPercent}%</strong> with <strong style={{ color: "var(--primary-navy)" }}>{stats.totalVotesCast}</strong> total votes submitted.
