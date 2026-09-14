@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { supabase } from "../supabase";
 import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "../types";
 import { CountdownTimer } from "../components/CountdownTimer";
@@ -107,6 +107,25 @@ const AuthForm: React.FC<{
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev <= 1) {
+          setFailedAttempts(0);
+          setError("");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const handleTimerLoaded = useCallback((endTime: string | null) => {
     if (endTime) {
@@ -141,6 +160,12 @@ const AuthForm: React.FC<{
       setError("Election period has ended. Student voting is now closed.");
       return;
     }
+
+    if (lockoutSeconds > 0) {
+      setError(`Too many failed login attempts. Please wait ${lockoutSeconds} seconds to try again.`);
+      return;
+    }
+
     setLoading(true);
     setError("");
     const identifier = form.identifier.trim();
@@ -167,10 +192,22 @@ const AuthForm: React.FC<{
     }
 
     if (!student) {
-      setError("Invalid LRN credentials. Please try again.");
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
+
+      if (nextAttempts >= 3) {
+        setLockoutSeconds(15);
+        setError("Too many failed password attempts. Please wait 15 seconds to try again.");
+      } else {
+        const remaining = 3 - nextAttempts;
+        setError(`Invalid LRN or password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before temporary 15s lockout.`);
+      }
       setLoading(false);
       return;
     }
+
+    setFailedAttempts(0);
+    setLockoutSeconds(0);
 
     const studentUser: Student = {
       ...student,
@@ -264,12 +301,17 @@ const AuthForm: React.FC<{
           >
             {activeTab === "student" ? (
               <>
-                {isTimerExpired && (
+                {isTimerExpired ? (
                   <div className="linear-alert-badge warning">
                     <BanIcon />
                     <span>Student voting is currently closed.</span>
                   </div>
-                )}
+                ) : lockoutSeconds > 0 ? (
+                  <div className="linear-alert-badge warning">
+                    <BanIcon />
+                    <span>Too many failed attempts. Try again in {lockoutSeconds}s.</span>
+                  </div>
+                ) : null}
 
                 <div className="linear-field-stack">
                   <div className="linear-field-group">
@@ -287,7 +329,7 @@ const AuthForm: React.FC<{
                         className="linear-input"
                         value={form.identifier}
                         onChange={handleChange}
-                        disabled={isTimerExpired}
+                        disabled={isTimerExpired || lockoutSeconds > 0}
                         autoComplete="off"
                         maxLength={12}
                       />
@@ -308,7 +350,7 @@ const AuthForm: React.FC<{
                         className="linear-input"
                         value={form.password}
                         onChange={handleChange}
-                        disabled={isTimerExpired}
+                        disabled={isTimerExpired || lockoutSeconds > 0}
                         onCopy={blockClipboard}
                         onCut={blockClipboard}
                         onPaste={blockClipboard}
@@ -330,9 +372,15 @@ const AuthForm: React.FC<{
                 <button
                   type="submit"
                   className="linear-btn-primary"
-                  disabled={loading || isTimerExpired}
+                  disabled={loading || isTimerExpired || lockoutSeconds > 0}
                 >
-                  <span>{loading ? "Authenticating..." : "Continue to Ballot"}</span>
+                  <span>
+                    {lockoutSeconds > 0
+                      ? `Locked Out (${lockoutSeconds}s)`
+                      : loading
+                      ? "Authenticating..."
+                      : "Continue to Ballot"}
+                  </span>
                   <ArrowRightIcon />
                 </button>
               </>
