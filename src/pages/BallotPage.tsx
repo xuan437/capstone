@@ -269,31 +269,38 @@ const BallotPage: React.FC<{
       {/* Header Banner & Student Welcome */}
       <div className="card-box" style={{ padding: "14px 16px", marginBottom: "16px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
-              <h1 style={{ margin: 0, fontSize: "16px", color: "var(--text-main)", fontWeight: 600 }}>
-                Official Electronic Ballot
-              </h1>
-              <span
-                style={{
-                  fontSize: "10.5px",
-                  background: "var(--color-success-bg)",
-                  color: "var(--color-success)",
-                  padding: "1px 6px",
-                  borderRadius: "99px",
-                  fontWeight: 500,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "3px",
-                  border: "1px solid var(--color-success-border)",
-                }}
-              >
-                <ShieldCheck size={11} /> Verified Voter
-              </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <img
+              src="/logo.png"
+              alt="School Emblem"
+              style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
+            />
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+                <h1 style={{ margin: 0, fontSize: "16px", color: "var(--text-main)", fontWeight: 600 }}>
+                  Official Electronic Ballot
+                </h1>
+                <span
+                  style={{
+                    fontSize: "10.5px",
+                    background: "var(--color-success-bg)",
+                    color: "var(--color-success)",
+                    padding: "1px 6px",
+                    borderRadius: "99px",
+                    fontWeight: 500,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                    border: "1px solid var(--color-success-border)",
+                  }}
+                >
+                  <ShieldCheck size={11} /> Verified Voter
+                </span>
+              </div>
+              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
+                Welcome, <strong>{currentUser.name}</strong> ({currentUser.grade}). Select <strong>one candidate per position</strong> before submission.
+              </p>
             </div>
-            <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
-              Welcome, <strong>{currentUser.name}</strong> ({currentUser.grade}). Select <strong>one candidate per position</strong> before submission.
-            </p>
           </div>
         </div>
       </div>

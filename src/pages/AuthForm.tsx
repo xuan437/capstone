@@ -93,12 +93,6 @@ const BanIcon = () => (
   </svg>
 );
 
-const SparklesIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z" />
-  </svg>
-);
-
 const AuthForm: React.FC<{
   setPage: (p: Page) => void;
   setCurrentUser: (u: User) => void;
@@ -110,14 +104,17 @@ const AuthForm: React.FC<{
   const [loading, setLoading] = useState(false);
   const [clipboardAlert, setClipboardAlert] = useState(false);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
+  const [hasCountdown, setHasCountdown] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const handleTimerLoaded = useCallback((endTime: string | null) => {
     if (endTime) {
       setIsTimerExpired(new Date() >= new Date(endTime));
+      setHasCountdown(true);
     } else {
       setIsTimerExpired(false);
+      setHasCountdown(false);
     }
   }, []);
 
@@ -215,10 +212,6 @@ const AuthForm: React.FC<{
           
           {/* Top Brand Header */}
           <div className="linear-brand-header">
-            <div className="linear-logo-chip">
-              <SparklesIcon />
-              <span>SSLG 2026</span>
-            </div>
             <div className="linear-header-text">
               <h1 className="linear-title">Portal Login</h1>
               <p className="linear-subtitle">Access your SSLG voting ballot securely</p>
@@ -428,7 +421,7 @@ const AuthForm: React.FC<{
         {/* RIGHT PANEL: High-Precision Raycast/Vercel Timer & Branding Display */}
         <div className="linear-info-panel">
           <div className="linear-info-inner">
-            <div className="linear-avatar-ring">
+            <div className={`linear-avatar-ring ${!hasCountdown ? "large-logo" : ""}`}>
               <img
                 src="/logo.png"
                 alt="School Emblem"

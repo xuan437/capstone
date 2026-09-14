@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, ChevronDown, Edit3, Trash2, Eye } from "lucide-react";
+import { ChevronDown, Edit3, Trash2, Eye } from "lucide-react";
 import { supabase } from "../supabase";
 import { Candidate, Page, POSITIONS } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
@@ -78,9 +78,11 @@ const AdminSetup: React.FC<{
       {/* Main Roster: Current Candidates by Position */}
       <div className="card-box" style={{ padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-          <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "var(--accent-blue)", border: "1px solid var(--border-blue)", color: "var(--primary-navy)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Users size={16} />
-          </div>
+          <img
+            src="/logo.png"
+            alt="School Logo"
+            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
+          />
           <div>
             <h3 style={{ margin: 0, fontSize: "14px", color: "var(--text-main)", fontWeight: 600 }}>Candidates by Position</h3>
             <p style={{ margin: "2px 0 0 0", color: "var(--text-muted)", fontSize: "12px" }}>Manage standing candidates, view candidate profiles, or update entries.</p>

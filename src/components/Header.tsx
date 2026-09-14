@@ -2,7 +2,6 @@
 import { User } from "../types";
 import Menu from "./Menu";
 import { ThemeToggle } from "./ThemeToggle";
-import { Vote } from "lucide-react";
 
 const Header = ({
   currentUser,
@@ -13,18 +12,11 @@ const Header = ({
 }) => (
   <header className="top-header">
     <div className="logo-area" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <div style={{
-        width: "26px",
-        height: "26px",
-        borderRadius: "6px",
-        backgroundColor: "var(--accent-primary)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#ffffff"
-      }}>
-        <Vote size={15} />
-      </div>
+      <img
+        src="/logo.png"
+        alt="School Logo"
+        style={{ width: "26px", height: "26px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)" }}
+      />
       <span className="logo-text" style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "-0.01em" }}>Student Voting System</span>
       <ThemeToggle compact />
     </div>

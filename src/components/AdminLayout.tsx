@@ -20,7 +20,6 @@ import {
   Shield,
   FileText,
   X,
-  Sparkles,
 } from "lucide-react";
 import { Page, User } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
@@ -238,8 +237,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* Left Vertical Brand Sidebar Navigation */}
       <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""} ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="admin-sidebar-header">
-          <div className="admin-logo-wrapper">
-            <Sparkles size={16} className="admin-brand-icon" />
+          <div className="admin-logo-wrapper" style={{ overflow: "hidden", padding: 0 }}>
+            <img
+              src="/logo.png"
+              alt="SSLG School Emblem"
+              style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+            />
           </div>
           <div>
             <h2 className="admin-brand-title">SSLG Console</h2>
