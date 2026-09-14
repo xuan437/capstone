@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { Page } from "../types";
 import { logAuditAction } from "../utils/auditLogger";
+import { Clock, CheckCircle2, Trash2, AlertCircle, Calendar } from "lucide-react";
 
 const AdminElectionSettings: React.FC<{
   setPage: (p: Page) => void;
@@ -80,32 +81,73 @@ const AdminElectionSettings: React.FC<{
   };
 
   if (loading) {
-    return <div className="screen-content flex-center">Loading election settings...</div>;
+    return (
+      <div style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+        <Clock size={16} className="spin" style={{ display: "block", margin: "0 auto 8px auto", color: "var(--accent-primary)" }} />
+        Loading election configuration settings...
+      </div>
+    );
   }
 
   return (
-    <div className="screen-content content-max-width">
-      <div style={{ maxWidth: "720px", margin: "0 auto", width: "100%" }}>
-        <div style={{ marginBottom: "24px" }}>
-          <span className="overline">System Configuration</span>
-          <h1>Election Countdown Settings</h1>
-          <p style={{ color: "var(--text-muted)" }}>
-            Configure the automated voting cutoff deadline. Students will see a live countdown timer, and voting will automatically lock upon expiration.
-          </p>
+    <div style={{ maxWidth: "640px", margin: "0 auto", padding: "16px 20px" }}>
+      <div style={{ marginBottom: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+          <div style={{
+            width: "26px",
+            height: "26px",
+            borderRadius: "6px",
+            backgroundColor: "rgba(99, 102, 241, 0.12)",
+            border: "1px solid rgba(99, 102, 241, 0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--accent-primary)"
+          }}>
+            <Clock size={14} />
+          </div>
+          <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
+            Election Deadline Controls
+          </h1>
         </div>
+        <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+          Set the automated voting cutoff deadline. Students will see a live countdown timer, and voting automatically locks upon expiration.
+        </p>
+      </div>
 
-        <div className="card-box">
-          {error && (
-            <div style={{ color: "var(--color-danger)", background: "var(--color-danger-bg)", border: "1px solid var(--color-danger-border)", padding: "12px 16px", borderRadius: "8px", fontSize: "13px", marginBottom: "24px", fontWeight: 600 }}>
-              {error}
-            </div>
-          )}
+      <div
+        style={{
+          backgroundColor: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "8px",
+          padding: "16px",
+          boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)",
+        }}
+      >
+        {error && (
+          <div style={{
+            backgroundColor: "rgba(239, 68, 68, 0.1)",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            color: "#EF4444",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            marginBottom: "14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
+            <AlertCircle size={14} />
+            <span>{error}</span>
+          </div>
+        )}
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            <div>
-              <label className="form-label" style={{ display: "block", marginBottom: "8px" }}>
-                Voting Cutoff Date & Time *
-              </label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div>
+            <label style={{ display: "block", marginBottom: "6px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
+              Voting Cutoff Date & Time
+            </label>
+            <div style={{ position: "relative" }}>
               <input
                 type="datetime-local"
                 value={timerInput}
@@ -113,85 +155,92 @@ const AdminElectionSettings: React.FC<{
                   setTimerInput(e.target.value);
                   setError("");
                 }}
-                style={{ width: "100%", padding: "14px", fontSize: "15px" }}
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--border-subtle)",
+                  backgroundColor: "var(--bg-main)",
+                  color: "var(--text-main)",
+                  fontSize: "13px",
+                  fontFamily: "inherit"
+                }}
               />
             </div>
+          </div>
 
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              className="btn-primary"
+              onClick={handleSaveTimer}
+              disabled={savingTimer}
+              style={{ flex: 1, padding: "8px 14px", borderRadius: "6px", fontSize: "12.5px", fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+            >
+              <Clock size={14} />
+              {savingTimer ? "Saving..." : "Set Voting Cutoff"}
+            </button>
+            {electionEndTime && (
               <button
-                className="btn-top-nav primary"
-                onClick={handleSaveTimer}
+                className="btn-secondary"
+                onClick={handleClearTimer}
                 disabled={savingTimer}
-                style={{ flex: 1, minWidth: "160px" }}
+                style={{ padding: "8px 14px", borderRadius: "6px", fontSize: "12.5px", color: "#EF4444", display: "flex", alignItems: "center", gap: "6px" }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>timer</span>
-                {savingTimer ? "Saving..." : "Set Voting Deadline"}
+                <Trash2 size={13} />
+                Clear
               </button>
-              {electionEndTime && (
-                <button
-                  className="btn-top-nav"
-                  onClick={handleClearTimer}
-                  disabled={savingTimer}
-                >
-                  Clear Timer
-                </button>
-              )}
-            </div>
-
-            {electionEndTime ? (
-              <div
-                style={{
-                  background: "var(--color-success-bg)",
-                  border: "1px solid var(--color-success-border)",
-                  borderRadius: "12px",
-                  padding: "16px 20px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ color: "var(--color-success)", fontSize: "24px" }}>
-                  check_circle
-                </span>
-                <div>
-                  <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--color-success)" }}>
-                    Active Cutoff Deadline
-                  </div>
-                  <strong style={{ fontSize: "16px", color: "var(--primary-navy)" }}>
-                    {new Date(electionEndTime).toLocaleString("en-PH", {
-                      weekday: "short",
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      hour12: true,
-                    })}
-                  </strong>
-                </div>
-              </div>
-            ) : (
-              <div
-                style={{
-                  background: "var(--bg-surface)",
-                  border: "1px dashed var(--border-light)",
-                  borderRadius: "12px",
-                  padding: "16px 20px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ color: "var(--text-light)", fontSize: "24px" }}>
-                  hourglass_disabled
-                </span>
-                <span style={{ fontSize: "14px", color: "var(--text-muted)", fontWeight: 500 }}>
-                  No active election cutoff timer configured. Voting remains open indefinitely.
-                </span>
-              </div>
             )}
           </div>
+
+          {electionEndTime ? (
+            <div
+              style={{
+                backgroundColor: "rgba(16, 185, 129, 0.08)",
+                border: "1px solid rgba(16, 185, 129, 0.2)",
+                borderRadius: "6px",
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <CheckCircle2 size={16} style={{ color: "#10B981", flexShrink: 0 }} />
+              <div>
+                <div style={{ fontSize: "10.5px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em", color: "#10B981" }}>
+                  Active Cutoff Timer Enforced
+                </div>
+                <strong style={{ fontSize: "13px", color: "var(--text-main)", fontFamily: "monospace" }}>
+                  {new Date(electionEndTime).toLocaleString("en-PH", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                  })}
+                </strong>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                backgroundColor: "var(--bg-main)",
+                border: "1px dashed var(--border-subtle)",
+                borderRadius: "6px",
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <Calendar size={15} style={{ color: "var(--text-light)", flexShrink: 0 }} />
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 400 }}>
+                No active election cutoff timer set. Voting remains open indefinitely.
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -199,3 +248,4 @@ const AdminElectionSettings: React.FC<{
 };
 
 export default AdminElectionSettings;
+

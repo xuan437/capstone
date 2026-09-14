@@ -1,33 +1,47 @@
 import React from "react";
 import { useLanguage } from "../context/LanguageContext";
+import { CheckCircle2, LogOut } from "lucide-react";
 
 const ConfirmationScreen: React.FC<{ handleLogout: () => void }> = ({ handleLogout }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="screen-content flex-center" style={{ minHeight: "calc(100vh - 180px)", padding: "var(--space-2-5)" }}>
+    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
       <div
-        className="card-box"
         style={{
-          maxWidth: "520px",
+          maxWidth: "440px",
           width: "100%",
           margin: "0 auto",
-          padding: "var(--space-6) var(--space-5)",
+          padding: "32px 24px",
           textAlign: "center",
+          backgroundColor: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "8px",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         }}
       >
-        <div style={{ marginBottom: "var(--space-3.5)" }}>
-          <span className="material-symbols-outlined confirm-success-icon">
-            task_alt
-          </span>
+        <div style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          backgroundColor: "rgba(16, 185, 129, 0.12)",
+          border: "1px solid rgba(16, 185, 129, 0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px auto",
+          color: "#10B981"
+        }}>
+          <CheckCircle2 size={26} />
         </div>
-        <h2 style={{ marginBottom: "var(--space-1-5)", fontSize: "28px", fontWeight: 700, color: "var(--primary-navy)" }}>
-          {t.voteSubmittedTitle || "You have voted successfully!"}
+        <h2 style={{ marginBottom: "6px", fontSize: "20px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
+          {t.voteSubmittedTitle || "Vote Successfully Cast"}
         </h2>
-        <p style={{ marginBottom: "var(--space-5)", fontSize: "16px", lineHeight: "1.6", color: "var(--text-muted)", maxWidth: "380px", marginLeft: "auto", marginRight: "auto" }}>
-          {t.voteSubmittedMsg || "Your vote has been recorded. Thank you for participating in the election."}
+        <p style={{ marginBottom: "20px", fontSize: "13px", lineHeight: "1.5", color: "var(--text-muted)", maxWidth: "340px", marginLeft: "auto", marginRight: "auto" }}>
+          {t.voteSubmittedMsg || "Your official ballot choices have been securely recorded in the election database."}
         </p>
-        <button className="btn-primary" onClick={handleLogout} style={{ width: "100%", padding: "var(--space-2)" }}>
+        <button className="btn-primary" onClick={handleLogout} style={{ width: "100%", padding: "8px 14px", fontSize: "13px", fontWeight: 500, borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+          <LogOut size={14} />
           {t.logoutButton || "Logout"}
         </button>
       </div>
@@ -36,3 +50,4 @@ const ConfirmationScreen: React.FC<{ handleLogout: () => void }> = ({ handleLogo
 };
 
 export default ConfirmationScreen;
+

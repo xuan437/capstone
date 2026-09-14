@@ -501,3 +501,24 @@
   font-weight: 400 !important;
   margin: 0 !important;
 }
+
+/* --- Mobile Responsive Modal Dialogs --- */
+@media (max-width: 640px) {
+  .policy-modal-container {
+    max-width: 95vw;
+    max-height: 88vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .policy-modal-header {
+    padding: 12px 14px;
+  }
+
+  .policy-modal-body {
+    padding: 14px;
+  }
+
+  .policy-modal-footer {
+    padding: 12px 14px;
+  }
+}

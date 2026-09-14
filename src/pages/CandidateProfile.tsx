@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import type { Candidate, Page } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
+import { Edit3, Megaphone, AlertCircle, Award } from "lucide-react";
 
 const CandidateProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -41,15 +42,15 @@ const CandidateProfile: React.FC<{
     run();
   }, [candidateId]);
 
-  if (loading) return <div className="screen-content flex-center"><BubbleLoader message="Loading candidate profile..." /></div>;
+  if (loading) return <div style={{ padding: "48px", textAlign: "center" }}><BubbleLoader message="Loading candidate profile..." /></div>;
   if (!candidate) {
     return (
-      <div className="screen-content content-max-width">
-        <div className="card-box flex-center" style={{ padding: "40px", flexDirection: "column" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--color-danger)", marginBottom: "12px" }}>error</span>
-          <p style={{ color: "var(--color-danger)", fontWeight: 600 }}>Candidate profile could not be found.</p>
-          <button className="btn-top-nav" onClick={() => setPage("admin_setup")} style={{ marginTop: "16px" }}>
-            Return to Dashboard
+      <div style={{ maxWidth: "500px", margin: "40px auto", padding: "0 20px" }}>
+        <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "32px 24px", textAlign: "center" }}>
+          <AlertCircle size={32} style={{ color: "#EF4444", marginBottom: "12px" }} />
+          <p style={{ color: "#EF4444", fontWeight: 500, fontSize: "13px" }}>Candidate profile could not be found.</p>
+          <button className="btn-secondary" onClick={() => setPage("admin_setup")} style={{ marginTop: "16px", padding: "6px 14px", borderRadius: "6px", fontSize: "12px" }}>
+            Return to Candidate Roster
           </button>
         </div>
       </div>
@@ -58,78 +59,72 @@ const CandidateProfile: React.FC<{
 
   const avatar =
     base64ToImageUrl(candidate.image_url) ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=E8F0FE&color=0A192F`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=6366F1&color=ffffff`;
 
   return (
-    <div className="screen-content content-max-width" style={{ maxWidth: "620px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px 20px" }}>
       {/* Modern Centered Candidate Profile Card */}
       <div
-        className="card-box"
         style={{
-          borderRadius: "24px",
-          padding: "36px 28px 24px 28px",
+          borderRadius: "10px",
+          padding: "24px 20px 16px 20px",
           textAlign: "center",
-          marginBottom: "24px",
-          boxShadow: "var(--shadow-md)",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-light)",
+          marginBottom: "16px",
+          backgroundColor: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         }}
       >
         {/* Top Centered Circular Ring Photo */}
-        <div style={{ position: "relative", display: "inline-block", marginBottom: "16px" }}>
+        <div style={{ position: "relative", display: "inline-block", marginBottom: "12px" }}>
           <img
             src={avatar}
             alt={candidate.name}
             style={{
-              width: "128px",
-              height: "128px",
+              width: "80px",
+              height: "80px",
               borderRadius: "50%",
               objectFit: "cover",
-              border: "4px solid var(--primary-navy)",
-              boxShadow: "0 8px 20px rgba(10, 25, 47, 0.15)",
+              border: "2px solid var(--border-subtle)",
               display: "block",
             }}
             onError={(e) => {
-              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=E8F0FE&color=0A192F`;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=6366F1&color=ffffff`;
             }}
           />
         </div>
 
         {/* Candidate Name Title */}
-        <h1 style={{ margin: "0 0 6px 0", fontSize: "26px", color: "var(--primary-navy)", fontWeight: 800 }}>
+        <h1 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "var(--text-main)", fontWeight: 600, letterSpacing: "-0.01em" }}>
           {candidate.name}
         </h1>
 
-        {/* Sub-location / Running Meta Line */}
+        {/* Running Meta Line */}
         <div
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "5px",
-            fontSize: "13.5px",
-            fontWeight: 600,
+            gap: "4px",
+            fontSize: "12px",
+            fontWeight: 500,
             color: "var(--text-muted)",
-            marginBottom: "18px",
+            marginBottom: "14px",
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--primary-navy)" }}>
-            location_on
-          </span>
+          <Award size={13} style={{ color: "var(--accent-primary)" }} />
           <span>SSLG Candidate &bull; Running for {candidate.position}</span>
         </div>
 
         {/* Action Button Row */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "28px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "18px" }}>
           <button
             type="button"
-            className="btn-top-nav primary"
+            className="btn-primary"
             onClick={() => setPage("admin_add_candidate")}
-            style={{ padding: "8px 22px", fontSize: "13px" }}
+            style={{ padding: "6px 14px", fontSize: "12px", borderRadius: "6px", display: "flex", alignItems: "center", gap: "4px" }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              edit
-            </span>
-            Edit Candidate Profile
+            <Edit3 size={13} />
+            Edit Profile
           </button>
         </div>
 
@@ -138,32 +133,32 @@ const CandidateProfile: React.FC<{
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "12px",
-            paddingTop: "20px",
-            borderTop: "1px solid var(--border-light)",
+            gap: "8px",
+            paddingTop: "14px",
+            borderTop: "1px solid var(--border-subtle)",
           }}
         >
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
               Total Votes
             </div>
-            <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--primary-navy)" }}>
+            <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--accent-primary)" }}>
               {voteCount}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
               Position
             </div>
-            <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {candidate.position}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
               Section
             </div>
-            <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {candidate.section || "—"}
             </div>
           </div>
@@ -171,27 +166,25 @@ const CandidateProfile: React.FC<{
       </div>
 
       {/* Campaign Platform & Biography Card */}
-      <div className="card-box" style={{ borderRadius: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", paddingBottom: "14px", borderBottom: "1px solid var(--border-light)" }}>
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "var(--primary-navy)", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>campaign</span>
-          </div>
+      <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid var(--border-subtle)" }}>
+          <Megaphone size={16} style={{ color: "var(--accent-primary)" }} />
           <div>
-            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "var(--primary-navy)" }}>Campaign Platform & Statement</h3>
-            <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--text-muted)" }}>Official campaign statement, vision, and candidate goals.</p>
+            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>Campaign Platform & Statement</h3>
+            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>Official campaign statement, vision, and candidate goals.</p>
           </div>
         </div>
 
         {candidate.campaign_text ? (
           <div
             style={{
-              padding: "20px",
-              background: "var(--bg-surface)",
-              borderRadius: "14px",
-              border: "1px solid var(--border-light)",
-              borderLeft: "4px solid var(--primary-navy)",
-              lineHeight: 1.85,
-              fontSize: "14.5px",
+              padding: "14px",
+              backgroundColor: "var(--bg-main)",
+              borderRadius: "6px",
+              border: "1px solid var(--border-subtle)",
+              borderLeft: "3px solid var(--accent-primary)",
+              lineHeight: "1.6",
+              fontSize: "12.5px",
               color: "var(--text-main)",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
@@ -201,11 +194,9 @@ const CandidateProfile: React.FC<{
             "{candidate.campaign_text}"
           </div>
         ) : (
-          <div style={{ padding: "32px 20px", textAlign: "center", background: "var(--bg-surface)", borderRadius: "14px", border: "2px dashed var(--border-light)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "36px", color: "var(--border-subtle)", marginBottom: "8px" }}>
-              description
-            </span>
-            <p style={{ margin: 0, color: "var(--text-muted)", fontWeight: 500, fontSize: "13.5px" }}>
+          <div style={{ padding: "24px 16px", textAlign: "center", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px dashed var(--border-subtle)" }}>
+            <Megaphone size={22} style={{ color: "var(--text-light)", marginBottom: "6px" }} />
+            <p style={{ margin: 0, color: "var(--text-muted)", fontWeight: 400, fontSize: "12px" }}>
               No campaign platform or biography submitted for this candidate.
             </p>
           </div>
@@ -216,3 +207,4 @@ const CandidateProfile: React.FC<{
 };
 
 export default CandidateProfile;
+

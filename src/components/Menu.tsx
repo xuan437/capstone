@@ -4,6 +4,20 @@ import { translations, LanguageCode } from "../utils/translations";
 import "./DropdownMenu.css";
 import "./PolicyModal.css";
 import { ReceiptVerificationModal } from "./ReceiptVerificationModal";
+import {
+  Menu as MenuIcon,
+  ChevronDown,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Vote,
+  Gavel,
+  Shield,
+  FileText,
+  User as UserIcon,
+  LogOut,
+  X,
+} from "lucide-react";
 
 interface MenuProps {
   currentUser: User | null;
@@ -252,8 +266,8 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <span className="material-symbols-outlined">menu</span>
-        <span className="material-symbols-outlined chevron">expand_more</span>
+        <MenuIcon size={18} />
+        <ChevronDown size={14} className="chevron" />
       </button>
 
       <div 
@@ -286,11 +300,11 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
           <div className="dropdown-section-label">{t.contactSectionTitle || "Contact"}</div>
           <div className="dropdown-list">
             <a href="https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=emjaygusela@gmail.com" target="_blank" rel="noopener noreferrer" className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">mail</span>
+              <Mail size={15} className="dropdown-item-icon" />
               <span>admin@gmail.com</span>
             </a>
             <a href="tel:09168562198" className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">call</span>
+              <Phone size={15} className="dropdown-item-icon" />
               <span>09168562198</span>
             </a>
           </div>
@@ -301,23 +315,23 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
           <div className="dropdown-section-label">{t.aboutSectionTitle || "About Platform"}</div>
           <div className="dropdown-list">
             <button onClick={() => setIsVerifyModalOpen(true)} className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon" style={{ color: "var(--color-success)" }}>verified_user</span>
+              <ShieldCheck size={15} className="dropdown-item-icon" style={{ color: "var(--color-success)" }} />
               <span style={{ fontWeight: 700, color: "var(--primary-navy)" }}>Verify Ballot Receipt</span>
             </button>
             <button onClick={() => handleAboutClick("process")} className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">how_to_vote</span>
+              <Vote size={15} className="dropdown-item-icon" />
               <span>{t.electionProcess || "Election Process"}</span>
             </button>
             <button onClick={() => handleAboutClick("rules")} className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">gavel</span>
+              <Gavel size={15} className="dropdown-item-icon" />
               <span>{t.votingRules || "Voting Rules"}</span>
             </button>
             <button onClick={() => handleAboutClick("privacy")} className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">shield</span>
+              <Shield size={15} className="dropdown-item-icon" />
               <span>{t.privacyPolicy || "Privacy Policy"}</span>
             </button>
             <button onClick={() => handleAboutClick("terms")} className="dropdown-item">
-              <span className="material-symbols-outlined dropdown-item-icon">description</span>
+              <FileText size={15} className="dropdown-item-icon" />
               <span>{t.termsOfService || "Terms of Service"}</span>
             </button>
           </div>
@@ -327,7 +341,7 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
         {currentUser && (
           <div className="dropdown-section">
             <div className="dropdown-user-row">
-              <span className="material-symbols-outlined dropdown-user-avatar">account_circle</span>
+              <UserIcon size={18} className="dropdown-user-avatar" />
               <span className="dropdown-user-name">
                 {sessionLabels.loggedInAs}: {currentUser.name}
               </span>
@@ -340,7 +354,7 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
                 }}
                 className="dropdown-item logout-btn"
               >
-                <span className="material-symbols-outlined dropdown-item-icon">logout</span>
+                <LogOut size={15} className="dropdown-item-icon" />
                 <span style={{ fontWeight: 600 }}>{sessionLabels.logout}</span>
               </button>
             </div>
@@ -383,9 +397,12 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
               cursor: isDragging ? "grabbing" : "grab",
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "#1E3A8A" }}>
-              {activeModalDetails.icon}
-            </span>
+            <div style={{ color: "#1E3A8A", display: "flex", alignItems: "center" }}>
+              {activeModalType === "process" && <Vote size={20} />}
+              {activeModalType === "rules" && <Gavel size={20} />}
+              {activeModalType === "privacy" && <Shield size={20} />}
+              {activeModalType === "terms" && <FileText size={20} />}
+            </div>
             <h3 style={{ margin: "0", fontSize: "15px", fontWeight: 600, color: "#0F172A", flex: 1 }}>
               {activeModalDetails.title}
             </h3>
@@ -395,17 +412,16 @@ const Menu: React.FC<MenuProps> = ({ currentUser, handleLogout }) => {
               style={{
                 background: "none",
                 border: "none",
-                fontSize: "20px",
+                fontSize: "18px",
                 cursor: "pointer",
                 color: "#94A3B8",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "4px",
-                fontWeight: 400
               }}
             >
-              ×
+              <X size={18} />
             </button>
           </div>
 

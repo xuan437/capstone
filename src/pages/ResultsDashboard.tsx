@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from "react";
+import {
+  Users,
+  PieChart,
+  Vote,
+  Trophy,
+} from "lucide-react";
 import { supabase } from "../supabase";
 import { POSITIONS } from "../types";
 import type { Candidate, User, Page } from "../types";
@@ -80,35 +86,28 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
     return matchesPos && matchesSearch;
   });
 
-  // Top 5 overall candidates by vote count
   const topOverallCandidates = [...results].sort((a, b) => b.count - a.count).slice(0, 5);
   const maxTopVotes = topOverallCandidates[0]?.count || 1;
 
-  // Positions available
   const availablePositions = Array.from(new Set(results.map((r) => r.candidate.position)));
 
-  // Filtered positions for display
   const activePositionsToDisplay = selectedPositionFilter === "All"
     ? POSITIONS.filter((p) => results.some((r) => r.candidate.position === p))
     : [selectedPositionFilter];
 
   return (
-    <div className="screen-content content-max-width" style={{ paddingBottom: "48px" }}>
-      {/* Title & Action Buttons Header */}
-      <div className="flex-between" style={{ marginBottom: "24px", flexWrap: "wrap", gap: "16px", alignItems: "center" }}>
+    <div className="screen-content content-max-width">
+      {/* Title & Action Header */}
+      <div className="flex-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <h1 style={{ fontSize: "24px", fontWeight: 800, margin: 0, color: "var(--text-main)", letterSpacing: "-0.02em", fontFamily: "var(--font-heading)" }}>
-              Live Election Tabulation & Analytics
-            </h1>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", padding: "4px 10px", borderRadius: "var(--radius-sm)", fontSize: "11px", fontWeight: 700, color: "var(--color-success)" }}>
-              <span className="status-live-dot" style={{ width: "6px", height: "6px" }} />
-              LIVE TABULATION
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span className="overline">Tabulation</span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "var(--color-success-bg)", border: "1px solid var(--color-success-border)", padding: "1px 6px", borderRadius: "4px", fontSize: "10.5px", fontWeight: 500, color: "var(--color-success)" }}>
+              <span className="live-dot-green" />
+              LIVE
             </div>
           </div>
-          <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)", fontSize: "13.5px" }}>
-            Real-time vote count breakdown, candidate standings, and voter participation metrics.
-          </p>
+          <h1>Live Tabulation & Analytics</h1>
         </div>
 
         {isStudent && currentUser && (
@@ -125,94 +124,86 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-          marginBottom: "24px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: "12px",
+          marginBottom: "16px",
         }}
       >
-        <div className="card-box" style={{ padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="card-box" style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-light)" }}>
-              {t.totalVoters || "Registered Voters"}
+            <span style={{ fontSize: "10.5px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-light)" }}>
+              {t.totalVoters || "Registered"}
             </span>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "var(--text-main)", marginTop: "4px", lineHeight: 1, fontFamily: "var(--font-heading)" }}>
+            <div style={{ fontSize: "22px", fontWeight: 600, color: "var(--text-main)", marginTop: "2px", lineHeight: 1 }}>
               {stats.totalRegistered}
             </div>
           </div>
-          <div style={{ width: "42px", height: "42px", borderRadius: "var(--radius-md)", background: "rgba(13, 122, 62, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary-navy)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>groups</span>
-          </div>
+          <Users size={16} style={{ color: "var(--primary-navy)", opacity: 0.8 }} />
         </div>
 
-        <div className="card-box" style={{ padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="card-box" style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-light)" }}>
-              {t.turnoutLabel || "Voter Turnout Rate"}
+            <span style={{ fontSize: "10.5px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-light)" }}>
+              {t.turnoutLabel || "Turnout"}
             </span>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "var(--primary-navy)", marginTop: "4px", lineHeight: 1, fontFamily: "var(--font-heading)" }}>
+            <div style={{ fontSize: "22px", fontWeight: 600, color: "var(--primary-navy)", marginTop: "2px", lineHeight: 1 }}>
               {turnoutPercent}%
             </div>
           </div>
-          <div style={{ width: "42px", height: "42px", borderRadius: "var(--radius-md)", background: "rgba(13, 122, 62, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary-navy)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>pie_chart</span>
-          </div>
+          <PieChart size={16} style={{ color: "var(--primary-navy)", opacity: 0.8 }} />
         </div>
 
-        <div className="card-box" style={{ padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="card-box" style={{ padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-light)" }}>
-              Total Votes Cast
+            <span style={{ fontSize: "10.5px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-light)" }}>
+              Total Votes
             </span>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "var(--text-main)", marginTop: "4px", lineHeight: 1, fontFamily: "var(--font-heading)" }}>
+            <div style={{ fontSize: "22px", fontWeight: 600, color: "var(--text-main)", marginTop: "2px", lineHeight: 1 }}>
               {stats.totalVotesCast}
             </div>
           </div>
-          <div style={{ width: "42px", height: "42px", borderRadius: "var(--radius-md)", background: "rgba(13, 122, 62, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--primary-navy)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>how_to_vote</span>
-          </div>
+          <Vote size={16} style={{ color: "var(--primary-navy)", opacity: 0.8 }} />
         </div>
       </div>
 
       {/* Main 2-Column Analytics Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "24px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px", alignItems: "start" }}>
         
         {/* LEFT COLUMN: Top Candidates + Position Standings */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           
           {/* Top 5 Leading Candidates Visual Block */}
-          <div className="card-box" style={{ padding: "24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: "var(--font-heading)" }}>
-                Top 5 Leading Candidates Overall
+          <div className="card-box" style={{ padding: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+              <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Top Overall Candidates
               </div>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--primary-navy)", background: "var(--color-success-bg)", padding: "3px 8px", borderRadius: "var(--radius-xs)", border: "1px solid var(--color-success-border)" }}>
-                Highest Votes
-              </span>
+              <Trophy size={14} style={{ color: "var(--color-warning)" }} />
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {topOverallCandidates.map((r, idx) => {
                 const widthPercent = maxTopVotes > 0 ? Math.round((r.count / maxTopVotes) * 100) : 0;
                 return (
-                  <div key={r.candidate.id} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ width: "22px", height: "22px", borderRadius: "50%", background: idx === 0 ? "var(--primary-navy)" : "var(--bg-subtle)", color: idx === 0 ? "#FFFFFF" : "var(--text-muted)", fontSize: "11px", fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div key={r.candidate.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ width: "18px", height: "18px", borderRadius: "50%", background: idx === 0 ? "var(--primary-navy)" : "var(--bg-subtle)", color: idx === 0 ? "#FFFFFF" : "var(--text-muted)", fontSize: "10px", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {idx + 1}
                     </span>
-                    <div style={{ width: "140px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "13px", fontWeight: 700, color: "var(--text-main)" }}>
+                    <div style={{ width: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: "12px", fontWeight: 500, color: "var(--text-main)" }}>
                       {r.candidate.name}
                     </div>
-                    <div style={{ flex: 1, background: "var(--bg-subtle)", height: "12px", borderRadius: "var(--radius-xs)", overflow: "hidden", position: "relative" }}>
+                    <div style={{ flex: 1, background: "var(--bg-subtle)", height: "8px", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
                       <div
                         style={{
                           width: `${widthPercent}%`,
                           height: "100%",
                           background: "var(--primary-navy)",
-                          borderRadius: "var(--radius-xs)",
-                          transition: "width 0.8s ease",
+                          borderRadius: "4px",
+                          transition: "width 0.6s ease",
                         }}
                       />
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--primary-navy)", minWidth: "42px", textAlign: "right", fontFamily: "var(--font-heading)" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--primary-navy)", minWidth: "32px", textAlign: "right" }}>
                       {r.count}
                     </span>
                   </div>
@@ -222,54 +213,51 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
           </div>
 
           {/* Detailed Candidate Standings Grouped by Position */}
-          <div className="card-box" style={{ padding: "24px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
-              <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em", fontFamily: "var(--font-heading)" }}>
-                Full Standings by Position
+          <div className="card-box" style={{ padding: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Standings by Position
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-muted)" }}>Filter Position:</label>
-                <select
-                  value={selectedPositionFilter}
-                  onChange={(e) => setSelectedPositionFilter(e.target.value)}
-                  style={{
-                    padding: "6px 36px 6px 14px",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "12.5px",
-                    fontWeight: 600,
-                    border: "1px solid var(--border-light)",
-                    background: "var(--bg-surface)",
-                    color: "var(--text-main)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <option value="All">All Positions ({availablePositions.length})</option>
-                  {availablePositions.map((pos) => (
-                    <option key={pos} value={pos}>{pos}</option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={selectedPositionFilter}
+                onChange={(e) => setSelectedPositionFilter(e.target.value)}
+                style={{
+                  padding: "0 24px 0 8px",
+                  borderRadius: "4px",
+                  fontSize: "11.5px",
+                  height: "28px",
+                  border: "1px solid var(--border-light)",
+                  background: "var(--bg-subtle)",
+                  color: "var(--text-main)",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="All">All Positions ({availablePositions.length})</option>
+                {availablePositions.map((pos) => (
+                  <option key={pos} value={pos}>{pos}</option>
+                ))}
+              </select>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {activePositionsToDisplay.map((positionName) => {
                 const positionItems = filteredResults.filter((r) => r.candidate.position === positionName);
                 if (positionItems.length === 0) return null;
                 const posTotalVotes = positionTotals[positionName] || 0;
 
                 return (
-                  <div key={positionName} style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-md)", padding: "16px", border: "1px solid var(--border-light)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "6px", fontFamily: "var(--font-heading)" }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--primary-navy)" }}>how_to_vote</span>
+                  <div key={positionName} style={{ background: "var(--bg-subtle)", borderRadius: "6px", padding: "10px 12px", border: "1px solid var(--border-light)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <div style={{ fontSize: "11.5px", fontWeight: 600, color: "var(--primary-navy)", textTransform: "uppercase", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: "4px" }}>
+                        <Vote size={12} />
                         {positionName}
                       </div>
-                      <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", background: "var(--bg-card)", padding: "3px 8px", borderRadius: "var(--radius-xs)", border: "1px solid var(--border-light)" }}>
-                        {posTotalVotes} Total Votes
+                      <span style={{ fontSize: "10.5px", fontWeight: 500, color: "var(--text-muted)", background: "var(--bg-card)", padding: "1px 5px", borderRadius: "3px", border: "1px solid var(--border-light)" }}>
+                        {posTotalVotes} Votes
                       </span>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                       {positionItems.map((r, idx) => {
                         const percentage = posTotalVotes > 0 ? Math.round((r.count / posTotalVotes) * 100) : 0;
                         const isLeading = idx === 0 && r.count > 0;
@@ -280,44 +268,43 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                             key={r.candidate.id}
                             style={{
                               background: "var(--bg-card)",
-                              borderRadius: "var(--radius-md)",
-                              padding: "12px 14px",
+                              borderRadius: "4px",
+                              padding: "8px 10px",
                               border: `1px solid ${isLeading ? "var(--color-success-border)" : "var(--border-light)"}`,
-                              borderLeft: isLeading ? "4px solid var(--color-success)" : "1px solid var(--border-light)",
                             }}
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                               <img
                                 src={avatar}
                                 alt={r.candidate.name}
-                                style={{ width: "36px", height: "36px", borderRadius: "var(--radius-sm)", objectFit: "cover", flexShrink: 0 }}
+                                style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
                                 onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`; }}
                               />
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                  <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  <div style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                     {r.candidate.name}
                                     {isLeading && (
-                                      <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-success)", background: "var(--color-success-bg)", padding: "2px 6px", borderRadius: "var(--radius-xs)", marginLeft: "6px", border: "1px solid var(--color-success-border)" }}>
-                                        ★ LEADING
+                                      <span style={{ fontSize: "9.5px", fontWeight: 600, color: "var(--color-success)", background: "var(--color-success-bg)", padding: "1px 4px", borderRadius: "3px", marginLeft: "4px" }}>
+                                        LEADING
                                       </span>
                                     )}
                                   </div>
-                                  <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-heading)" }}>
-                                    {r.count} <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)" }}>({percentage}%)</span>
+                                  <div style={{ fontSize: "11.5px", fontWeight: 600, color: "var(--text-main)" }}>
+                                    {r.count} <span style={{ fontSize: "10.5px", fontWeight: 400, color: "var(--text-muted)" }}>({percentage}%)</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
 
-                            <div style={{ background: "var(--bg-subtle)", height: "8px", borderRadius: "var(--radius-xs)", overflow: "hidden" }}>
+                            <div style={{ background: "var(--bg-subtle)", height: "6px", borderRadius: "3px", overflow: "hidden" }}>
                               <div
                                 style={{
                                   width: `${percentage}%`,
                                   height: "100%",
                                   background: isLeading ? "var(--color-success)" : "var(--primary-navy)",
-                                  borderRadius: "var(--radius-xs)",
-                                  transition: "width 0.8s ease",
+                                  borderRadius: "3px",
+                                  transition: "width 0.6s ease",
                                 }}
                               />
                             </div>
@@ -333,46 +320,46 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
         </div>
 
         {/* RIGHT COLUMN: Analytical Insights & Overview Narrative */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           
           {/* Executive Analytics Insight Text Box */}
-          <div className="card-box" style={{ padding: "24px" }}>
-            <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "12px", fontFamily: "var(--font-heading)" }}>
-              Election Analytics & Insights
+          <div className="card-box" style={{ padding: "16px" }}>
+            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              Analytics Summary
             </div>
-            <p style={{ fontSize: "13px", lineHeight: 1.7, color: "var(--text-muted)", margin: "0 0 14px 0" }}>
-              This live analytics view tracks real-time voter popularity and candidate standings across all grade levels in the Supreme Student Government Election.
+            <p style={{ fontSize: "12px", lineHeight: 1.45, color: "var(--text-muted)", margin: "0 0 10px 0" }}>
+              Real-time tabulation tracking voter participation and standings across Supreme Student Government candidates.
             </p>
-            <p style={{ fontSize: "13px", lineHeight: 1.7, color: "var(--text-muted)", margin: 0 }}>
-              Voting turnout currently stands at <strong style={{ color: "var(--primary-navy)" }}>{turnoutPercent}%</strong> with <strong style={{ color: "var(--primary-navy)" }}>{stats.totalVotesCast}</strong> total ballots cast by verified student voters.
+            <p style={{ fontSize: "12px", lineHeight: 1.45, color: "var(--text-muted)", margin: 0 }}>
+              Turnout rate is currently <strong style={{ color: "var(--primary-navy)" }}>{turnoutPercent}%</strong> with <strong style={{ color: "var(--primary-navy)" }}>{stats.totalVotesCast}</strong> total votes submitted.
             </p>
           </div>
 
-          {/* Position Vote Share Visualizer Stacked Overview */}
-          <div className="card-box" style={{ padding: "24px" }}>
-            <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "16px", fontFamily: "var(--font-heading)" }}>
-              Position Turnout Distribution
+          {/* Position Vote Share Visualizer */}
+          <div className="card-box" style={{ padding: "16px" }}>
+            <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+              Turnout by Position
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {availablePositions.map((pos) => {
                 const totalPosVotes = positionTotals[pos] || 0;
                 const posPercent = stats.totalVotesCast > 0 ? Math.round((totalPosVotes / stats.totalVotesCast) * 100) : 0;
 
                 return (
                   <div key={pos}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", fontWeight: 700, marginBottom: "6px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11.5px", fontWeight: 500, marginBottom: "4px" }}>
                       <span style={{ color: "var(--text-main)" }}>{pos}</span>
-                      <span style={{ color: "var(--primary-navy)", fontFamily: "var(--font-heading)" }}>{totalPosVotes} votes ({posPercent}%)</span>
+                      <span style={{ color: "var(--primary-navy)" }}>{totalPosVotes} votes ({posPercent}%)</span>
                     </div>
-                    <div style={{ background: "var(--bg-subtle)", height: "8px", borderRadius: "var(--radius-xs)", overflow: "hidden" }}>
+                    <div style={{ background: "var(--bg-subtle)", height: "6px", borderRadius: "3px", overflow: "hidden" }}>
                       <div
                         style={{
                           width: `${posPercent}%`,
                           height: "100%",
                           background: "var(--primary-navy)",
-                          borderRadius: "var(--radius-xs)",
-                          transition: "width 0.8s ease",
+                          borderRadius: "3px",
+                          transition: "width 0.6s ease",
                         }}
                       />
                     </div>

@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { Student, Page } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
+import { CheckCircle2, Clock, RotateCw, MapPin, Eye, EyeOff, Vote, ShieldCheck, AlertCircle, RefreshCw } from "lucide-react";
 
 const StudentProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -123,15 +124,15 @@ const StudentProfile: React.FC<{
     }
   };
 
-  if (loading) return <div className="screen-content flex-center"><BubbleLoader message="Loading voter profile..." /></div>;
+  if (loading) return <div style={{ padding: "48px", textAlign: "center" }}><BubbleLoader message="Loading voter profile..." /></div>;
   if (error || !student) {
     return (
-      <div className="screen-content content-max-width">
-        <div className="card-box flex-center" style={{ padding: "40px", flexDirection: "column" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--color-danger)", marginBottom: "12px" }}>error</span>
-          <p style={{ color: "var(--color-danger)", fontWeight: 600 }}>{error || "Student profile could not be loaded."}</p>
-          <button className="btn-top-nav" onClick={() => setPage("admin_voters")} style={{ marginTop: "16px" }}>
-            Return to Voters List
+      <div style={{ maxWidth: "500px", margin: "40px auto", padding: "0 20px" }}>
+        <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "32px 24px", textAlign: "center" }}>
+          <AlertCircle size={32} style={{ color: "#EF4444", marginBottom: "12px" }} />
+          <p style={{ color: "#EF4444", fontWeight: 500, fontSize: "13px" }}>{error || "Student profile could not be loaded."}</p>
+          <button className="btn-secondary" onClick={() => setPage("admin_voters")} style={{ marginTop: "16px", padding: "6px 14px", borderRadius: "6px", fontSize: "12px" }}>
+            Return to Voters Roster
           </button>
         </div>
       </div>
@@ -139,83 +140,77 @@ const StudentProfile: React.FC<{
   }
 
   return (
-    <div className="screen-content content-max-width" style={{ maxWidth: "620px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px 20px" }}>
       {/* Modern Centered Student Voter Profile Card */}
       <div
-        className="card-box"
         style={{
-          borderRadius: "24px",
-          padding: "36px 28px 24px 28px",
+          borderRadius: "10px",
+          padding: "24px 20px 16px 20px",
           textAlign: "center",
-          marginBottom: "24px",
-          boxShadow: "var(--shadow-md)",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-light)",
+          marginBottom: "16px",
+          backgroundColor: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         }}
       >
-        {/* Top Centered Circular Ring Photo */}
-        <div style={{ position: "relative", display: "inline-block", marginBottom: "16px" }}>
+        {/* Top Centered Circular Photo */}
+        <div style={{ position: "relative", display: "inline-block", marginBottom: "12px" }}>
           <img
             src={
               base64ToImageUrl(student.photo_url) ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=E8F0FE&color=0A192F`
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff`
             }
             alt={student.name}
             style={{
-              width: "128px",
-              height: "128px",
+              width: "80px",
+              height: "80px",
               borderRadius: "50%",
               objectFit: "cover",
-              border: "4px solid var(--primary-navy)",
-              boxShadow: "0 8px 20px rgba(10, 25, 47, 0.15)",
+              border: "2px solid var(--border-subtle)",
               display: "block",
             }}
             onError={(e) => {
-              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=E8F0FE&color=0A192F`;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff`;
             }}
           />
         </div>
 
         {/* Student Name Title */}
-        <h1 style={{ margin: "0 0 6px 0", fontSize: "26px", color: "var(--primary-navy)", fontWeight: 800 }}>
+        <h1 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "var(--text-main)", fontWeight: 600, letterSpacing: "-0.01em" }}>
           {student.name}
         </h1>
 
-        {/* Sub-location / Grade & Section Meta Line */}
+        {/* Meta Line */}
         <div
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "5px",
-            fontSize: "13.5px",
-            fontWeight: 600,
+            gap: "4px",
+            fontSize: "12px",
+            fontWeight: 500,
             color: "var(--text-muted)",
-            marginBottom: "18px",
+            marginBottom: "14px",
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--primary-navy)" }}>
-            location_on
-          </span>
-          <span>DLMHS Student Voter &bull; Grade {student.grade} {student.section ? `• Section ${student.section}` : ""}</span>
+          <MapPin size={13} style={{ color: "var(--accent-primary)" }} />
+          <span>DLMHS Voter &bull; Grade {student.grade} {student.section ? `• Section ${student.section}` : ""}</span>
         </div>
 
         {/* Action Button & Status Pill Row */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", flexWrap: "wrap", marginBottom: "28px" }}>
-          <div className={`profile-voted-pill ${student.has_voted ? "voted" : "pending"}`} style={{ padding: "6px 16px", fontSize: "13px" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              {student.has_voted ? "check_circle" : "pending"}
-            </span>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
+          <div className={`profile-voted-pill ${student.has_voted ? "voted" : "pending"}`} style={{ padding: "4px 12px", fontSize: "12px", borderRadius: "12px" }}>
+            {student.has_voted ? <CheckCircle2 size={13} /> : <Clock size={13} />}
             {student.has_voted ? "Official Vote Cast" : "Voting Pending"}
           </div>
 
-          <button className="btn-top-nav" onClick={fetchStudentProfile} style={{ padding: "6px 14px", fontSize: "12.5px" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>refresh</span>
+          <button className="btn-secondary" onClick={fetchStudentProfile} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11.5px", display: "flex", alignItems: "center", gap: "4px" }}>
+            <RotateCw size={12} />
             Refresh
           </button>
 
           {student.has_voted && (
-            <button className="btn-top-nav" onClick={handleResetStatus} disabled={isResetting} style={{ padding: "6px 14px", fontSize: "12.5px" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>restart_alt</span>
+            <button className="btn-secondary" onClick={handleResetStatus} disabled={isResetting} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11.5px", color: "#EF4444", display: "flex", alignItems: "center", gap: "4px" }}>
+              <RefreshCw size={12} />
               {isResetting ? "Resetting..." : "Reset Vote Status"}
             </button>
           )}
@@ -226,32 +221,32 @@ const StudentProfile: React.FC<{
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
-            gap: "12px",
-            paddingTop: "20px",
-            borderTop: "1px solid var(--border-light)",
+            gap: "8px",
+            paddingTop: "14px",
+            borderTop: "1px solid var(--border-subtle)",
           }}
         >
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-              Student ID
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
+              Student LRN
             </div>
-            <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {student.id}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
               Grade Level
             </div>
-            <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--primary-navy)" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)" }}>
               {student.grade}
             </div>
           </div>
           <div>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>
-              Voting Status
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "2px" }}>
+              Status
             </div>
-            <div style={{ fontSize: "14.5px", fontWeight: 800, color: student.has_voted ? "var(--color-success)" : "var(--color-warning)" }}>
+            <div style={{ fontSize: "13px", fontWeight: 600, color: student.has_voted ? "#10B981" : "#F59E0B" }}>
               {student.has_voted ? "Voted" : "Pending"}
             </div>
           </div>
@@ -259,40 +254,36 @@ const StudentProfile: React.FC<{
       </div>
 
       {/* Security & Access Key Details Box */}
-      <div className="card-box" style={{ borderRadius: "20px", marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px", paddingBottom: "14px", borderBottom: "1px solid var(--border-light)" }}>
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "var(--primary-navy)", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>badge</span>
-          </div>
+      <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px", marginBottom: "16px", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", paddingBottom: "10px", borderBottom: "1px solid var(--border-subtle)" }}>
+          <ShieldCheck size={16} style={{ color: "var(--accent-primary)" }} />
           <div>
-            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "var(--primary-navy)" }}>Student Credentials & Key</h3>
-            <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--text-muted)" }}>LRN student identification and login access key.</p>
+            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>Student Credentials & Key</h3>
+            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>LRN identification and passcode access details.</p>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-          <div style={{ background: "var(--bg-surface)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--border-light)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", marginBottom: "4px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+          <div style={{ minWidth: 0, backgroundColor: "var(--bg-main)", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "2px" }}>
               Access Password
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               {(() => {
                 const displayPw = student.password && student.password.startsWith("$2a$") ? "123456" : student.password;
                 return (
                   <>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14.5px", fontWeight: 800, color: "var(--primary-navy)", letterSpacing: showPassword ? "normal" : "0.15em" }}>
+                    <span style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600, color: "var(--text-main)", letterSpacing: showPassword ? "normal" : "0.15em" }}>
                       {displayPw ? (showPassword ? displayPw : "••••••••") : "Standard"}
                     </span>
                     {displayPw && (
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "var(--text-light)", display: "inline-flex", alignItems: "center" }}
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "var(--text-muted)", display: "inline-flex", alignItems: "center" }}
                         title={showPassword ? "Hide Password" : "Show Password"}
                       >
-                        <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                          {showPassword ? "visibility_off" : "visibility"}
-                        </span>
+                        {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
                       </button>
                     )}
                   </>
@@ -301,30 +292,30 @@ const StudentProfile: React.FC<{
             </div>
           </div>
 
-          <div style={{ background: "var(--bg-surface)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--border-light)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div style={{ minWidth: 0, backgroundColor: "var(--bg-main)", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "2px" }}>
               Voting Time
             </div>
-            <div style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--primary-navy)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-main)" }}>
               {student.has_voted && resolvedVotedAt ? (
                 new Date(resolvedVotedAt).toLocaleString("en-PH", {
                   month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: true
                 })
               ) : (
-                <span style={{ color: "var(--text-light)", fontStyle: "italic" }}>Not Voted</span>
+                <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not Voted</span>
               )}
             </div>
           </div>
 
-          <div style={{ background: "var(--bg-surface)", padding: "12px 14px", borderRadius: "12px", border: "1px solid var(--border-light)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-light)", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div style={{ minWidth: 0, backgroundColor: "var(--bg-main)", padding: "10px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+            <div style={{ fontSize: "10.5px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "2px" }}>
               Voting Location
             </div>
-            <div style={{ fontSize: "12.5px", fontWeight: 700, color: "var(--primary-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ fontSize: "11.5px", fontWeight: 500, color: "var(--text-main)", wordBreak: "break-word", lineHeight: 1.35 }} title={resolvedLocation || ""}>
               {student.has_voted && resolvedLocation ? (
                 resolvedLocation
               ) : (
-                <span style={{ color: "var(--text-light)", fontStyle: "italic" }}>Not Voted</span>
+                <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not Voted</span>
               )}
             </div>
           </div>
@@ -332,29 +323,25 @@ const StudentProfile: React.FC<{
       </div>
 
       {/* Votes Cast Breakdown */}
-      <div className="card-box" style={{ borderRadius: "20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "var(--primary-navy)", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>how_to_vote</span>
-          </div>
+      <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+          <Vote size={16} style={{ color: "var(--accent-primary)" }} />
           <div>
-            <h3 style={{ margin: 0, fontSize: "18px", color: "var(--primary-navy)", fontWeight: 800 }}>Votes Cast Record</h3>
-            <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "var(--text-muted)" }}>Official ballot record of candidate choices.</p>
+            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>Votes Cast Record</h3>
+            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>Official ballot record of candidate choices.</p>
           </div>
         </div>
 
         {votes.length === 0 ? (
-          <div style={{ padding: "40px 20px", textAlign: "center", background: "var(--bg-surface)", borderRadius: "14px", border: "2px dashed var(--border-light)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "var(--border-subtle)", marginBottom: "8px" }}>
-              inbox
-            </span>
-            <h4 style={{ margin: "0 0 4px 0", color: "var(--primary-navy)", fontSize: "15px" }}>No Votes Cast Yet</h4>
-            <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "13px" }}>
-              This student has not submitted a ballot in the current election cycle.
+          <div style={{ padding: "28px 16px", textAlign: "center", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px dashed var(--border-subtle)" }}>
+            <Vote size={24} style={{ color: "var(--text-light)", marginBottom: "6px" }} />
+            <h4 style={{ margin: "0 0 2px 0", color: "var(--text-main)", fontSize: "13px", fontWeight: 500 }}>No Votes Cast Yet</h4>
+            <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
+              This student has not submitted a ballot in the current election.
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {votes.map((vote) => {
               const formattedTime = vote.voted_at
                 ? new Date(vote.voted_at).toLocaleString("en-PH", {
@@ -365,35 +352,34 @@ const StudentProfile: React.FC<{
                 <div
                   key={vote.id}
                   style={{
-                    padding: "16px 20px",
-                    background: "var(--bg-surface)",
-                    borderRadius: "14px",
-                    border: "1px solid var(--border-light)",
-                    borderLeft: "4px solid var(--primary-navy)",
+                    padding: "10px 14px",
+                    backgroundColor: "var(--bg-main)",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border-subtle)",
+                    borderLeft: "3px solid var(--accent-primary)",
                   }}
-                  className="hover-lift"
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
                     <div>
-                      <div className="overline" style={{ color: "var(--text-light)", marginBottom: "2px" }}>Position</div>
-                      <strong style={{ fontSize: "15px", color: "var(--primary-navy)" }}>{vote.candidate.position}</strong>
+                      <div style={{ fontSize: "10.5px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 500 }}>Position</div>
+                      <strong style={{ fontSize: "13px", color: "var(--text-main)" }}>{vote.candidate.position}</strong>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <div className="overline" style={{ color: "var(--text-light)", marginBottom: "2px" }}>Selected Candidate</div>
-                      <div style={{ fontWeight: 700, color: "var(--color-success)", fontSize: "15px" }}>{vote.candidate.name}</div>
+                      <div style={{ fontSize: "10.5px", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 500 }}>Selected Candidate</div>
+                      <div style={{ fontWeight: 600, color: "#10B981", fontSize: "13px" }}>{vote.candidate.name}</div>
                     </div>
                   </div>
                   {(formattedTime || vote.location) && (
-                    <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px dashed var(--border-light)", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed var(--border-subtle)", display: "flex", flexWrap: "wrap", gap: "6px" }}>
                       {formattedTime && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "99px", border: "1px solid var(--border-light)" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>schedule</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "var(--text-muted)" }}>
+                          <Clock size={11} />
                           {formattedTime}
                         </span>
                       )}
                       {vote.location && (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", background: "var(--bg-subtle)", padding: "3px 8px", borderRadius: "99px", border: "1px solid var(--border-light)" }}>
-                          <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>location_on</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "11px", color: "var(--text-muted)" }}>
+                          <MapPin size={11} />
                           {vote.location}
                         </span>
                       )}
@@ -410,3 +396,4 @@ const StudentProfile: React.FC<{
 };
 
 export default StudentProfile;
+

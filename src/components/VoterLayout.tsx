@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  Vote,
+  Settings,
+  ChevronDown,
+  Mail,
+  Phone,
+  Gavel,
+  Shield,
+  FileText,
+  LogOut,
+  Menu,
+  Search,
+  X,
+  Sparkles,
+} from "lucide-react";
 import { Page, User, Student } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
 import { translations, LanguageCode } from "../utils/translations";
@@ -26,7 +41,16 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
   setSearchTerm: _setSearchTerm,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(true); // Open settings by default for voters
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(true);
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth <= 900) {
+      setSidebarOpen((prev) => !prev);
+    } else {
+      setSidebarCollapsed((prev) => !prev);
+    }
+  };
 
   const [lang, setLang] = useState<LanguageCode>(() => {
     const saved = localStorage.getItem("app_lang");
@@ -47,7 +71,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
 
   useEffect(() => {
     if (activeModalType) {
-      const modalWidth = 380;
+      const modalWidth = 360;
       const modalHeight = 420;
       const centeredX = Math.max(20, (window.innerWidth - modalWidth) / 2);
       const centeredY = Math.max(20, (window.innerHeight - modalHeight) / 2);
@@ -100,26 +124,26 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
 
   const t = translations[lang] || {};
 
-  const modalConfig: Record<ModalType, { title: string; content: string; icon: string }> = {
+  const modalConfig: Record<ModalType, { title: string; content: string; IconComponent: React.ComponentType<{ size?: number }> }> = {
     process: {
       title: t.electionProcessTitle || "Election Guidelines",
       content: t.electionProcessContent || "1. Log in with your verified credentials.\n2. Cast your ballot securely.\n3. Confirm submission.",
-      icon: "how_to_vote",
+      IconComponent: Vote,
     },
     rules: {
       title: t.votingRulesTitle || "System Voting Rules",
       content: t.votingRulesContent || "1. One verified profile per unique voter.\n2. Complete within active voting hours.\n3. Security bypass attempts will lock session.",
-      icon: "gavel",
+      IconComponent: Gavel,
     },
     privacy: {
       title: t.privacyPolicyTitle || "Privacy & Data Protection",
       content: t.privacyPolicyContent || "1. Vote data is fully encrypted to maintain anonymity.\n2. Audit logs are collected strictly for system validation.",
-      icon: "shield",
+      IconComponent: Shield,
     },
     terms: {
       title: t.termsOfServiceTitle || "Terms of Platform Service",
       content: t.termsOfServiceContent || "1. Intended for authorized organizational voting use.\n2. Automated scripts or disruptive actions are prohibited.",
-      icon: "description",
+      IconComponent: FileText,
     },
   };
 
@@ -136,36 +160,24 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
       .filter((line) => line.length > 0);
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {lines.map((line, i) => {
-          let theme = { bg: "#F8FAFC", border: "#94A3B8", text: "#334155" };
+          let theme = { bg: "var(--bg-subtle)", border: "var(--border-subtle)", text: "var(--text-main)" };
 
           if (type === "rules") {
             const ruleThemes = [
-              { bg: "#F8FAFC", border: "#94A3B8", text: "#334155" },
-              { bg: "#F0FDF4", border: "#BBF7D0", text: "#166534" },
-              { bg: "#FEF2F2", border: "#FEE2E2", text: "#991B1B" },
+              { bg: "var(--bg-subtle)", border: "var(--border-subtle)", text: "var(--text-main)" },
+              { bg: "var(--color-success-bg)", border: "var(--color-success-border)", text: "var(--color-success)" },
+              { bg: "var(--color-danger-bg)", border: "var(--color-danger-border)", text: "var(--color-danger)" },
             ];
             theme = ruleThemes[i % ruleThemes.length];
           } else if (type === "process") {
             const processThemes = [
-              { bg: "#EFF6FF", border: "#BFDBFE", text: "#1E40AF" },
-              { bg: "#F0FDF4", border: "#BBF7D0", text: "#166534" },
-              { bg: "#F5F3FF", border: "#DDD6FE", text: "#5B21B6" },
+              { bg: "var(--color-info-bg)", border: "var(--color-info-border)", text: "var(--color-info)" },
+              { bg: "var(--color-success-bg)", border: "var(--color-success-border)", text: "var(--color-success)" },
+              { bg: "var(--accent-blue)", border: "var(--border-blue)", text: "var(--primary-navy)" },
             ];
             theme = processThemes[i % processThemes.length];
-          } else if (type === "privacy") {
-            const privacyThemes = [
-              { bg: "#F0FDFA", border: "#99F6E4", text: "#115E59" },
-              { bg: "#F8FAFC", border: "#CBD5E1", text: "#334155" },
-            ];
-            theme = i === 0 ? privacyThemes[0] : privacyThemes[1];
-          } else if (type === "terms") {
-            const termsThemes = [
-              { bg: "#FFFBEB", border: "#FEF3C7", text: "#92400E" },
-              { bg: "#F8FAFC", border: "#CBD5E1", text: "#334155" },
-            ];
-            theme = i === 0 ? termsThemes[0] : termsThemes[1];
           }
 
           return (
@@ -173,17 +185,16 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               key={i}
               style={{
                 backgroundColor: theme.bg,
-                borderLeft: `4px solid ${theme.border}`,
-                padding: "12px 14px",
-                borderRadius: "0 8px 8px 0",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+                borderLeft: `3px solid ${theme.border}`,
+                padding: "10px 12px",
+                borderRadius: "0 6px 6px 0",
               }}
             >
               <p
                 style={{
                   margin: "0",
-                  fontSize: "14px",
-                  lineHeight: "1.5",
+                  fontSize: "12.5px",
+                  lineHeight: "1.4",
                   color: theme.text,
                   textAlign: "left",
                   fontFamily: "var(--font-sans)",
@@ -211,18 +222,20 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             inset: 0,
             background: "rgba(0,0,0,0.5)",
             zIndex: 999,
-            backdropFilter: "blur(2px)",
+            backdropFilter: "blur(4px)",
           }}
         />
       )}
 
       {/* Left Vertical Brand Sidebar Navigation */}
-      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
+      <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""} ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="admin-sidebar-header">
-          <img src="/image.png" alt="School Logo" className="admin-sidebar-logo" />
+          <div className="admin-logo-wrapper">
+            <Sparkles size={16} className="admin-brand-icon" />
+          </div>
           <div>
-            <h2 className="admin-brand-title">SSG E-Voting</h2>
-            <p className="admin-brand-subtitle">Student Voter Portal</p>
+            <h2 className="admin-brand-title">SSLG Voter Portal</h2>
+            <p className="admin-brand-subtitle">Student Voting Console</p>
           </div>
         </div>
 
@@ -235,7 +248,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               setSidebarOpen(false);
             }}
           >
-            <span className="material-symbols-outlined">how_to_vote</span>
+            <Vote size={15} />
             <span>Official Ballot</span>
           </button>
 
@@ -243,21 +256,18 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
           <button
             className={`admin-nav-item ${settingsOpen ? "active" : ""}`}
             onClick={() => setSettingsOpen(!settingsOpen)}
-            style={{ marginTop: "6px" }}
+            style={{ marginTop: "4px" }}
           >
-            <span className="material-symbols-outlined">settings</span>
-            <span>Settings</span>
-            <span
-              className="material-symbols-outlined"
+            <Settings size={15} />
+            <span>Preferences</span>
+            <ChevronDown
+              size={14}
               style={{
                 marginLeft: "auto",
-                fontSize: "18px",
                 transform: settingsOpen ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.2s ease",
+                transition: "transform 0.15s ease",
               }}
-            >
-              expand_more
-            </span>
+            />
           </button>
 
           {/* Expandable Settings Options Panel */}
@@ -273,7 +283,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
                       className={`admin-lang-btn ${lang === l ? "active" : ""}`}
                       onClick={() => changeLanguage(l)}
                     >
-                      {l === "en" ? "English" : l === "tl" ? "Tagalog" : "Bisaya"}
+                      {l === "en" ? "EN" : l === "tl" ? "TL" : "CEB"}
                     </button>
                   ))}
                 </div>
@@ -281,40 +291,40 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
 
               {/* Contact Information */}
               <div>
-                <div className="admin-settings-section-title">Contact Admin</div>
+                <div className="admin-settings-section-title">Support</div>
                 <a
-                  href="https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=emjaygusela@gmail.com"
+                  href="mailto:emjaygusela@gmail.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="admin-sub-link"
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>mail</span>
-                  <span>admin@gmail.com</span>
+                  <Mail size={13} />
+                  <span>admin@school.edu</span>
                 </a>
                 <a href="tel:09168562198" className="admin-sub-link">
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>call</span>
+                  <Phone size={13} />
                   <span>09168562198</span>
                 </a>
               </div>
 
               {/* About & Policies */}
               <div>
-                <div className="admin-settings-section-title">System Policies</div>
+                <div className="admin-settings-section-title">Guidelines</div>
                 <button className="admin-sub-link" onClick={() => setActiveModalType("process")}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>how_to_vote</span>
-                  <span>{t.electionProcess || "Election Process"}</span>
+                  <Vote size={13} />
+                  <span>{t.electionProcess || "Guidelines"}</span>
                 </button>
                 <button className="admin-sub-link" onClick={() => setActiveModalType("rules")}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>gavel</span>
+                  <Gavel size={13} />
                   <span>{t.votingRules || "Voting Rules"}</span>
                 </button>
                 <button className="admin-sub-link" onClick={() => setActiveModalType("privacy")}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>shield</span>
+                  <Shield size={13} />
                   <span>{t.privacyPolicy || "Privacy Policy"}</span>
                 </button>
                 <button className="admin-sub-link" onClick={() => setActiveModalType("terms")}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>description</span>
-                  <span>{t.termsOfService || "Terms of Service"}</span>
+                  <FileText size={13} />
+                  <span>{t.termsOfService || "Terms"}</span>
                 </button>
               </div>
             </div>
@@ -328,12 +338,12 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             <div className="admin-avatar-circle-sidebar">
               {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "V"}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-              <span style={{ fontSize: "13px", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-main)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {currentUser?.name || "Verified Voter"}
               </span>
-              <span style={{ fontSize: "11px", color: "#10B981", fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
-                ● Active Session
+              <span style={{ fontSize: "10.5px", color: "var(--color-success)", fontWeight: 500, display: "flex", alignItems: "center", gap: "4px" }}>
+                <span className="live-dot-green" /> Verified Session
               </span>
             </div>
           </div>
@@ -344,9 +354,9 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             <ThemeToggle compact />
           </div>
 
-          <button className="admin-nav-item" onClick={handleLogout} style={{ color: "#EF4444", padding: "8px 12px" }}>
-            <span className="material-symbols-outlined" style={{ color: "#EF4444" }}>logout</span>
-            <span>Logout</span>
+          <button className="admin-nav-item logout-btn" onClick={handleLogout}>
+            <LogOut size={14} />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -356,21 +366,19 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
         {/* Top Header Navigation Bar */}
         <header className="admin-top-header">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", width: "100%" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <button className="admin-mobile-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>menu</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <button className="admin-mobile-toggle" onClick={handleToggleSidebar} title="Toggle Navigation Sidebar">
+                <Menu size={18} />
               </button>
 
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-main)" }}>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
                 {activePage === "ballot" ? "Official Electronic Ballot" : activePage === "confirm" ? "Vote Submitted" : "Live Standings"}
               </div>
             </div>
 
             {/* Global Voter Search Bar */}
-            <div className="admin-search-wrapper" style={{ maxWidth: "280px" }}>
-              <span className="material-symbols-outlined" style={{ color: "var(--text-light)", fontSize: "18px" }}>
-                search
-              </span>
+            <div className="admin-search-wrapper" style={{ maxWidth: "240px" }}>
+              <Search size={14} style={{ color: "var(--text-light)" }} />
               <input
                 type="text"
                 placeholder="Search candidates..."
@@ -394,21 +402,21 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             position: "fixed",
             left: `${position.x}px`,
             top: `${position.y}px`,
-            width: "380px",
-            background: "#FFFFFF",
-            borderRadius: "16px",
-            boxShadow: "0px 20px 50px rgba(15, 23, 42, 0.22)",
-            border: "1px solid #E2E8F0",
+            width: "360px",
+            background: "var(--bg-card)",
+            borderRadius: "10px",
+            boxShadow: "var(--shadow-modal)",
+            border: "1px solid var(--border-subtle)",
             zIndex: 9999,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             userSelect: isDragging ? "none" : "auto",
             opacity: isModalRendered ? 1 : 0,
-            transform: isModalRendered ? "scale(1)" : "scale(0.95)",
+            transform: isModalRendered ? "scale(1)" : "scale(0.96)",
             transition: isDragging
               ? "none"
-              : "opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+              : "opacity 0.15s ease, transform 0.15s ease",
           }}
         >
           {/* Header Handle */}
@@ -417,17 +425,17 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "10px",
-              padding: "16px 20px",
-              background: "#F8FAFC",
-              borderBottom: "1px solid #E2E8F0",
+              gap: "8px",
+              padding: "12px 16px",
+              background: "var(--bg-surface)",
+              borderBottom: "1px solid var(--border-light)",
               cursor: isDragging ? "grabbing" : "grab",
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "22px", color: "#1E3A8A" }}>
-              {activeModalDetails.icon}
+            <span style={{ color: "var(--accent-primary)", display: "inline-flex" }}>
+              <activeModalDetails.IconComponent size={16} />
             </span>
-            <h3 style={{ margin: "0", fontSize: "15px", fontWeight: 600, color: "#0F172A", flex: 1 }}>
+            <h3 style={{ margin: "0", fontSize: "13px", fontWeight: 600, color: "var(--text-main)", flex: 1 }}>
               {activeModalDetails.title}
             </h3>
             <button
@@ -436,38 +444,36 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               style={{
                 background: "none",
                 border: "none",
-                fontSize: "20px",
                 cursor: "pointer",
-                color: "#94A3B8",
+                color: "var(--text-light)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "4px",
-                fontWeight: 400,
+                padding: "2px",
               }}
             >
-              ×
+              <X size={14} />
             </button>
           </div>
 
           {/* Content Block */}
-          <div style={{ padding: "20px", maxHeight: "320px", overflowY: "auto", background: "#FFFFFF" }}>
+          <div style={{ padding: "16px", maxHeight: "280px", overflowY: "auto", background: "var(--bg-card)" }}>
             {renderUnifiedBlockContent(activeModalType, activeModalDetails.content)}
           </div>
 
           {/* Footer Close Button */}
-          <div style={{ padding: "14px 20px", borderTop: "1px solid #F1F5F9", background: "#F8FAFC" }}>
+          <div style={{ padding: "10px 16px", borderTop: "1px solid var(--border-light)", background: "var(--bg-surface)" }}>
             <button
               onClick={closeModal}
               style={{
                 width: "100%",
-                padding: "10px",
-                background: "#0F172A",
+                padding: "8px",
+                background: "var(--primary-navy)",
                 color: "#FFFFFF",
                 border: "none",
-                borderRadius: "8px",
-                fontWeight: 600,
-                fontSize: "13.5px",
+                borderRadius: "6px",
+                fontWeight: 500,
+                fontSize: "12.5px",
                 cursor: "pointer",
               }}
             >

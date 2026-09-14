@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { verifyReceiptCode, ReceiptVerificationResult } from "../utils/receiptVerifier";
+import { ShieldCheck, X, Search, CheckCircle2, XCircle } from "lucide-react";
 
 interface ReceiptVerificationModalProps {
   isOpen: boolean;
@@ -59,9 +60,7 @@ export const ReceiptVerificationModal: React.FC<ReceiptVerificationModalProps> =
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "var(--primary-navy)" }}>
-              verified_user
-            </span>
+            <ShieldCheck size={26} style={{ color: "var(--primary-navy)" }} />
             <div>
               <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "var(--primary-navy)" }}>
                 Ballot Receipt Verification
@@ -82,7 +81,7 @@ export const ReceiptVerificationModal: React.FC<ReceiptVerificationModalProps> =
               display: "flex",
             }}
           >
-            <span className="material-symbols-outlined">close</span>
+            <X size={18} />
           </button>
         </div>
 
@@ -128,9 +127,7 @@ export const ReceiptVerificationModal: React.FC<ReceiptVerificationModalProps> =
                 "Checking..."
               ) : (
                 <>
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-                    search
-                  </span>
+                  <Search size={16} />
                   Verify
                 </>
               )}
@@ -149,15 +146,11 @@ export const ReceiptVerificationModal: React.FC<ReceiptVerificationModalProps> =
             }}
           >
             <div style={{ display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "12px" }}>
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  fontSize: "32px",
-                  color: result.valid ? "var(--color-success)" : "var(--color-danger)",
-                }}
-              >
-                {result.valid ? "check_circle" : "cancel"}
-              </span>
+              {result.valid ? (
+                <CheckCircle2 size={28} style={{ color: "var(--color-success)" }} />
+              ) : (
+                <XCircle size={28} style={{ color: "var(--color-danger)" }} />
+              )}
               <div>
                 <div
                   style={{

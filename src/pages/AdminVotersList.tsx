@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import {
+  Users,
+  Vote,
+  Clock,
+  Download,
+  RefreshCw,
+  Search,
+  X,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  EyeOff,
+  Lock,
+  UserSearch,
+} from "lucide-react";
 import { supabase } from "../supabase";
 import "./AdminVotersList.css";
 import type { Student, Page } from "../types";
@@ -184,39 +199,46 @@ const AdminVotersList: React.FC<{
   return (
     <div className="screen-content content-max-width">
       {/* Page Title & Navigation Actions */}
-      <div className="flex-between" style={{ marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
+      <div className="flex-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <span className="overline">Student Registry</span>
-          <h1>Voters List Dashboard</h1>
+          <h1>Voters Registry</h1>
         </div>
-        <div className="action-buttons" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div className="action-buttons" style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button className="btn-top-nav primary" onClick={handleDownloadClick}>
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>download</span>
-            Download PDF
+            <Download size={14} />
+            <span>Export PDF</span>
           </button>
           <button className="btn-top-nav" onClick={fetchStudentsWithVotes}>
-            Refresh
+            <RefreshCw size={14} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Summary KPI Stat Grid */}
       {!loading && (
-        <div className="stat-grid" style={{ marginBottom: "24px" }}>
+        <div className="stat-grid" style={{ marginBottom: "16px" }}>
           <div className="stat-box light">
-            <span className="overline" style={{ color: "var(--primary-navy)", marginBottom: "4px" }}>Total Registered</span>
-            <h1 style={{ fontSize: "32px", margin: 0 }}>{students.length}</h1>
-            <span className="material-symbols-outlined watermark-icon" style={{ color: "rgba(10,25,47,0.06)" }}>group</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span className="overline" style={{ color: "var(--primary-navy)", marginBottom: "2px" }}>Total Registered</span>
+              <Users size={15} style={{ color: "var(--primary-navy)", opacity: 0.7 }} />
+            </div>
+            <h1 style={{ fontSize: "24px", margin: 0, fontWeight: 600 }}>{students.length}</h1>
           </div>
           <div className="stat-box light">
-            <span className="overline" style={{ color: "var(--color-success)", marginBottom: "4px" }}>Voted</span>
-            <h1 style={{ fontSize: "32px", margin: 0 }}>{students.filter((s) => s.has_voted).length}</h1>
-            <span className="material-symbols-outlined watermark-icon" style={{ color: "rgba(5,150,105,0.08)" }}>how_to_vote</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span className="overline" style={{ color: "var(--color-success)", marginBottom: "2px" }}>Voted</span>
+              <Vote size={15} style={{ color: "var(--color-success)", opacity: 0.7 }} />
+            </div>
+            <h1 style={{ fontSize: "24px", margin: 0, fontWeight: 600 }}>{students.filter((s) => s.has_voted).length}</h1>
           </div>
           <div className="stat-box light">
-            <span className="overline" style={{ color: "var(--color-warning)", marginBottom: "4px" }}>Pending / Not Voted</span>
-            <h1 style={{ fontSize: "32px", margin: 0 }}>{students.filter((s) => !s.has_voted).length}</h1>
-            <span className="material-symbols-outlined watermark-icon" style={{ color: "rgba(217,119,6,0.08)" }}>hourglass_empty</span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span className="overline" style={{ color: "var(--color-warning)", marginBottom: "2px" }}>Pending</span>
+              <Clock size={15} style={{ color: "var(--color-warning)", opacity: 0.7 }} />
+            </div>
+            <h1 style={{ fontSize: "24px", margin: 0, fontWeight: 600 }}>{students.filter((s) => !s.has_voted).length}</h1>
           </div>
         </div>
       )}
@@ -224,10 +246,10 @@ const AdminVotersList: React.FC<{
       {/* Real-time Search & Filter Controls Bar */}
       <div className="voters-controls-bar">
         <div className="search-input-wrapper">
-          <span className="material-symbols-outlined" style={{ color: "var(--text-light)", fontSize: "20px" }}>search</span>
+          <Search size={14} style={{ color: "var(--text-light)" }} />
           <input
             type="text"
-            placeholder="Search by student name or LRN ID..."
+            placeholder="Search student name or LRN..."
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
@@ -236,7 +258,7 @@ const AdminVotersList: React.FC<{
               onClick={() => handleSearchChange("")}
               style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-light)", display: "flex", padding: 0 }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>cancel</span>
+              <X size={14} />
             </button>
           )}
         </div>
@@ -266,8 +288,8 @@ const AdminVotersList: React.FC<{
             <option value="pending">{t.pendingOnlyOption || "Pending Only"}</option>
           </select>
 
-          <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-muted)", padding: "0 6px" }}>
-            Showing {filteredStudents.length} of {students.length}
+          <span style={{ fontSize: "11.5px", fontWeight: 500, color: "var(--text-light)", padding: "0 4px" }}>
+            {filteredStudents.length} of {students.length}
           </span>
         </div>
       </div>
@@ -275,16 +297,14 @@ const AdminVotersList: React.FC<{
       {/* Main Voters Data Table */}
       <div className="card-box" style={{ padding: "0", overflow: "hidden" }}>
         {loading ? (
-          <div style={{ padding: "48px 24px" }}>
+          <div style={{ padding: "32px 16px" }}>
             <BubbleLoader message="Loading student registry table..." />
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div style={{ padding: "56px 24px", textAlign: "center" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--border-subtle)", marginBottom: "12px" }}>
-              person_search
-            </span>
-            <h3 style={{ margin: "0 0 6px 0", color: "var(--primary-navy)", fontSize: "18px" }}>No Student Voters Found</h3>
-            <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "14px" }}>
+          <div style={{ padding: "40px 16px", textAlign: "center" }}>
+            <UserSearch size={32} style={{ color: "var(--text-light)", marginBottom: "8px" }} />
+            <h3 style={{ margin: "0 0 4px 0", color: "var(--text-main)", fontSize: "14px", fontWeight: 600 }}>No Student Voters Found</h3>
+            <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
               No voters match your current search or filter selections. Try clearing your filters.
             </p>
           </div>
@@ -298,7 +318,7 @@ const AdminVotersList: React.FC<{
                   <th>Grade</th>
                   <th>Section</th>
                   <th>Password</th>
-                  <th>Voting Status</th>
+                  <th>Status</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
@@ -328,17 +348,17 @@ const AdminVotersList: React.FC<{
                       <span className="credential-chip">{student.id}</span>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 600, color: "var(--text-muted)" }}>{student.grade}</span>
+                      <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: "12px" }}>{student.grade}</span>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 600, color: "var(--text-muted)" }}>{student.section || "—"}</span>
+                      <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: "12px" }}>{student.section || "—"}</span>
                     </td>
                     <td>
                       {(() => {
                         const displayPw = student.password && student.password.startsWith("$2a$") ? "123456" : student.password;
                         return displayPw ? (
-                          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                            <span className="credential-chip" style={{ letterSpacing: showPasswords[student.id] ? "normal" : "0.15em" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <span className="credential-chip" style={{ letterSpacing: showPasswords[student.id] ? "normal" : "0.12em" }}>
                               {showPasswords[student.id] ? displayPw : "••••••••"}
                             </span>
                             <button
@@ -347,25 +367,23 @@ const AdminVotersList: React.FC<{
                               style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "var(--text-light)", display: "inline-flex", alignItems: "center" }}
                               title={showPasswords[student.id] ? "Hide Password" : "Show Password"}
                             >
-                              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                                {showPasswords[student.id] ? "visibility_off" : "visibility"}
-                              </span>
+                              {showPasswords[student.id] ? <EyeOff size={13} /> : <Eye size={13} />}
                             </button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: "12px", color: "var(--text-light)", fontStyle: "italic" }}>—</span>
+                          <span style={{ fontSize: "11px", color: "var(--text-light)", fontStyle: "italic" }}>—</span>
                         );
                       })()}
                     </td>
                     <td>
                       {student.has_voted ? (
                         <span className="badge-pill voted">
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>check_circle</span>
+                          <CheckCircle2 size={12} />
                           Voted
                         </span>
                       ) : (
                         <span className="badge-pill pending">
-                          <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>pending</span>
+                          <Clock3 size={12} />
                           Pending
                         </span>
                       )}
@@ -375,7 +393,7 @@ const AdminVotersList: React.FC<{
                         className="btn-inner-action"
                         onClick={() => onViewProfile(student.id)}
                       >
-                        View Profile
+                        Profile
                       </button>
                     </td>
                   </tr>
@@ -394,15 +412,15 @@ const AdminVotersList: React.FC<{
           zIndex: 99999, backdropFilter: "blur(4px)"
         }}>
           <div style={{
-            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "16px", padding: "32px",
-            width: "100%", maxWidth: "380px", boxShadow: "var(--shadow-modal)", border: "1px solid var(--border-light)"
+            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
+            width: "100%", maxWidth: "340px", boxShadow: "var(--shadow-modal)", border: "1px solid var(--border-subtle)"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "28px", color: "var(--color-danger)" }}>lock</span>
-              <h3 style={{ margin: 0, color: "var(--primary-navy)", fontSize: "18px", fontWeight: 800 }}>Confirm PDF Download</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Lock size={18} style={{ color: "var(--color-danger)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Confirm PDF Export</h3>
             </div>
-            <p style={{ margin: "0 0 20px 0", color: "var(--text-muted)", fontSize: "13px" }}>
-              Enter the faculty admin password to download the voters list PDF. This file contains sensitive student credentials.
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.4" }}>
+              Enter faculty admin password to download the voter credentials PDF.
             </p>
             <input
               type="password"
@@ -412,17 +430,17 @@ const AdminVotersList: React.FC<{
               onKeyDown={(e) => e.key === "Enter" && handlePdfAuthSubmit()}
               autoFocus
               style={{
-                width: "100%", padding: "12px 14px", border: `1px solid ${pdfAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
-                borderRadius: "8px", fontSize: "14px", boxSizing: "border-box",
-                outline: "none", marginBottom: "8px", background: "var(--bg-surface)"
+                width: "100%", padding: "8px 10px", border: `1px solid ${pdfAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
+                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
+                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
               }}
             />
             {pdfAuthError && (
-              <p style={{ margin: "0 0 12px 0", color: "var(--color-danger)", fontSize: "12px", fontWeight: 600 }}>
+              <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11px", fontWeight: 500 }}>
                 {pdfAuthError}
               </p>
             )}
-            <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
               <button
                 className="btn-top-nav"
                 onClick={() => setShowPdfAuth(false)}
@@ -436,7 +454,7 @@ const AdminVotersList: React.FC<{
                 disabled={isExporting}
                 style={{ flex: 1, opacity: isExporting ? 0.7 : 1 }}
               >
-                {isExporting ? "Exporting PDF..." : "Download"}
+                {isExporting ? "Exporting..." : "Download"}
               </button>
             </div>
           </div>

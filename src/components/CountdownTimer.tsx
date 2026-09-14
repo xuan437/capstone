@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
+import { Clock } from "lucide-react";
 
 interface CountdownTimerProps {
   onExpire?: () => void;
@@ -205,8 +206,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
 
   if (!endTime || !timeLeft) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "12px", fontSize: "12px", color: "var(--text-muted)" }}>
-        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>schedule</span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "10px 14px", fontSize: "12.5px", color: "var(--text-muted)", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "6px", maxWidth: "300px", margin: "0 auto 16px auto" }}>
+        <Clock size={15} style={{ color: "var(--accent-primary)" }} />
         <span>Loading Election Countdown...</span>
       </div>
     );

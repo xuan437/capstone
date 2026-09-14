@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Users, ChevronDown, Edit3, Trash2, Eye } from "lucide-react";
 import { supabase } from "../supabase";
 import { Candidate, Page, POSITIONS } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
@@ -66,28 +67,23 @@ const AdminSetup: React.FC<{
 
   return (
     <div className="screen-content content-max-width">
-      {/* Header & Main Navigation Bar */}
-      <div className="flex-between" style={{ marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
-        <div className="dashboard-header-flex" style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
-          <div>
-            <h1>Admin Dashboard</h1>
-          </div>
-          <div className="dashboard-logos">
-            <img src="/image.png" alt="Logo 1" className="dashboard-logo-img" />
-            <img src="/image copy.png" alt="Logo 2" className="dashboard-logo-img" />
-          </div>
+      {/* Header Bar */}
+      <div className="flex-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
+        <div>
+          <span className="overline">Console Management</span>
+          <h1>Candidate Roster</h1>
         </div>
       </div>
 
       {/* Main Roster: Current Candidates by Position */}
-      <div className="card-box">
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
-          <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "var(--primary-navy)", color: "var(--text-white)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>groups</span>
+      <div className="card-box" style={{ padding: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+          <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "var(--accent-blue)", border: "1px solid var(--border-blue)", color: "var(--primary-navy)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Users size={16} />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontSize: "24px", color: "var(--primary-navy)", fontWeight: 800 }}>Current Candidates by Position</h3>
-            <p style={{ margin: "4px 0 0 0", color: "var(--text-muted)", fontSize: "13.5px" }}>Manage standing candidates, view candidate profiles, or update entries.</p>
+            <h3 style={{ margin: 0, fontSize: "14px", color: "var(--text-main)", fontWeight: 600 }}>Candidates by Position</h3>
+            <p style={{ margin: "2px 0 0 0", color: "var(--text-muted)", fontSize: "12px" }}>Manage standing candidates, view candidate profiles, or update entries.</p>
           </div>
         </div>
 
@@ -97,64 +93,64 @@ const AdminSetup: React.FC<{
           const isCollapsed = collapsedPositions[position];
 
           return (
-            <div key={position} style={{ marginBottom: "24px" }}>
+            <div key={position} style={{ marginBottom: "16px" }}>
               <div
                 onClick={() => setCollapsedPositions(prev => ({ ...prev, [position]: !prev[position] }))}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "14px 20px",
-                  background: "linear-gradient(135deg, #f8fafc, #f1f5f9)",
-                  color: "var(--text-muted)",
-                  borderRadius: "12px",
+                  padding: "8px 12px",
+                  background: "var(--bg-subtle)",
+                  color: "var(--text-main)",
+                  borderRadius: "6px",
                   cursor: "pointer",
                   userSelect: "none",
-                  marginBottom: isCollapsed ? "0" : "16px",
+                  marginBottom: isCollapsed ? "0" : "10px",
                   border: "1px solid var(--border-light)",
-                  transition: "background 0.2s ease"
+                  transition: "background 0.15s ease"
                 }}
-                className="hover-lift"
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <span style={{ fontSize: "14px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--primary-navy)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "11.5px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--primary-navy)" }}>
                     {position}
                   </span>
-                  <span className="badge-cyan" style={{ fontSize: "12px", padding: "3px 10px", borderRadius: "6px" }}>
+                  <span style={{ fontSize: "11px", background: "var(--bg-card)", border: "1px solid var(--border-light)", padding: "1px 6px", borderRadius: "4px", color: "var(--text-muted)" }}>
                     {posCandidates.length} {posCandidates.length === 1 ? 'Candidate' : 'Candidates'}
                   </span>
                 </div>
-                <span className="material-symbols-outlined" style={{
-                  transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s ease",
-                  color: "var(--text-muted)"
-                }}>
-                  expand_more
-                </span>
+                <ChevronDown
+                  size={14}
+                  style={{
+                    transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
+                    transition: "transform 0.15s ease",
+                    color: "var(--text-light)"
+                  }}
+                />
               </div>
 
               {!isCollapsed && (
                 <div className="candidate-grid">
                   {posCandidates.map((c) => (
-                    <div key={c.id} className="candidate-card-box hover-lift">
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
+                    <div key={c.id} className="candidate-card-box">
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <img
                           src={base64ToImageUrl(c.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=E8F0FE&color=0A192F`}
                           alt={c.name}
-                          style={{ width: "52px", height: "52px", borderRadius: "50%", objectFit: "cover", border: "2px solid white", boxShadow: "var(--shadow-sm)", flexShrink: 0 }}
+                          style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
                           onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=E8F0FE&color=0A192F`; }}
                         />
                         <div style={{ minWidth: 0, flex: 1 }}>
-                          <h4 style={{ margin: "0 0 6px 0", fontSize: "16px", color: "var(--primary-navy)", fontWeight: 700, lineHeight: 1.3 }}>{c.name}</h4>
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                          <h4 style={{ margin: "0 0 2px 0", fontSize: "13px", color: "var(--text-main)", fontWeight: 600, lineHeight: 1.2 }}>{c.name}</h4>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
                             {c.age && (
-                              <span style={{ fontSize: "11px", background: "var(--accent-blue)", color: "var(--primary-navy)", padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
+                              <span style={{ fontSize: "10.5px", background: "var(--bg-subtle)", color: "var(--text-muted)", padding: "1px 5px", borderRadius: "3px" }}>
                                 Age: {c.age}
                               </span>
                             )}
                             {c.section && (
-                              <span style={{ fontSize: "11px", background: "var(--color-success-bg)", color: "var(--color-success)", padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
-                                Section: {c.section}
+                              <span style={{ fontSize: "10.5px", background: "var(--color-success-bg)", color: "var(--color-success)", padding: "1px 5px", borderRadius: "3px" }}>
+                                {c.section}
                               </span>
                             )}
                           </div>
@@ -162,20 +158,23 @@ const AdminSetup: React.FC<{
                       </div>
 
                       {c.campaign_text && (
-                        <div style={{ fontSize: "12.5px", color: "var(--text-muted)", fontStyle: "italic", background: "var(--bg-main)", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border-light)", lineHeight: 1.4 }}>
-                          "{c.campaign_text.length > 75 ? c.campaign_text.slice(0, 75) + "..." : c.campaign_text}"
+                        <div style={{ fontSize: "11.5px", color: "var(--text-muted)", fontStyle: "italic", background: "var(--bg-subtle)", padding: "6px 8px", borderRadius: "4px", border: "1px solid var(--border-light)", lineHeight: 1.35 }}>
+                          "{c.campaign_text.length > 65 ? c.campaign_text.slice(0, 65) + "..." : c.campaign_text}"
                         </div>
                       )}
 
-                      <div style={{ display: "flex", gap: "8px", justifyContent: "space-between", paddingTop: "8px", borderTop: "1px solid var(--border-light)" }}>
+                      <div style={{ display: "flex", gap: "6px", justifyContent: "space-between", paddingTop: "6px", borderTop: "1px solid var(--border-light)" }}>
                         <button className="btn-inner-action" onClick={() => onViewCandidate(c.id)} style={{ flex: 1 }}>
-                          Profile
+                          <Eye size={12} />
+                          <span>Profile</span>
                         </button>
                         <button className="btn-inner-action outline" onClick={() => { onEditCandidate(c.id); setPage("admin_add_candidate"); }} style={{ flex: 1 }}>
-                          Edit
+                          <Edit3 size={12} />
+                          <span>Edit</span>
                         </button>
                         <button className="btn-inner-action danger" onClick={() => handleDelete(c.id)} disabled={isSubmitting} style={{ flex: 1 }}>
-                          Delete
+                          <Trash2 size={12} />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>

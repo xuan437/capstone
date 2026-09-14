@@ -1,12 +1,103 @@
 import React, { useState, useCallback } from "react";
-
 import { supabase } from "../supabase";
 import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "../types";
-
 import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
-
 import "./AuthForm.css";
+
+// Crisp 14px-16px SVG Micro Icons (Linear / Raycast Style)
+const UserIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const EyeIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOffIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+    <line x1="2" y1="2" x2="22" y2="22" />
+  </svg>
+);
+
+const GraduationCapIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+  </svg>
+);
+
+const ShieldBadgeIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+);
+
+const AlertCircleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const HelpCircleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const BanIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+  </svg>
+);
+
+const SparklesIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z" />
+  </svg>
+);
 
 const AuthForm: React.FC<{
   setPage: (p: Page) => void;
@@ -18,14 +109,10 @@ const AuthForm: React.FC<{
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [clipboardAlert, setClipboardAlert] = useState(false);
-
-  // Candidates drawer removed
-
-
-  // Countdown timer states
   const [isTimerExpired, setIsTimerExpired] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
-  // Use callback to stabilize listeners sent down to children
   const handleTimerLoaded = useCallback((endTime: string | null) => {
     if (endTime) {
       setIsTimerExpired(new Date() >= new Date(endTime));
@@ -40,13 +127,11 @@ const AuthForm: React.FC<{
     setTimeout(() => setClipboardAlert(false), 3000);
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleFacultyChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => setFacultyForm({ ...facultyForm, [e.target.name]: e.target.value });
+  const handleFacultyChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFacultyForm({ ...facultyForm, [e.target.name]: e.target.value });
 
   const switchTab = (tab: "student" | "faculty") => {
     setActiveTab(tab);
@@ -69,7 +154,6 @@ const AuthForm: React.FC<{
       return;
     }
 
-    // Direct plain-text password query & string comparison
     const { data: student, error: fetchError } = await supabase
       .from("students")
       .select("*")
@@ -92,7 +176,7 @@ const AuthForm: React.FC<{
 
     const studentUser: Student = {
       ...student,
-      id: String(student.id)
+      id: String(student.id),
     };
 
     localStorage.setItem("currentUser", JSON.stringify(studentUser));
@@ -118,75 +202,88 @@ const AuthForm: React.FC<{
     }
   };
 
-
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-
   return (
-    <div className="split-card-portal-container">
-      {/* 2-Panel Split Container Card matching uploaded screenshot */}
-      <div className="split-card-wrapper">
-        {/* LEFT PANEL: Login Credentials Form */}
-        <div className="split-left-section">
-          {/* Header */}
-          <div className="split-form-header">
-            <h2 className="split-form-title">PORTAL LOGIN</h2>
-            <p className="split-form-subtitle">Enter your credentials to access your voting ballot</p>
+    <div className="linear-portal-viewport">
+      {/* Subtle Background Surface Grid Effect */}
+      <div className="linear-grid-overlay" />
+
+      {/* Main Glassmorphic Container Card */}
+      <div className="linear-portal-card">
+        
+        {/* LEFT PANEL: Compact High-Density Form */}
+        <div className="linear-form-panel">
+          
+          {/* Top Brand Header */}
+          <div className="linear-brand-header">
+            <div className="linear-logo-chip">
+              <SparklesIcon />
+              <span>SSLG 2026</span>
+            </div>
+            <div className="linear-header-text">
+              <h1 className="linear-title">Portal Login</h1>
+              <p className="linear-subtitle">Access your SSLG voting ballot securely</p>
+            </div>
           </div>
 
-          {/* Clean Segmented Pill Tabs */}
-          <div className="login-tab-pill-container">
+          {/* Segmented Pill Tabs */}
+          <div className="linear-tab-segmented">
             <button
               type="button"
-              className={`login-tab-btn ${activeTab === "student" ? "active" : ""}`}
+              className={`linear-tab-item ${activeTab === "student" ? "active" : ""}`}
               onClick={() => switchTab("student")}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>school</span>
+              <GraduationCapIcon />
               <span>Student</span>
             </button>
             <button
               type="button"
-              className={`login-tab-btn ${activeTab === "faculty" ? "active" : ""}`}
+              className={`linear-tab-item ${activeTab === "faculty" ? "active" : ""}`}
               onClick={() => switchTab("faculty")}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>badge</span>
-              <span>Faculty</span>
+              <ShieldBadgeIcon />
+              <span>Faculty Admin</span>
             </button>
           </div>
 
+          {/* Alert Notification Badge */}
           {error && (
-            <div className="login-error-alert">
-              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>error</span>
+            <div className="linear-alert-badge error">
+              <AlertCircleIcon />
               <span>{error}</span>
             </div>
           )}
 
+          {/* Form Controls */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               activeTab === "student" ? handleStudentLogin() : handleFacultyLogin();
             }}
-            style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}
+            className="linear-form-body"
           >
             {activeTab === "student" ? (
               <>
                 {isTimerExpired && (
-                  <div className="login-expired-alert">
-                    Student voting has ended. Login is closed.
+                  <div className="linear-alert-badge warning">
+                    <BanIcon />
+                    <span>Student voting is currently closed.</span>
                   </div>
                 )}
 
-                <div className="login-fields-stack">
-                  <div className="login-field-group">
-                    <label className="login-field-label">Learner Reference Number (LRN)</label>
-                    <div className="input-with-icon-wrapper">
-                      <span className="material-symbols-outlined input-icon-prefix">person</span>
+                <div className="linear-field-stack">
+                  <div className="linear-field-group">
+                    <label className="linear-field-label">
+                      Learner Reference Number (LRN)
+                    </label>
+                    <div className="linear-input-wrapper">
+                      <span className="linear-input-icon">
+                        <UserIcon />
+                      </span>
                       <input
                         name="identifier"
                         aria-label="LRN Identifier"
                         placeholder="Enter 12-digit LRN"
-                        className="split-input-field"
+                        className="linear-input"
                         value={form.identifier}
                         onChange={handleChange}
                         disabled={isTimerExpired}
@@ -196,16 +293,18 @@ const AuthForm: React.FC<{
                     </div>
                   </div>
 
-                  <div className="login-field-group">
-                    <label className="login-field-label">Password</label>
-                    <div className="input-with-icon-wrapper">
-                      <span className="material-symbols-outlined input-icon-prefix">lock</span>
+                  <div className="linear-field-group">
+                    <label className="linear-field-label">Password</label>
+                    <div className="linear-input-wrapper">
+                      <span className="linear-input-icon">
+                        <LockIcon />
+                      </span>
                       <input
                         name="password"
                         type={showPassword ? "text" : "password"}
                         aria-label="Student Password"
-                        placeholder="Enter your password"
-                        className="split-input-field"
+                        placeholder="Enter password"
+                        className="linear-input"
                         value={form.password}
                         onChange={handleChange}
                         disabled={isTimerExpired}
@@ -217,12 +316,11 @@ const AuthForm: React.FC<{
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="password-toggle-btn"
-                        title={showPassword ? "Hide Password" : "Show Password"}
+                        className="linear-input-action"
+                        title={showPassword ? "Hide password" : "Show password"}
+                        tabIndex={-1}
                       >
-                        <span className="material-symbols-outlined">
-                          {showPassword ? "visibility_off" : "visibility"}
-                        </span>
+                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                       </button>
                     </div>
                   </div>
@@ -230,25 +328,27 @@ const AuthForm: React.FC<{
 
                 <button
                   type="submit"
-                  className="btn-login-now-pill"
+                  className="linear-btn-primary"
                   disabled={loading || isTimerExpired}
                 >
-                  <span>{loading ? "Authenticating..." : "Login Now"}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
+                  <span>{loading ? "Authenticating..." : "Continue to Ballot"}</span>
+                  <ArrowRightIcon />
                 </button>
               </>
             ) : (
               <>
-                <div className="login-fields-stack">
-                  <div className="login-field-group">
-                    <label className="login-field-label">Faculty / Admin Email</label>
-                    <div className="input-with-icon-wrapper">
-                      <span className="material-symbols-outlined input-icon-prefix">mail</span>
+                <div className="linear-field-stack">
+                  <div className="linear-field-group">
+                    <label className="linear-field-label">Faculty / Admin Email</label>
+                    <div className="linear-input-wrapper">
+                      <span className="linear-input-icon">
+                        <MailIcon />
+                      </span>
                       <input
                         name="email"
                         aria-label="Faculty Email"
-                        placeholder="Enter admin email"
-                        className="split-input-field"
+                        placeholder="admin@school.edu.ph"
+                        className="linear-input"
                         value={facultyForm.email}
                         onChange={handleFacultyChange}
                         autoComplete="off"
@@ -256,16 +356,18 @@ const AuthForm: React.FC<{
                     </div>
                   </div>
 
-                  <div className="login-field-group">
-                    <label className="login-field-label">Password</label>
-                    <div className="input-with-icon-wrapper">
-                      <span className="material-symbols-outlined input-icon-prefix">lock</span>
+                  <div className="linear-field-group">
+                    <label className="linear-field-label">Password</label>
+                    <div className="linear-input-wrapper">
+                      <span className="linear-input-icon">
+                        <LockIcon />
+                      </span>
                       <input
                         name="password"
                         type={showPassword ? "text" : "password"}
                         aria-label="Faculty Password"
                         placeholder="Enter admin password"
-                        className="split-input-field"
+                        className="linear-input"
                         value={facultyForm.password}
                         onChange={handleFacultyChange}
                         onCopy={blockClipboard}
@@ -276,12 +378,11 @@ const AuthForm: React.FC<{
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="password-toggle-btn"
-                        title={showPassword ? "Hide Password" : "Show Password"}
+                        className="linear-input-action"
+                        title={showPassword ? "Hide password" : "Show password"}
+                        tabIndex={-1}
                       >
-                        <span className="material-symbols-outlined">
-                          {showPassword ? "visibility_off" : "visibility"}
-                        </span>
+                        {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                       </button>
                     </div>
                   </div>
@@ -289,53 +390,59 @@ const AuthForm: React.FC<{
 
                 <button
                   type="submit"
-                  className="btn-login-now-pill"
+                  className="linear-btn-primary"
                   disabled={loading}
                 >
-                  <span>{loading ? "Authenticating..." : "Login Now"}</span>
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>arrow_forward</span>
+                  <span>{loading ? "Authenticating..." : "Access Admin Console"}</span>
+                  <ArrowRightIcon />
                 </button>
               </>
             )}
           </form>
 
-          {/* Status Banner UNDER Login Now button */}
-          <div className={isTimerExpired ? "under-login-status-banner closed" : "under-login-status-banner open"}>
-            <span className="status-live-dot" />
-            <span>{isTimerExpired ? "ELECTION CLOSED" : "ELECTION IS OPEN — VOTE NOW"}</span>
+          {/* Live Status Badge */}
+          <div className={`linear-status-row ${isTimerExpired ? "closed" : "active"}`}>
+            <span className="linear-status-pulse" />
+            <span className="linear-status-text">
+              {isTimerExpired ? "Election Period Closed" : "Election Live • Voting Open"}
+            </span>
           </div>
 
-          {/* Secondary Actions Row */}
-          <div className="login-footer-actions">
+          {/* Footer Toolbar */}
+          <div className="linear-footer-toolbar">
             <button
               type="button"
-              className="login-help-link"
+              className="linear-link-button"
               onClick={() => setShowForgotPasswordModal(true)}
             >
-              Forgot Password / Help
+              <HelpCircleIcon />
+              <span>Password Help</span>
             </button>
-            <span className="login-footer-divider">•</span>
+
+            <div className="linear-toolbar-divider" />
+
             <ThemeToggle compact />
           </div>
         </div>
 
-        {/* RIGHT PANEL: Real-time Countdown Timer Banner */}
-        <div className="split-right-section">
-          <div className="timer-card-glass">
-            <img
-              src="/logo.png"
-              alt="School Logo"
-              style={{ width: "76px", height: "76px", borderRadius: "50%", border: "3px solid #FFFFFF", objectFit: "cover", marginBottom: "14px", boxShadow: "0 4px 14px rgba(0,0,0,0.2)" }}
-            />
-            <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 800, color: "#FFFFFF" }}>
-              Student Voting System
-            </h3>
-            <p style={{ margin: "0 0 20px 0", fontSize: "12px", color: "#94A3B8" }}>
-              Official SSLG Student Council Elections
-            </p>
+        {/* RIGHT PANEL: High-Precision Raycast/Vercel Timer & Branding Display */}
+        <div className="linear-info-panel">
+          <div className="linear-info-inner">
+            <div className="linear-avatar-ring">
+              <img
+                src="/logo.png"
+                alt="School Emblem"
+                className="linear-school-logo"
+              />
+            </div>
+            
+            <div className="linear-info-heading">
+              <h2 className="linear-info-title">Student Voting System</h2>
+              <p className="linear-info-subtitle">Official SSLG Supreme Student Government</p>
+            </div>
 
-            {/* Countdown Timer Block on the Right */}
-            <div style={{ width: "100%", background: "rgba(255, 255, 255, 0.95)", borderRadius: "14px", padding: "16px", color: "#0F172A", boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)" }}>
+            {/* Glass Timer Card Container */}
+            <div className="linear-timer-card">
               <CountdownTimer
                 onExpire={() => setIsTimerExpired(true)}
                 onTimerLoaded={handleTimerLoaded}
@@ -345,155 +452,95 @@ const AuthForm: React.FC<{
         </div>
       </div>
 
-      {/* Forgot Password / Help Modal */}
+      {/* Raycast-style Command Dialog / Help Modal */}
       {showForgotPasswordModal && (
         <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(15, 23, 42, 0.6)",
-            backdropFilter: "blur(4px)",
-            zIndex: 99999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-            boxSizing: "border-box",
-          }}
+          className="linear-modal-backdrop"
           onClick={() => setShowForgotPasswordModal(false)}
         >
           <div
-            style={{
-              background: "#FFFFFF",
-              borderRadius: "20px",
-              padding: "32px",
-              maxWidth: "460px",
-              width: "100%",
-              boxShadow: "0 20px 50px rgba(0, 0, 0, 0.2)",
-              position: "relative",
-              boxSizing: "border-box",
-            }}
+            className="linear-modal-dialog"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #E2E8F0", paddingBottom: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <span className="material-symbols-outlined" style={{ color: "var(--primary-navy, #0A192F)", fontSize: "24px" }}>help_center</span>
-                <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "var(--primary-navy, #0A192F)" }}>
-                  How to Get Your Password
-                </h3>
+            <div className="linear-modal-header">
+              <div className="linear-modal-title-group">
+                <HelpCircleIcon />
+                <h3>How to Retrieve Your Voting Password</h3>
               </div>
               <button
+                className="linear-modal-close-btn"
                 onClick={() => setShowForgotPasswordModal(false)}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "#64748B", display: "flex", alignItems: "center" }}
+                aria-label="Close dialog"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>close</span>
+                <CloseIcon />
               </button>
             </div>
 
-            <p style={{ margin: "0 0 20px 0", fontSize: "13px", color: "#475569", lineHeight: 1.5 }}>
-              Follow these steps to retrieve your plain-text password or voting access key:
+            <p className="linear-modal-description">
+              Follow these simple steps to obtain your plain-text voter password or voting access key:
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
-              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <div style={{ background: "#F1F5F9", color: "var(--primary-navy, #0A192F)", width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "13px", flexShrink: 0 }}>
-                  1
-                </div>
-                <div>
-                  <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--primary-navy, #0A192F)", marginBottom: "2px" }}>
-                    Contact Your Class Adviser
-                  </div>
-                  <div style={{ fontSize: "12.5px", color: "#64748B", lineHeight: 1.4 }}>
-                    Reach out to your section Class Adviser or SSLG Comelec Representative.
+            <div className="linear-steps-list">
+              <div className="linear-step-item">
+                <div className="linear-step-number">01</div>
+                <div className="linear-step-content">
+                  <div className="linear-step-title">Contact Class Adviser</div>
+                  <div className="linear-step-desc">
+                    Reach out to your section Adviser or SSLG Comelec Representative.
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <div style={{ background: "#F1F5F9", color: "var(--primary-navy, #0A192F)", width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "13px", flexShrink: 0 }}>
-                  2
-                </div>
-                <div>
-                  <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--primary-navy, #0A192F)", marginBottom: "2px" }}>
-                    Provide Your 12-Digit LRN
-                  </div>
-                  <div style={{ fontSize: "12.5px", color: "#64748B", lineHeight: 1.4 }}>
-                    Present your 12-digit Learner Reference Number and Student ID for identity verification.
+              <div className="linear-step-item">
+                <div className="linear-step-number">02</div>
+                <div className="linear-step-content">
+                  <div className="linear-step-title">Provide 12-Digit LRN</div>
+                  <div className="linear-step-desc">
+                    Present your 12-digit Learner Reference Number and Student ID card.
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <div style={{ background: "#F1F5F9", color: "var(--primary-navy, #0A192F)", width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "13px", flexShrink: 0 }}>
-                  3
-                </div>
-                <div>
-                  <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--primary-navy, #0A192F)", marginBottom: "2px" }}>
-                    Receive Your Plain-Text Access Key
-                  </div>
-                  <div style={{ fontSize: "12.5px", color: "#64748B", lineHeight: 1.4 }}>
-                    Your Adviser will provide your assigned password (e.g. <code style={{ background: "#F1F5F9", padding: "2px 6px", borderRadius: "4px", fontWeight: 700, color: "var(--primary-navy, #0A192F)" }}>123456</code>).
+              <div className="linear-step-item">
+                <div className="linear-step-number">03</div>
+                <div className="linear-step-content">
+                  <div className="linear-step-title">Receive Plain-Text Key</div>
+                  <div className="linear-step-desc">
+                    Your Adviser will look up your voter account and give you your access key (e.g. <code className="linear-code-chip">123456</code>).
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <div style={{ background: "#F1F5F9", color: "var(--primary-navy, #0A192F)", width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "13px", flexShrink: 0 }}>
-                  4
-                </div>
-                <div>
-                  <div style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--primary-navy, #0A192F)", marginBottom: "2px" }}>
-                    Login & Cast Your Ballot
-                  </div>
-                  <div style={{ fontSize: "12.5px", color: "#64748B", lineHeight: 1.4 }}>
-                    Enter your LRN and password in the login portal above to open your ballot.
+              <div className="linear-step-item">
+                <div className="linear-step-number">04</div>
+                <div className="linear-step-content">
+                  <div className="linear-step-title">Cast Your Vote</div>
+                  <div className="linear-step-desc">
+                    Return to this portal, enter your LRN & password, and cast your vote!
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "12px 14px", fontSize: "12px", color: "#475569", lineHeight: 1.5, marginBottom: "20px" }}>
-              <strong>📌 Admin Note:</strong> Faculty admins can export the full printable password list from <em>Admin Dashboard → Voters List → Export PDF</em>.
+            <div className="linear-modal-tip">
+              <strong>Note for Faculty:</strong> Admin voters list export containing credentials is available in the <em>Admin Console → Voters List</em>.
             </div>
 
             <button
               onClick={() => setShowForgotPasswordModal(false)}
-              className="btn-royal-blue"
-              style={{ width: "100%", padding: "12px" }}
+              className="linear-btn-primary full-width"
             >
-              Got It, Thanks!
+              Understand & Return
             </button>
           </div>
         </div>
       )}
 
-      {/* Clipboard Security Toast */}
+      {/* Floating Micro-Toast for Restricted Clipboard */}
       {clipboardAlert && (
-        <div style={{
-          position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "#FFFFFF",
-          color: "#DC2626",
-          border: "1px solid #000000",
-          padding: "6px 10px",
-          borderRadius: "4px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          fontSize: "11px",
-          fontWeight: 650,
-          zIndex: 99999,
-          animation: "slideUpIn 0.22s ease",
-          whiteSpace: "nowrap",
-        }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#DC2626" }}>block</span>
-          <span>Invalid Action</span>
+        <div className="linear-toast-notification">
+          <BanIcon />
+          <span>Clipboard actions restricted for secure input fields</span>
         </div>
       )}
     </div>

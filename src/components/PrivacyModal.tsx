@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ShieldCheck, Lock, Vote, CheckSquare, CheckCircle2 } from "lucide-react";
 
 interface PrivacyModalProps {
   onAgree: () => void;
@@ -32,63 +33,64 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(11, 23, 54, 0.75)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        backgroundColor: "rgba(0, 0, 0, 0.65)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         zIndex: 99999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
-        animation: "fadeIn 0.3s ease-out",
+        padding: "16px",
+        animation: "fadeIn 0.2s ease-out",
       }}
     >
       <div
         style={{
-          background: "#FFFFFF",
-          borderRadius: "16px",
-          maxWidth: "560px",
+          backgroundColor: "var(--bg-surface)",
+          borderRadius: "8px",
+          maxWidth: "520px",
           width: "100%",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35)",
+          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.4)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "90vh",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
+          maxHeight: "85vh",
+          border: "1px solid var(--border-subtle)",
         }}
       >
         {/* Header */}
         <div
           style={{
-            background: "var(--primary-navy)",
-            color: "var(--text-white)",
-            padding: "24px 28px",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-main)",
+            padding: "14px 18px",
             display: "flex",
             alignItems: "center",
-            gap: "14px",
+            gap: "10px",
+            borderBottom: "1px solid var(--border-subtle)",
           }}
         >
           <div
             style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "12px",
-              background: "rgba(255, 255, 255, 0.12)",
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              backgroundColor: "rgba(99, 102, 241, 0.12)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              color: "var(--accent-primary)",
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "26px", color: "#60A5FA" }}>
-              verified_user
-            </span>
+            <ShieldCheck size={16} />
           </div>
           <div>
-            <h2 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-white)" }}>
+            <h2 style={{ margin: 0, fontSize: "15px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
               Privacy & Data Policy Notice
             </h2>
-            <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "var(--text-white)" }}>
-              DLMHS Online Voting Election
+            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>
+              DLMHS Online Voting Election System
             </p>
           </div>
         </div>
@@ -96,57 +98,51 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         {/* Content Body */}
         <div
           style={{
-            padding: "24px 28px",
+            padding: "16px 18px",
             overflowY: "auto",
-            fontSize: "14px",
-            lineHeight: "1.6",
+            fontSize: "12.5px",
+            lineHeight: "1.5",
             color: "var(--text-muted)",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "12px",
           }}
         >
-          <p style={{ margin: 0, fontWeight: 500 }}>
+          <p style={{ margin: 0, fontWeight: 400 }}>
             Welcome to the <strong>DLMHS Online Voting System</strong>. Before accessing the portal, please read and acknowledge our data privacy guidelines:
           </p>
 
           <div
             style={{
-              background: "var(--bg-surface)",
-              border: "1px solid var(--border-light)",
-              borderRadius: "10px",
-              padding: "16px",
+              backgroundColor: "var(--bg-main)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "6px",
+              padding: "12px",
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
+              gap: "10px",
             }}
           >
-            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-              <span className="material-symbols-outlined" style={{ color: "var(--primary-navy)", fontSize: "18px", marginTop: "2px" }}>
-                lock
-              </span>
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <Lock size={14} style={{ color: "var(--accent-primary)", marginTop: "2px", flexShrink: 0 }} />
               <div>
-                <strong style={{ color: "var(--primary-navy)", display: "block" }}>1. Data Protection & Security</strong>
+                <strong style={{ color: "var(--text-main)", display: "block", fontSize: "12px" }}>1. Data Protection & Security</strong>
                 Your Student LRN, full name, grade, section, and voting records are encrypted and processed strictly in accordance with Republic Act No. 10173 (Data Privacy Act of 2012).
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-              <span className="material-symbols-outlined" style={{ color: "var(--primary-navy)", fontSize: "18px", marginTop: "2px" }}>
-                how_to_vote
-              </span>
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <Vote size={14} style={{ color: "var(--accent-primary)", marginTop: "2px", flexShrink: 0 }} />
               <div>
-                <strong style={{ color: "var(--primary-navy)", display: "block" }}>2. Ballot Secrecy Guaranteed</strong>
+                <strong style={{ color: "var(--text-main)", display: "block", fontSize: "12px" }}>2. Ballot Secrecy Guaranteed</strong>
                 Your individual candidate selections remain confidential. Only aggregate tally counts are made public on the final election results summary.
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-              <span className="material-symbols-outlined" style={{ color: "var(--primary-navy)", fontSize: "18px", marginTop: "2px" }}>
-                assignment_turned_in
-              </span>
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <CheckSquare size={14} style={{ color: "var(--accent-primary)", marginTop: "2px", flexShrink: 0 }} />
               <div>
-                <strong style={{ color: "var(--primary-navy)", display: "block" }}>3. Authorized Usage</strong>
+                <strong style={{ color: "var(--text-main)", display: "block", fontSize: "12px" }}>3. Authorized Usage</strong>
                 By logging in, you agree that your credentials will be used solely to cast a single valid vote during official school election periods.
               </div>
             </div>
@@ -157,13 +153,13 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              padding: "12px 14px",
-              borderRadius: "8px",
+              gap: "10px",
+              padding: "10px 12px",
+              borderRadius: "6px",
               border: "1px solid var(--border-subtle)",
-              background: agreed ? "var(--accent-blue)" : "var(--bg-main)",
+              backgroundColor: agreed ? "rgba(99, 102, 241, 0.08)" : "var(--bg-main)",
               cursor: "pointer",
-              transition: "all 0.2s ease",
+              transition: "all 150ms ease",
             }}
           >
             <input
@@ -171,13 +167,13 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
               style={{
-                width: "18px",
-                height: "18px",
-                accentColor: "var(--primary-navy)",
+                width: "16px",
+                height: "16px",
+                accentColor: "var(--accent-primary)",
                 cursor: "pointer",
               }}
             />
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--primary-navy)" }}>
+            <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-main)" }}>
               I have read and agree to the Privacy Policy & Data Usage Terms
             </span>
           </label>
@@ -186,9 +182,9 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         {/* Footer Actions */}
         <div
           style={{
-            padding: "16px 28px",
-            background: "var(--bg-surface)",
-            borderTop: "1px solid var(--border-light)",
+            padding: "12px 18px",
+            backgroundColor: "var(--bg-card)",
+            borderTop: "1px solid var(--border-subtle)",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -196,25 +192,20 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
           <button
             onClick={handleAgreeClick}
             disabled={!agreed}
+            className="btn-primary"
             style={{
-              background: agreed ? "var(--primary-navy)" : "var(--text-light)",
-              color: "var(--text-white)",
-              border: "none",
-              padding: "12px 24px",
-              borderRadius: "8px",
-              fontWeight: 700,
-              fontSize: "14px",
+              opacity: agreed ? 1 : 0.5,
+              padding: "7px 16px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 500,
               cursor: agreed ? "pointer" : "not-allowed",
-              transition: "all 0.2s ease",
               display: "inline-flex",
               alignItems: "center",
-              gap: "8px",
-              boxShadow: agreed ? "0 4px 12px rgba(11, 23, 54, 0.25)" : "none",
+              gap: "6px",
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              check_circle
-            </span>
+            <CheckCircle2 size={14} />
             I Agree & Continue
           </button>
         </div>
@@ -224,3 +215,4 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
 };
 
 export default PrivacyModal;
+

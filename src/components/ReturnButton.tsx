@@ -1,4 +1,5 @@
 import React from "react";
+import { ArrowLeft } from "lucide-react";
 
 interface ReturnButtonProps {
   onClick: (e?: any) => void;
@@ -17,11 +18,10 @@ const ReturnButton: React.FC<ReturnButtonProps> = ({
     <button
       className={`btn-top-nav ${className}`}
       onClick={onClick}
+      style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
     >
-      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-        arrow_back
-      </span>
-      {label}
+      <ArrowLeft size={16} />
+      <span>{label}</span>
     </button>
   </div>
 );

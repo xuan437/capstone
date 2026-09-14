@@ -8,6 +8,7 @@ import { base64ToImageUrl } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
 import { logAuditAction } from "../utils/auditLogger";
 import { useLanguage } from "../context/LanguageContext";
+import { FileText, Award, Download, FileSpreadsheet } from "lucide-react";
 
 const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _setPage }) => {
   const { t } = useLanguage();
@@ -137,49 +138,73 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
   }).filter((item) => item.winner !== null);
 
   return (
-    <div className="screen-content content-max-width" style={{ maxWidth: "900px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "16px 20px" }}>
       {/* Header Bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <span className="overline">Official Canvass</span>
-          <h1 style={{ margin: "2px 0 0" }}>Results & Official Certificate</h1>
-          <p style={{ color: "var(--text-muted)", margin: "4px 0 0", fontSize: "13.5px" }}>
-            Generate certified vote summaries or the official Certificate of Canvass.
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+            <div style={{
+              width: "26px",
+              height: "26px",
+              borderRadius: "6px",
+              backgroundColor: "rgba(99, 102, 241, 0.12)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--accent-primary)"
+            }}>
+              <FileText size={14} />
+            </div>
+            <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
+              Results & Official Canvass
+            </h1>
+          </div>
+          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+            Export vote totals, canvass analytics, or print the official Certificate of Canvass.
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {/* Report Type Toggle */}
-          <div style={{ display: "flex", backgroundColor: "var(--bg-surface)", padding: "4px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-light)" }}>
+          <div style={{ display: "flex", backgroundColor: "var(--bg-surface)", padding: "3px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
             <button
               onClick={() => setReportType("summary")}
               style={{
-                padding: "6px 14px",
-                borderRadius: "var(--radius-sm)",
+                padding: "4px 10px",
+                borderRadius: "4px",
                 border: "none",
-                backgroundColor: reportType === "summary" ? "var(--primary-navy)" : "transparent",
-                color: reportType === "summary" ? "var(--text-white)" : "var(--text-muted)",
-                fontWeight: 700,
-                fontSize: "12.5px",
+                backgroundColor: reportType === "summary" ? "var(--bg-card)" : "transparent",
+                color: reportType === "summary" ? "var(--text-main)" : "var(--text-muted)",
+                fontWeight: 500,
+                fontSize: "12px",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
               }}
             >
-              {t.summaryTabBtn || "Summary Report"}
+              <FileSpreadsheet size={13} />
+              {t.summaryTabBtn || "Summary"}
             </button>
             <button
               onClick={() => setReportType("certificate")}
               style={{
-                padding: "6px 14px",
-                borderRadius: "var(--radius-sm)",
+                padding: "4px 10px",
+                borderRadius: "4px",
                 border: "none",
-                backgroundColor: reportType === "certificate" ? "var(--primary-navy)" : "transparent",
-                color: reportType === "certificate" ? "var(--text-white)" : "var(--text-muted)",
-                fontWeight: 700,
-                fontSize: "12.5px",
+                backgroundColor: reportType === "certificate" ? "var(--bg-card)" : "transparent",
+                color: reportType === "certificate" ? "var(--text-main)" : "var(--text-muted)",
+                fontWeight: 500,
+                fontSize: "12px",
                 cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
               }}
             >
-              {t.certificateTabBtn || "Certificate of Canvass"}
+              <Award size={13} />
+              {t.certificateTabBtn || "Certificate"}
             </button>
           </div>
 
@@ -187,12 +212,10 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             className="btn-primary"
             onClick={handleDownloadPDF}
             disabled={isExporting}
-            style={{ padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", borderRadius: "var(--radius-md)" }}
+            style={{ padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px", borderRadius: "6px", fontSize: "12px" }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
-              picture_as_pdf
-            </span>
-            {isExporting ? "Generating PDF..." : (t.exportPdfBtn || "Export as PDF")}
+            <Download size={13} />
+            {isExporting ? "Exporting..." : (t.exportPdfBtn || "Export PDF")}
           </button>
         </div>
       </div>
@@ -200,19 +223,19 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
       {/* Screen View */}
       {reportType === "summary" ? (
         /* Summary View */
-        <div className="card-box">
-          <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "28px", padding: "16px", background: "var(--bg-surface)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)" }}>
+        <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "16px", padding: "12px", backgroundColor: "var(--bg-main)", border: "1px solid var(--border-subtle)", borderRadius: "6px" }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "12px", color: "var(--text-light)", fontWeight: 700 }}>REGISTERED VOTERS</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--primary-navy)" }}>{stats.totalRegistered}</div>
+              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Registered</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>{stats.totalRegistered}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "12px", color: "var(--text-light)", fontWeight: 700 }}>VOTES CAST</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--primary-navy)" }}>{stats.totalVotesCast}</div>
+              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Votes Cast</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>{stats.totalVotesCast}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "12px", color: "var(--text-light)", fontWeight: 700 }}>VOTER TURNOUT</div>
-              <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-success)" }}>{turnout}%</div>
+              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Turnout</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#10B981" }}>{turnout}%</div>
             </div>
           </div>
 
@@ -220,21 +243,21 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             const posTotalVotes = positionTotals[r.candidate.position] || 0;
             const percentage = posTotalVotes > 0 ? Math.round((r.count / posTotalVotes) * 100) : 0;
             return (
-              <div key={r.candidate.id} style={{ padding: "16px 0", borderBottom: index < results.length - 1 ? "1px solid var(--border-light)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <div key={r.candidate.id} style={{ padding: "10px 0", borderBottom: index < results.length - 1 ? "1px solid var(--border-subtle)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <img
-                    src={base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`}
+                    src={base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=6366F1&color=ffffff`}
                     alt={r.candidate.name}
-                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
+                    style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
                   />
                   <div>
-                    <strong style={{ fontSize: "16px", color: "var(--text-main)" }}>{r.candidate.name}</strong>
-                    <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>{r.candidate.position}</div>
+                    <strong style={{ fontSize: "13px", color: "var(--text-main)" }}>{r.candidate.name}</strong>
+                    <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>{r.candidate.position}</div>
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--primary-navy)" }}>{r.count}</div>
-                  <div style={{ fontSize: "12.5px", color: "var(--text-light)" }}>{percentage}% of position votes</div>
+                  <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--accent-primary)" }}>{r.count}</div>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{percentage}% of position votes</div>
                 </div>
               </div>
             );
@@ -242,60 +265,60 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
         </div>
       ) : (
         /* Certificate View Screen Preview */
-        <div className="card-box" style={{ padding: "32px", border: "2px solid var(--primary-navy)", background: "var(--bg-main)" }}>
-          <div style={{ textAlign: "center", borderBottom: "2px double var(--primary-navy)", paddingBottom: "16px", marginBottom: "24px" }}>
-            <h4 style={{ margin: 0, textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-light)" }}>
+        <div style={{ padding: "24px", border: "1px solid var(--border-subtle)", borderRadius: "8px", backgroundColor: "var(--bg-surface)", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ textAlign: "center", borderBottom: "1px solid var(--border-subtle)", paddingBottom: "12px", marginBottom: "16px" }}>
+            <h4 style={{ margin: 0, textTransform: "uppercase", fontSize: "10px", letterSpacing: "0.05em", color: "var(--text-muted)" }}>
               Republic of the Philippines • Department of Education
             </h4>
-            <h2 style={{ margin: "4px 0", fontSize: "20px", fontWeight: 900, color: "var(--primary-navy)" }}>
+            <h2 style={{ margin: "2px 0", fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>
               DOMINGO LEDESMA MAPA HIGH SCHOOL
             </h2>
-            <div style={{ fontSize: "14px", fontWeight: 800, color: "var(--color-purple)", letterSpacing: "0.08em", marginTop: "6px" }}>
+            <div style={{ fontSize: "11.5px", fontWeight: 600, color: "var(--accent-primary)", letterSpacing: "0.03em", marginTop: "2px" }}>
               SUPREME STUDENT LEARNERS GOVERNMENT ELECTIONS
             </div>
-            <h3 style={{ margin: "14px 0 0", fontSize: "17px", fontWeight: 900, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <h3 style={{ margin: "10px 0 0", fontSize: "13.5px", fontWeight: 600, color: "var(--text-main)", textTransform: "uppercase", letterSpacing: "0.02em" }}>
               Official Certificate of Canvass & Declaration of Winners
             </h3>
           </div>
 
-          <p style={{ fontSize: "13px", color: "var(--text-main)", lineHeight: 1.6, marginBottom: "20px" }}>
-            WE, THE UNDERSIGNED MEMBERS of the Electoral Board of Canvassers, hereby certify that we have officially canvassed the votes cast in the Supreme Student Learners Government Elections held on <strong>{new Date().toLocaleDateString()}</strong>. Total turnout recorded: <strong>{stats.uniqueVoters}</strong> out of <strong>{stats.totalRegistered}</strong> enrolled voters (<strong>{turnout}% Turnout</strong>).
+          <p style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5, marginBottom: "16px" }}>
+            WE, THE UNDERSIGNED MEMBERS of the Board of Canvassers, certify that we have canvassed the votes cast in the elections held on <strong>{new Date().toLocaleDateString()}</strong>. Total turnout recorded: <strong>{stats.uniqueVoters}</strong> out of <strong>{stats.totalRegistered}</strong> enrolled voters (<strong>{turnout}% Turnout</strong>).
           </p>
 
-          <h4 style={{ fontSize: "13.5px", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--primary-navy)", marginBottom: "12px", paddingBottom: "4px", borderBottom: "1px solid var(--border-light)" }}>
-            Official Roster of Duly Elected Officers
+          <h4 style={{ fontSize: "11.5px", textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--text-main)", marginBottom: "8px", paddingBottom: "4px", borderBottom: "1px solid var(--border-subtle)" }}>
+            Duly Elected Officers Roster
           </h4>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "20px" }}>
             {winnersByPosition.map(({ position, winner, posTotal }) => {
               const pct = posTotal > 0 ? Math.round((winner!.count / posTotal) * 100) : 0;
               return (
-                <div key={position} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-light)", borderRadius: "var(--radius-md)" }}>
+                <div key={position} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", backgroundColor: "var(--bg-main)", border: "1px solid var(--border-subtle)", borderRadius: "6px" }}>
                   <div>
-                    <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--text-light)", textTransform: "uppercase", display: "block" }}>{position}</span>
-                    <strong style={{ fontSize: "15px", color: "var(--primary-navy)" }}>{winner!.candidate.name}</strong>
+                    <span style={{ fontSize: "10px", fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", display: "block" }}>{position}</span>
+                    <strong style={{ fontSize: "13px", color: "var(--text-main)" }}>{winner!.candidate.name}</strong>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--color-success)" }}>{winner!.count} Votes</span>
-                    <span style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "8px" }}>({pct}% of votes)</span>
+                    <span style={{ fontSize: "12.5px", fontWeight: 600, color: "#10B981" }}>{winner!.count} Votes</span>
+                    <span style={{ fontSize: "11px", color: "var(--text-muted)", marginLeft: "6px" }}>({pct}%)</span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div style={{ marginTop: "40px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px", textAlign: "center", paddingTop: "20px", borderTop: "1px solid var(--border-light)" }}>
+          <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", textAlign: "center", paddingTop: "14px", borderTop: "1px solid var(--border-subtle)" }}>
             <div>
-              <div style={{ borderBottom: "1px solid var(--text-main)", marginBottom: "6px", height: "30px" }}></div>
-              <strong style={{ fontSize: "12px", color: "var(--text-main)" }}>Electoral Board Chairman</strong>
+              <div style={{ borderBottom: "1px solid var(--border-subtle)", marginBottom: "4px", height: "24px" }}></div>
+              <strong style={{ fontSize: "11px", color: "var(--text-muted)" }}>Electoral Board Chair</strong>
             </div>
             <div>
-              <div style={{ borderBottom: "1px solid var(--text-main)", marginBottom: "6px", height: "30px" }}></div>
-              <strong style={{ fontSize: "12px", color: "var(--text-main)" }}>Commission Secretary</strong>
+              <div style={{ borderBottom: "1px solid var(--border-subtle)", marginBottom: "4px", height: "24px" }}></div>
+              <strong style={{ fontSize: "11px", color: "var(--text-muted)" }}>Commission Secretary</strong>
             </div>
             <div>
-              <div style={{ borderBottom: "1px solid var(--text-main)", marginBottom: "6px", height: "30px" }}></div>
-              <strong style={{ fontSize: "12px", color: "var(--text-main)" }}>School Principal / Adviser</strong>
+              <div style={{ borderBottom: "1px solid var(--border-subtle)", marginBottom: "4px", height: "24px" }}></div>
+              <strong style={{ fontSize: "11px", color: "var(--text-muted)" }}>School Adviser</strong>
             </div>
           </div>
         </div>
@@ -345,7 +368,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
           color: "#0F172A",
           padding: "40px",
           boxSizing: "border-box",
-          fontFamily: "var(--font-sans)",
+          fontFamily: "sans-serif",
         }}
       >
         <div style={{ textAlign: "center", borderBottom: "3px double #0D7A3E", paddingBottom: "18px", marginBottom: "24px" }}>
@@ -394,7 +417,6 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             })}
           </tbody>
         </table>
-
         <div style={{ marginTop: "60px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px", textAlign: "center" }}>
           <div>
             <div style={{ borderBottom: "1px solid #0F172A", marginBottom: "8px", height: "40px" }}></div>
