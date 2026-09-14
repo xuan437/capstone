@@ -296,13 +296,13 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               <div>
                 <div className="admin-settings-section-title">Support</div>
                 <a
-                  href="mailto:emjaygusela@gmail.com"
+                  href="mailto:admin@gmail.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="admin-sub-link"
                 >
                   <Mail size={13} />
-                  <span>admin@school.edu</span>
+                  <span>admin@gmail.com</span>
                 </a>
                 <a href="tel:09168562198" className="admin-sub-link">
                   <Phone size={13} />

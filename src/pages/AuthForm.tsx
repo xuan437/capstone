@@ -186,8 +186,15 @@ const AuthForm: React.FC<{
     setLoading(true);
     setError("");
     const { email, password } = facultyForm;
+    const cleanEmail = email.trim().toLowerCase();
 
-    if (email === ADMIN_IDENTIFIER && password === ADMIN_PASSWORD) {
+    if (
+      (cleanEmail === ADMIN_IDENTIFIER.toLowerCase() ||
+        cleanEmail === "admin@gmail.com" ||
+        cleanEmail === "admin@school.edu.ph" ||
+        cleanEmail === "admin@school.edu") &&
+      password === ADMIN_PASSWORD
+    ) {
       const adminUser: Admin = { name: "Faculty Admin", id: "admin", isAdmin: true };
       localStorage.setItem("currentUser", JSON.stringify(adminUser));
       setCurrentUser(adminUser);
@@ -206,10 +213,10 @@ const AuthForm: React.FC<{
 
       {/* Main Glassmorphic Container Card */}
       <div className="linear-portal-card">
-        
+
         {/* LEFT PANEL: Compact High-Density Form */}
         <div className="linear-form-panel">
-          
+
           {/* Top Brand Header */}
           <div className="linear-brand-header">
             <div className="linear-header-text">
@@ -340,7 +347,7 @@ const AuthForm: React.FC<{
                       <input
                         name="email"
                         aria-label="Faculty Email"
-                        placeholder="admin@school.edu.ph"
+                        placeholder="Admin Email"
                         className="linear-input"
                         value={facultyForm.email}
                         onChange={handleFacultyChange}
@@ -428,7 +435,7 @@ const AuthForm: React.FC<{
                 className="linear-school-logo"
               />
             </div>
-            
+
             <div className="linear-info-heading">
               <h2 className="linear-info-title">Student Voting System</h2>
               <p className="linear-info-subtitle">Official SSLG Supreme Secondary Learner Government</p>
