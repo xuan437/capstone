@@ -81,7 +81,7 @@ const AdminSetup: React.FC<{
           <img
             src="/logo.png"
             alt="School Logo"
-            style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
+            style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
           />
           <div>
             <h3 style={{ margin: 0, fontSize: "14px", color: "var(--text-main)", fontWeight: 600 }}>Candidates by Position</h3>

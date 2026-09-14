@@ -273,7 +273,7 @@ const BallotPage: React.FC<{
             <img
               src="/logo.png"
               alt="School Emblem"
-              style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
+              style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}
             />
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>

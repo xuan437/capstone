@@ -445,7 +445,10 @@ const AuthForm: React.FC<{
             {/* Glass Timer Card Container */}
             <div className="linear-timer-card">
               <CountdownTimer
-                onExpire={() => setIsTimerExpired(true)}
+                onExpire={() => {
+                  setIsTimerExpired(true);
+                  setIsCountdownActive(false);
+                }}
                 onTimerLoaded={handleTimerLoaded}
               />
             </div>
