@@ -104,17 +104,18 @@ const AuthForm: React.FC<{
   const [loading, setLoading] = useState(false);
   const [clipboardAlert, setClipboardAlert] = useState(false);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
-  const [hasCountdown, setHasCountdown] = useState(false);
+  const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const handleTimerLoaded = useCallback((endTime: string | null) => {
     if (endTime) {
-      setIsTimerExpired(new Date() >= new Date(endTime));
-      setHasCountdown(true);
+      const expired = new Date() >= new Date(endTime);
+      setIsTimerExpired(expired);
+      setIsCountdownActive(!expired);
     } else {
       setIsTimerExpired(false);
-      setHasCountdown(false);
+      setIsCountdownActive(false);
     }
   }, []);
 
@@ -428,7 +429,7 @@ const AuthForm: React.FC<{
         {/* RIGHT PANEL: High-Precision Raycast/Vercel Timer & Branding Display */}
         <div className="linear-info-panel">
           <div className="linear-info-inner">
-            <div className={`linear-avatar-ring ${!hasCountdown ? "large-logo" : ""}`}>
+            <div className={`linear-avatar-ring ${!isCountdownActive ? "large-logo" : ""}`}>
               <img
                 src="/logo.png"
                 alt="School Emblem"
