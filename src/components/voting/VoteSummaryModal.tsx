@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Candidate } from "../../types";
 import { BallotSelections, PositionVoteLimits } from "../../types/voting";
 import { base64ToImageUrl } from "../../utils/imageUtils";
@@ -39,6 +40,15 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
   voterGrade,
   voterId,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Build a lookup map of candidates by ID for O(1) retrieval
@@ -93,7 +103,7 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
     };
   });
 
-  return (
+  const modalContent = (
     <div
       className="voting-modal-backdrop"
       onClick={onEditSelections}
@@ -343,4 +353,8 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
