@@ -48,8 +48,64 @@ const AdminVotersList: React.FC<{
   const [isExporting, setIsExporting] = useState(false);
   const pdfPrintRef = useRef<HTMLDivElement>(null);
 
+  // View password authorization states
+  const [viewPasswordStudentId, setViewPasswordStudentId] = useState<string | null>(null);
+  const [viewPasswordAuthInput, setViewPasswordAuthInput] = useState("");
+  const [viewPasswordAuthError, setViewPasswordAuthError] = useState("");
+
+  // Reset vote status authorization states
+  const [resetVoteStudent, setResetVoteStudent] = useState<Student | null>(null);
+  const [resetVoteAuthInput, setResetVoteAuthInput] = useState("");
+  const [resetVoteAuthError, setResetVoteAuthError] = useState("");
+  const [isResettingVote, setIsResettingVote] = useState(false);
+
   const toggleShowPassword = (id: string) => {
-    setShowPasswords((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (showPasswords[id]) {
+      setShowPasswords((prev) => ({ ...prev, [id]: false }));
+    } else {
+      setViewPasswordStudentId(id);
+      setViewPasswordAuthInput("");
+      setViewPasswordAuthError("");
+    }
+  };
+
+  const handleViewPasswordAuthSubmit = async () => {
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (viewPasswordAuthInput !== ADMIN_PASSWORD) {
+      setViewPasswordAuthError("Incorrect admin password. Access denied.");
+      return;
+    }
+    if (viewPasswordStudentId) {
+      setShowPasswords((prev) => ({ ...prev, [viewPasswordStudentId]: true }));
+    }
+    setViewPasswordStudentId(null);
+    setViewPasswordAuthInput("");
+    setViewPasswordAuthError("");
+  };
+
+  const handleResetVoteSubmit = async () => {
+    if (!resetVoteStudent) return;
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (resetVoteAuthInput !== ADMIN_PASSWORD) {
+      setResetVoteAuthError("Incorrect admin password. Access denied.");
+      return;
+    }
+    setIsResettingVote(true);
+    setResetVoteAuthError("");
+    try {
+      await supabase.from("votes").delete().eq("student_id", resetVoteStudent.id);
+      await supabase.from("students").update({ has_voted: false, voted_at: null, vote_location: null }).eq("id", resetVoteStudent.id);
+      setStudents((prev) =>
+        prev.map((s) => (s.id === resetVoteStudent.id ? { ...s, has_voted: false, voted_at: undefined, vote_location: undefined } : s))
+      );
+      setResetVoteStudent(null);
+      setResetVoteAuthInput("");
+      alert(`Voting status for ${resetVoteStudent.name} was successfully reset.`);
+    } catch (err: any) {
+      setResetVoteAuthError("Failed to reset vote: " + (err.message || "Unknown error"));
+    } finally {
+      setIsResettingVote(false);
+    }
   };
 
   const fetchStudentsWithVotes = async (_?: any) => {
@@ -389,12 +445,32 @@ const AdminVotersList: React.FC<{
                       )}
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <button
-                        className="btn-inner-action"
-                        onClick={() => onViewProfile(student.id)}
-                      >
-                        Profile
-                      </button>
+                      <div style={{ display: "inline-flex", gap: "6px", alignItems: "center", justifyContent: "flex-end" }}>
+                        <button
+                          className="btn-inner-action"
+                          onClick={() => onViewProfile(student.id)}
+                        >
+                          Profile
+                        </button>
+                        {student.has_voted && (
+                          <button
+                            className="btn-inner-action"
+                            onClick={() => {
+                              setResetVoteStudent(student);
+                              setResetVoteAuthInput("");
+                              setResetVoteAuthError("");
+                            }}
+                            title="Reset Vote Status (Requires Admin Password)"
+                            style={{
+                              color: "var(--color-danger, #EF4444)",
+                              borderColor: "var(--color-danger-border, rgba(239, 68, 68, 0.3))",
+                              background: "var(--color-danger-bg, rgba(239, 68, 68, 0.05))",
+                            }}
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -455,6 +531,119 @@ const AdminVotersList: React.FC<{
                 style={{ flex: 1, opacity: isExporting ? 0.7 : 1 }}
               >
                 {isExporting ? "Exporting..." : "Download"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Password Authorization Modal */}
+      {viewPasswordStudentId && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 99999, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
+            width: "100%", maxWidth: "340px", boxShadow: "var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.15))", border: "1px solid var(--border-subtle)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Lock size={18} style={{ color: "var(--primary-navy)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reveal Voter Password</h3>
+            </div>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.4" }}>
+              Enter administrator password to decrypt and view this student's access password.
+            </p>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              value={viewPasswordAuthInput}
+              onChange={(e) => { setViewPasswordAuthInput(e.target.value); setViewPasswordAuthError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleViewPasswordAuthSubmit()}
+              autoFocus
+              style={{
+                width: "100%", padding: "8px 10px", border: `1px solid ${viewPasswordAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
+                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
+                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
+              }}
+            />
+            {viewPasswordAuthError && (
+              <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11px", fontWeight: 500 }}>
+                {viewPasswordAuthError}
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+              <button
+                className="btn-secondary"
+                onClick={() => { setViewPasswordStudentId(null); setViewPasswordAuthInput(""); setViewPasswordAuthError(""); }}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleViewPasswordAuthSubmit}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+              >
+                Reveal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Vote Status Authorization Modal */}
+      {resetVoteStudent && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 99999, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
+            width: "100%", maxWidth: "350px", boxShadow: "var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.15))", border: "1px solid var(--border-subtle)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Lock size={18} style={{ color: "var(--color-danger)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reset Vote Status</h3>
+            </div>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.4" }}>
+              Resetting will clear submitted votes for <strong>{resetVoteStudent.name}</strong> ({resetVoteStudent.id}). Enter administrator password to confirm:
+            </p>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              value={resetVoteAuthInput}
+              onChange={(e) => { setResetVoteAuthInput(e.target.value); setResetVoteAuthError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleResetVoteSubmit()}
+              autoFocus
+              style={{
+                width: "100%", padding: "8px 10px", border: `1px solid ${resetVoteAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
+                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
+                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
+              }}
+            />
+            {resetVoteAuthError && (
+              <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11px", fontWeight: 500 }}>
+                {resetVoteAuthError}
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+              <button
+                className="btn-secondary"
+                onClick={() => { setResetVoteStudent(null); setResetVoteAuthInput(""); setResetVoteAuthError(""); }}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleResetVoteSubmit}
+                disabled={isResettingVote}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--color-danger)", borderColor: "var(--color-danger)" }}
+              >
+                {isResettingVote ? "Resetting..." : "Confirm Reset"}
               </button>
             </div>
           </div>

@@ -16,6 +16,7 @@ import {
 import { Page, User, Student } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
 import { translations, LanguageCode } from "../utils/translations";
+import { base64ToImageUrl } from "../utils/imageUtils";
 import "./AdminLayout.css";
 
 interface VoterLayoutProps {
@@ -36,8 +37,8 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
   setPage,
   currentUser,
   handleLogout,
-  searchTerm: _searchTerm,
-  setSearchTerm: _setSearchTerm,
+  searchTerm,
+  setSearchTerm,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -338,9 +339,27 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
         <div className="admin-sidebar-footer">
           {/* Student Profile Chip inside Sidebar */}
           <div className="admin-user-badge-sidebar">
-            <div className="admin-avatar-circle-sidebar">
-              {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "V"}
-            </div>
+            {currentUser && "photo_url" in currentUser && currentUser.photo_url ? (
+              <img
+                src={base64ToImageUrl(currentUser.photo_url) || undefined}
+                alt={currentUser.name}
+                style={{
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "1.5px solid var(--border-subtle)",
+                  flexShrink: 0,
+                }}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="admin-avatar-circle-sidebar">
+                {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "V"}
+              </div>
+            )}
             <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
               <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-main)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {currentUser?.name || "Verified Voter"}
@@ -380,14 +399,35 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             </div>
 
             {/* Global Voter Search Bar */}
-            <div className="admin-search-wrapper" style={{ maxWidth: "240px" }}>
-              <Search size={14} style={{ color: "var(--text-light)" }} />
+            <div className="admin-search-wrapper" style={{ maxWidth: "280px" }}>
+              <Search size={14} style={{ color: "var(--text-light)", flexShrink: 0 }} />
               <input
                 type="text"
-                placeholder="Search candidates..."
-                value={_searchTerm || ""}
-                onChange={(e) => _setSearchTerm && _setSearchTerm(e.target.value)}
+                placeholder="Search candidates by name, position..."
+                value={searchTerm || ""}
+                onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && setSearchTerm) setSearchTerm("");
+                }}
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm && setSearchTerm("")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-light)",
+                    padding: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
           </div>
         </header>

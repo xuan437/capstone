@@ -391,14 +391,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
             </button>
 
             {/* Global Admin Search Bar */}
-            <div className="admin-search-wrapper">
-              <Search size={14} style={{ color: "var(--text-light)" }} />
+            <div className="admin-search-wrapper" style={{ maxWidth: "300px" }}>
+              <Search size={14} style={{ color: "var(--text-light)", flexShrink: 0 }} />
               <input
                 type="text"
-                placeholder="Search voters or candidates..."
+                placeholder="Search candidates or voters..."
                 value={searchTerm || ""}
                 onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && setSearchTerm) setSearchTerm("");
+                }}
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm && setSearchTerm("")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-light)",
+                    padding: "2px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
           </div>
         </header>

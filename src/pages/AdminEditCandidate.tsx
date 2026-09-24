@@ -1,22 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
-import { Page, POSITIONS } from "../types";
+import { Candidate, Page, POSITIONS } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import {
-  UserPlus,
+  Edit3,
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
   Save,
+  User,
   Upload,
+  Eye,
 } from "lucide-react";
 
-interface AdminAddCandidateProps {
+interface AdminEditCandidateProps {
   setPage: (p: Page) => void;
+  candidateId: string | null;
+  onViewCandidate?: (id: string) => void;
 }
 
-const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
+const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
+  setPage,
+  candidateId,
+  onViewCandidate,
+}) => {
   const [form, setForm] = useState({
     lastName: "",
     firstName: "",
@@ -28,8 +36,76 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     section: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // Helper to parse existing single full name string into structured parts
+  const parseCandidateName = (fullName: string) => {
+    if (!fullName) return { lastName: "", firstName: "", middleName: "" };
+    const trimmed = fullName.trim();
+
+    // Format: "LastName, FirstName MiddleName"
+    if (trimmed.includes(",")) {
+      const [lastPart, firstPart] = trimmed.split(",");
+      const tokens = (firstPart || "").trim().split(/\s+/);
+      return {
+        lastName: (lastPart || "").trim(),
+        firstName: tokens[0] || "",
+        middleName: tokens.slice(1).join(" ") || "",
+      };
+    }
+
+    // Format: "FirstName [MiddleName...] LastName"
+    const tokens = trimmed.split(/\s+/);
+    if (tokens.length === 1) {
+      return { lastName: tokens[0], firstName: "", middleName: "" };
+    } else if (tokens.length === 2) {
+      return { firstName: tokens[0], middleName: "", lastName: tokens[1] };
+    } else {
+      const firstName = tokens[0];
+      const lastName = tokens[tokens.length - 1];
+      const middleName = tokens.slice(1, -1).join(" ");
+      return { firstName, middleName, lastName };
+    }
+  };
+
+  useEffect(() => {
+    if (!candidateId) {
+      setError("No candidate ID specified for editing.");
+      return;
+    }
+
+    const loadCandidate = async () => {
+      setIsLoading(true);
+      setError("");
+      const { data, error } = await supabase
+        .from("candidates")
+        .select("*")
+        .eq("id", candidateId)
+        .single();
+
+      if (error || !data) {
+        setError("Failed to load candidate details: " + (error?.message || "Not found"));
+      } else {
+        const c = data as Candidate;
+        const parsed = parseCandidateName(c.name);
+        setForm({
+          lastName: parsed.lastName,
+          firstName: parsed.firstName,
+          middleName: parsed.middleName,
+          position: c.position,
+          image_url: c.image_url || "",
+          campaign_text: c.campaign_text || "",
+          age: c.age !== undefined && c.age !== null ? String(c.age) : "",
+          section: c.section || "",
+        });
+      }
+      setIsLoading(false);
+    };
+
+    loadCandidate();
+  }, [candidateId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -46,7 +122,6 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     }
   };
 
-  // Compute final combined full name from structured parts
   const getCombinedFullName = () => {
     const fn = form.firstName.trim();
     const mn = form.middleName.trim();
@@ -59,7 +134,10 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     return `${fn} ${ln}`.trim();
   };
 
-  const handleRegisterCandidate = async () => {
+  const handleUpdate = async () => {
+    if (!candidateId) {
+      return setError("Invalid candidate ID. Unable to update.");
+    }
     if (!form.lastName.trim()) {
       return setError("Last Name is required.");
     }
@@ -86,36 +164,78 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     setError("");
 
     try {
-      const { error: insertErr } = await supabase.from("candidates").insert([
-        {
+      const { error: updateErr } = await supabase
+        .from("candidates")
+        .update({
           name: finalFullName,
           position: form.position,
           image_url: form.image_url,
           campaign_text: form.campaign_text.trim(),
           age: parsedAge,
           section: form.section.trim(),
-        },
-      ]);
+        })
+        .eq("id", candidateId);
 
-      if (insertErr) {
-        throw insertErr;
+      if (updateErr) {
+        throw updateErr;
       }
 
       await logAuditAction(
-        "CANDIDATE_REGISTERED",
+        "CANDIDATE_UPDATED",
         "Admin",
-        `Enrolled new candidate ${finalFullName} running for ${form.position}`
+        `Updated candidate profile for ${finalFullName} (${form.position})`
       );
 
       setIsSubmitting(false);
       setSuccess(true);
     } catch (err: any) {
-      setError("Failed to add candidate: " + (err.message || "Unknown error"));
+      setError("Failed to update candidate: " + (err.message || "Unknown error"));
       setIsSubmitting(false);
     }
   };
 
   const candidateDisplayName = getCombinedFullName() || "Candidate";
+
+  if (!candidateId) {
+    return (
+      <div style={{ maxWidth: "520px", margin: "40px auto", padding: "0 20px" }}>
+        <div
+          style={{
+            backgroundColor: "var(--bg-card)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "var(--radius-lg)",
+            padding: "36px 24px",
+            textAlign: "center",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <AlertCircle size={32} style={{ color: "var(--color-danger)", margin: "0 auto 12px auto" }} />
+          <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-main)", marginBottom: "8px" }}>
+            No Candidate Selected
+          </h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "20px" }}>
+            Please select a candidate from the roster to edit their details.
+          </p>
+          <button
+            className="btn-primary"
+            onClick={() => setPage("admin_setup")}
+            style={{ padding: "8px 18px", borderRadius: "6px", fontSize: "13px", fontWeight: 600 }}
+          >
+            Return to Roster
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: "48px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+        <User size={16} className="spin" style={{ display: "block", margin: "0 auto 8px auto", color: "var(--primary-navy)" }} />
+        Loading candidate profile data...
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -147,10 +267,10 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             <CheckCircle2 size={24} />
           </div>
           <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-main)", marginBottom: "6px" }}>
-            Candidate Successfully Registered!
+            Candidate Profile Updated!
           </h2>
           <p style={{ color: "var(--text-muted)", marginBottom: "20px", fontSize: "13px" }}>
-            Official records for <strong>{candidateDisplayName}</strong> running for <strong>{form.position}</strong> have been recorded.
+            Changes for <strong>{candidateDisplayName}</strong> running for <strong>{form.position}</strong> have been recorded.
           </p>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center", flexWrap: "wrap" }}>
             <button
@@ -160,25 +280,23 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             >
               Return to Roster
             </button>
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                setForm({
-                  lastName: "",
-                  firstName: "",
-                  middleName: "",
-                  position: POSITIONS[0],
-                  image_url: "",
-                  campaign_text: "",
-                  age: "",
-                  section: "",
-                });
-                setSuccess(false);
-              }}
-              style={{ padding: "8px 18px", borderRadius: "6px", fontSize: "13px" }}
-            >
-              Add Another Candidate
-            </button>
+            {onViewCandidate && candidateId && (
+              <button
+                className="btn-secondary"
+                onClick={() => onViewCandidate(candidateId)}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <Eye size={14} />
+                <span>View Profile</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -205,22 +323,22 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
               width: "28px",
               height: "28px",
               borderRadius: "6px",
-              backgroundColor: "var(--color-success-bg)",
-              border: "1px solid var(--color-success-border)",
+              backgroundColor: "rgba(5, 150, 105, 0.12)",
+              border: "1px solid rgba(5, 150, 105, 0.25)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "var(--primary-navy)",
             }}
           >
-            <UserPlus size={15} />
+            <Edit3 size={15} />
           </div>
           <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
-            Register Candidate
+            Edit Candidate Profile
           </h1>
         </div>
         <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
-          Register an official student candidate for the SSLG election roster.
+          Update candidate information, position, and campaign platform details.
         </p>
       </div>
 
@@ -255,7 +373,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {/* Avatar Upload Banner */}
+          {/* Avatar Preview & Upload */}
           <div
             style={{
               display: "flex",
@@ -325,7 +443,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             </div>
           </div>
 
-          {/* 3-Box Structured Name Inputs: Last Name, First Name, Middle Name */}
+          {/* Structured Name Inputs */}
           <div>
             <label
               style={{
@@ -411,7 +529,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
               </div>
             </div>
 
-            {/* Live Full Name Preview */}
+            {/* Live Name Preview */}
             {(form.firstName || form.lastName) && (
               <div
                 style={{
@@ -516,12 +634,12 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             />
           </div>
 
-          {/* Action Submission Buttons */}
+          {/* Actions */}
           <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
             <button
               type="button"
               className="btn-primary"
-              onClick={handleRegisterCandidate}
+              onClick={handleUpdate}
               disabled={isSubmitting}
               style={{
                 flex: 1,
@@ -536,7 +654,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
               }}
             >
               <Save size={15} />
-              <span>{isSubmitting ? "Saving..." : "Save Candidate"}</span>
+              <span>{isSubmitting ? "Updating..." : "Update Candidate"}</span>
             </button>
             <button
               type="button"
@@ -562,4 +680,4 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
   );
 };
 
-export default AdminAddCandidate;
+export default AdminEditCandidate;

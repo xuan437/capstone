@@ -40,6 +40,7 @@ export type Page =
   | "download_results"
   | "admin_register"
   | "admin_add_candidate"
+  | "admin_edit_candidate"
   | "admin_election_settings"
   | "admin_audit_logs";
 
@@ -61,3 +62,6 @@ export type Position = (typeof POSITIONS)[number];
 
 export const ADMIN_IDENTIFIER = "admin@gmail.com";
 export const ADMIN_PASSWORD = "admin123";
+
+// Voting Limits & Two-Stage Modal Flow Types
+export * from "./types/voting";

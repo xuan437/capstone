@@ -16,6 +16,7 @@ import CandidateProfile from "./pages/CandidateProfile";
 import DownloadResults from "./pages/DownloadResults";
 import AdminRegister from "./pages/AdminRegister";
 import AdminAddCandidate from "./pages/AdminAddCandidate";
+import AdminEditCandidate from "./pages/AdminEditCandidate";
 import AdminElectionSettings from "./pages/AdminElectionSettings";
 import { AdminAuditLogs } from "./pages/AdminAuditLogs";
 import PrivacyModal from "./components/PrivacyModal";
@@ -38,6 +39,13 @@ const AppShell: React.FC = () => {
     setSelectedStudentId(null);
     setSelectedCandidateId(null);
     setSearchTerm("");
+  };
+
+  const handleNavigate = (nextPage: Page) => {
+    if (nextPage === "admin_add_candidate") {
+      setSelectedCandidateId(null);
+    }
+    setPage(nextPage);
   };
 
   useEffect(() => {
@@ -84,6 +92,7 @@ const AppShell: React.FC = () => {
     "admin_voters",
     "admin_register",
     "admin_add_candidate",
+    "admin_edit_candidate",
     "admin_election_settings",
     "admin_audit_logs",
     "results",
@@ -95,19 +104,25 @@ const AppShell: React.FC = () => {
   const renderContent = () => {
     switch (page) {
       case "login":
-        return <AuthForm setPage={setPage} setCurrentUser={setCurrentUser} />;
+        return <AuthForm setPage={handleNavigate} setCurrentUser={setCurrentUser} />;
 
       case "admin_setup":
         return (
           <AdminSetup
-            setPage={setPage}
+            setPage={handleNavigate}
             searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
             onViewCandidate={(id) => {
               setSelectedCandidateId(id);
-              setPage("candidate_profile");
+              handleNavigate("candidate_profile");
             }}
             onEditCandidate={(id) => {
               setSelectedCandidateId(id);
+              if (id) {
+                handleNavigate("admin_edit_candidate");
+              } else {
+                handleNavigate("admin_add_candidate");
+              }
             }}
           />
         );
@@ -115,47 +130,74 @@ const AppShell: React.FC = () => {
       case "admin_voters":
         return (
           <AdminVotersList
-            setPage={setPage}
+            setPage={handleNavigate}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             onViewProfile={(id) => {
               setSelectedStudentId(id);
-              setPage("student_profile");
+              handleNavigate("student_profile");
             }}
           />
         );
 
       case "admin_register":
-        return <AdminRegister setPage={setPage} />;
+        return <AdminRegister setPage={handleNavigate} />;
 
       case "admin_add_candidate":
-        return <AdminAddCandidate setPage={setPage} candidateId={selectedCandidateId} />;
+        return <AdminAddCandidate setPage={handleNavigate} />;
+
+      case "admin_edit_candidate":
+        return (
+          <AdminEditCandidate
+            setPage={handleNavigate}
+            candidateId={selectedCandidateId}
+            onViewCandidate={(id) => {
+              setSelectedCandidateId(id);
+              handleNavigate("candidate_profile");
+            }}
+          />
+        );
 
       case "admin_election_settings":
-        return <AdminElectionSettings setPage={setPage} />;
+        return <AdminElectionSettings setPage={handleNavigate} />;
 
       case "admin_audit_logs":
         return <AdminAuditLogs />;
 
       case "ballot":
         return currentUser && !("isAdmin" in currentUser) ? (
-          <BallotPage setPage={setPage} currentUser={currentUser as Student} />
+          <BallotPage
+            setPage={handleNavigate}
+            currentUser={currentUser as Student}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onViewCandidate={(id) => {
+              setSelectedCandidateId(id);
+              handleNavigate("candidate_profile");
+            }}
+          />
         ) : null;
 
       case "confirm":
         return <ConfirmationScreen handleLogout={handleLogout} />;
 
       case "results":
-        return <ResultsDashboard currentUser={currentUser} setPage={setPage} searchTerm={searchTerm} />;
+        return <ResultsDashboard currentUser={currentUser} setPage={handleNavigate} searchTerm={searchTerm} />;
 
       case "student_profile":
-        return selectedStudentId ? <StudentProfile setPage={setPage} studentId={selectedStudentId} /> : null;
+        return selectedStudentId ? <StudentProfile setPage={handleNavigate} studentId={selectedStudentId} /> : null;
 
       case "candidate_profile":
-        return selectedCandidateId ? <CandidateProfile setPage={setPage} candidateId={selectedCandidateId} /> : null;
+        return selectedCandidateId ? (
+          <CandidateProfile
+            setPage={handleNavigate}
+            candidateId={selectedCandidateId}
+            currentUser={currentUser}
+          />
+        ) : null;
 
       case "download_results":
-        return <DownloadResults setPage={setPage} />;
+        return <DownloadResults setPage={handleNavigate} />;
 
       default:
         return null;
@@ -171,7 +213,7 @@ const AppShell: React.FC = () => {
       ) : isAdminUser && isAdminPage ? (
         <AdminLayout
           activePage={page}
-          setPage={setPage}
+          setPage={handleNavigate}
           currentUser={currentUser}
           handleLogout={handleLogout}
           searchTerm={searchTerm}
@@ -182,7 +224,7 @@ const AppShell: React.FC = () => {
       ) : (
         <VoterLayout
           activePage={page}
-          setPage={setPage}
+          setPage={handleNavigate}
           currentUser={currentUser}
           handleLogout={handleLogout}
           searchTerm={searchTerm}

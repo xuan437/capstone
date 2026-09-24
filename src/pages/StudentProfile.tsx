@@ -1,9 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 import { Student, Page } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
-import { CheckCircle2, Clock, RotateCw, MapPin, Eye, EyeOff, Vote, ShieldCheck, AlertCircle, RefreshCw } from "lucide-react";
+import PhotoViewerModal from "../components/PhotoViewerModal";
+import {
+  CheckCircle2,
+  Clock,
+  RotateCw,
+  MapPin,
+  Eye,
+  EyeOff,
+  Vote,
+  ShieldCheck,
+  AlertCircle,
+  RefreshCw,
+  Camera,
+  Maximize2,
+  Trash2,
+  Upload,
+  Check,
+  Lock,
+} from "lucide-react";
 
 const StudentProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -16,6 +34,16 @@ const StudentProfile: React.FC<{
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isResetting, setIsResetting] = useState(false);
+  const [showResetAuthModal, setShowResetAuthModal] = useState(false);
+  const [resetAuthPassword, setResetAuthPassword] = useState("");
+  const [resetAuthError, setResetAuthError] = useState("");
+
+  // Photo upload and preview states
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoToast, setPhotoToast] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [showPhotoViewer, setShowPhotoViewer] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Resolved vote metadata: prefer student record, fall back to first vote row
   const [resolvedVotedAt, setResolvedVotedAt] = useState<string | null>(null);
@@ -109,16 +137,89 @@ const StudentProfile: React.FC<{
     fetchStudentProfile();
   }, [studentId]);
 
-  const handleResetStatus = async () => {
-    if (!window.confirm(`Are you sure you want to reset the voting status for ${student?.name}? This will clear their votes.`)) return;
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setPhotoError("Please select a valid image file (JPG, PNG, WebP).");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("Image size exceeds 5MB limit.");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setPhotoError(null);
+
+    try {
+      const base64 = await fileToBase64(file);
+      const { error: updateErr } = await supabase
+        .from("students")
+        .update({ photo_url: base64 })
+        .eq("id", studentId);
+
+      if (updateErr) throw updateErr;
+
+      setStudent((prev) => (prev ? { ...prev, photo_url: base64 } : null));
+      setPhotoToast("Voter photo updated successfully!");
+      setTimeout(() => setPhotoToast(null), 3500);
+    } catch (err: any) {
+      setPhotoError(err.message || "Failed to update voter photo.");
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!window.confirm(`Are you sure you want to remove the photo for ${student?.name}?`)) return;
+    setUploadingPhoto(true);
+    setPhotoError(null);
+
+    try {
+      const { error: updateErr } = await supabase
+        .from("students")
+        .update({ photo_url: null })
+        .eq("id", studentId);
+
+      if (updateErr) throw updateErr;
+
+      setStudent((prev) => (prev ? { ...prev, photo_url: undefined } : null));
+      setPhotoToast("Voter photo removed.");
+      setTimeout(() => setPhotoToast(null), 3500);
+    } catch (err: any) {
+      setPhotoError(err.message || "Failed to remove photo.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleResetStatus = () => {
+    setShowResetAuthModal(true);
+    setResetAuthPassword("");
+    setResetAuthError("");
+  };
+
+  const handleConfirmResetStatus = async () => {
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (resetAuthPassword !== ADMIN_PASSWORD) {
+      setResetAuthError("Incorrect administrator password. Access denied.");
+      return;
+    }
     setIsResetting(true);
+    setResetAuthError("");
     try {
       await supabase.from("votes").delete().eq("student_id", studentId);
       await supabase.from("students").update({ has_voted: false, voted_at: null, vote_location: null }).eq("id", studentId);
       await fetchStudentProfile();
-      alert("Student voting status reset successfully.");
+      setShowResetAuthModal(false);
+      setResetAuthPassword("");
+      alert(`Voting status for ${student?.name} has been reset successfully.`);
     } catch (err: any) {
-      alert("Failed to reset voting status: " + err.message);
+      setResetAuthError("Failed to reset voting status: " + err.message);
     } finally {
       setIsResetting(false);
     }
@@ -139,6 +240,10 @@ const StudentProfile: React.FC<{
     );
   }
 
+  const avatarUrl =
+    base64ToImageUrl(student.photo_url) ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff&size=200`;
+
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px 20px" }}>
       {/* Modern Centered Student Voter Profile Card */}
@@ -153,26 +258,219 @@ const StudentProfile: React.FC<{
           boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         }}
       >
-        {/* Top Centered Circular Photo */}
-        <div style={{ position: "relative", display: "inline-block", marginBottom: "12px" }}>
-          <img
-            src={
-              base64ToImageUrl(student.photo_url) ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff`
-            }
-            alt={student.name}
+        {/* Top Centered Circular Photo with Interactive Controls */}
+        <div style={{ position: "relative", display: "inline-block", marginBottom: "14px" }}>
+          <div
             style={{
-              width: "80px",
-              height: "80px",
+              position: "relative",
+              width: "96px",
+              height: "96px",
               borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid var(--border-subtle)",
-              display: "block",
+              padding: "3px",
+              background: student.has_voted
+                ? "linear-gradient(135deg, #10B981, #059669)"
+                : "linear-gradient(135deg, var(--accent-primary, #6366F1), #8B5CF6)",
+              boxShadow: student.has_voted
+                ? "0 4px 14px rgba(16, 185, 129, 0.25)"
+                : "0 4px 14px rgba(99, 102, 241, 0.25)",
+              margin: "0 auto",
             }}
-            onError={(e) => {
-              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff`;
-            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                overflow: "hidden",
+                position: "relative",
+                cursor: "pointer",
+                backgroundColor: "var(--bg-card)",
+              }}
+              onClick={() => setShowPhotoViewer(true)}
+              title="Click to view full photo"
+            >
+              <img
+                src={avatarUrl}
+                alt={student.name}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff&size=200`;
+                }}
+              />
+
+              {uploadingPhoto && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.65)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#ffffff",
+                    fontSize: "10px",
+                    gap: "4px",
+                  }}
+                >
+                  <RefreshCw size={18} style={{ animation: "spin 1s linear infinite" }} />
+                  <span>Saving...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Camera Action Badge */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              disabled={uploadingPhoto}
+              title="Change voter photo"
+              style={{
+                position: "absolute",
+                bottom: "-2px",
+                right: "-2px",
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                backgroundColor: student.has_voted ? "#10B981" : "var(--accent-primary, #6366F1)",
+                color: "#ffffff",
+                border: "2px solid var(--bg-surface)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+                padding: 0,
+                transition: "transform 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <Camera size={15} />
+            </button>
+          </div>
+
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handlePhotoUpload}
+            accept="image/png, image/jpeg, image/webp, image/gif"
+            style={{ display: "none" }}
           />
+
+          {/* Quick Photo Actions Buttons */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "10px" }}>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              style={{
+                background: "var(--bg-subtle, rgba(99, 102, 241, 0.08))",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "14px",
+                padding: "3px 10px",
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "var(--accent-primary)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <Upload size={11} />
+              {student.photo_url ? "Change Photo" : "Upload Photo"}
+            </button>
+
+            {student.photo_url && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowPhotoViewer(true)}
+                  style={{
+                    background: "var(--bg-subtle, rgba(0,0,0,0.04))",
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: "14px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    color: "var(--text-muted)",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                  }}
+                  title="View full resolution"
+                >
+                  <Maximize2 size={11} />
+                  View
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  disabled={uploadingPhoto}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: "14px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    color: "#EF4444",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                  }}
+                  title="Remove voter photo"
+                >
+                  <Trash2 size={11} />
+                  Remove
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Toast / Feedback Message */}
+          {photoToast && (
+            <div
+              style={{
+                marginTop: "6px",
+                fontSize: "11.5px",
+                color: "#10B981",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: 500,
+              }}
+            >
+              <Check size={13} /> {photoToast}
+            </div>
+          )}
+          {photoError && (
+            <div
+              style={{
+                marginTop: "6px",
+                fontSize: "11.5px",
+                color: "#EF4444",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: 500,
+              }}
+            >
+              <AlertCircle size={13} /> {photoError}
+            </div>
+          )}
         </div>
 
         {/* Student Name Title */}
@@ -391,9 +689,76 @@ const StudentProfile: React.FC<{
           </div>
         )}
       </div>
+
+      {/* Full Resolution Photo Viewer Modal */}
+      {showPhotoViewer && (
+        <PhotoViewerModal
+          imageUrl={avatarUrl}
+          title={`${student.name} — Voter Photo`}
+          onClose={() => setShowPhotoViewer(false)}
+        />
+      )}
+
+      {/* Admin Password Authorization Modal for Resetting Vote Status */}
+      {showResetAuthModal && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 99999, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
+            width: "100%", maxWidth: "360px", boxShadow: "0 10px 25px rgba(0,0,0,0.15)", border: "1px solid var(--border-subtle)"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Lock size={18} style={{ color: "var(--color-danger)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>
+                Confirm Vote Status Reset
+              </h3>
+            </div>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.45" }}>
+              Resetting will clear all submitted ballots for <strong>{student.name}</strong> ({student.id}) and allow them to re-vote. Enter administrator password to authorize:
+            </p>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              value={resetAuthPassword}
+              onChange={(e) => { setResetAuthPassword(e.target.value); setResetAuthError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmResetStatus()}
+              autoFocus
+              style={{
+                width: "100%", padding: "8px 10px", border: `1px solid ${resetAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
+                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
+                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
+              }}
+            />
+            {resetAuthError && (
+              <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11.5px", fontWeight: 500 }}>
+                {resetAuthError}
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+              <button
+                className="btn-secondary"
+                onClick={() => { setShowResetAuthModal(false); setResetAuthPassword(""); setResetAuthError(""); }}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleConfirmResetStatus}
+                disabled={isResetting}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--color-danger)", borderColor: "var(--color-danger)" }}
+              >
+                {isResetting ? "Resetting..." : "Authorize Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default StudentProfile;
-
