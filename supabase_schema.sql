@@ -31,10 +31,21 @@ CREATE TABLE candidates (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     name TEXT NOT NULL,
     position TEXT NOT NULL,
+    partylist TEXT, -- Affiliated Partylist or Independent
     image_url TEXT, -- Standard image URL or Data URL string (no binary BYTEA conversion)
     campaign_text TEXT,
     age INTEGER,
     section TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4b. Create 'partylists' table
+CREATE TABLE partylists (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    name TEXT NOT NULL UNIQUE,
+    code TEXT,
+    color TEXT DEFAULT '#2563EB',
+    description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -107,9 +118,18 @@ CREATE POLICY "Enable insert for everyone" ON election_settings FOR INSERT WITH 
 CREATE POLICY "Enable update for everyone" ON election_settings FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Enable delete for everyone" ON election_settings FOR DELETE USING (true);
 
+-- Partylists Policies
+ALTER TABLE partylists ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable read for everyone" ON partylists FOR SELECT USING (true);
+CREATE POLICY "Enable insert for everyone" ON partylists FOR INSERT WITH CHECK (true);
+CREATE POLICY "Enable update for everyone" ON partylists FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Enable delete for everyone" ON partylists FOR DELETE USING (true);
+
 -- 10. Direct Plain-Text Password Notes (No Hashing Triggers)
 -- Passwords are saved and queried directly as plain text strings for local/demo simplicity.
 
 -- 11. Database Performance Indexes for Ultra-Fast Querying
 CREATE INDEX IF NOT EXISTS idx_students_name ON students(name);
 CREATE INDEX IF NOT EXISTS idx_students_grade ON students(grade);
+CREATE INDEX IF NOT EXISTS idx_partylists_name ON partylists(name);
+CREATE INDEX IF NOT EXISTS idx_candidates_partylist ON candidates(partylist);

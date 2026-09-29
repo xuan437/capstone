@@ -23,7 +23,17 @@ export type Candidate = {
   campaign_text?: string;
   age?: number;
   section?: string;
+  partylist?: string;
 };
+
+export interface PartyList {
+  id: string;
+  name: string;
+  code?: string;
+  color?: string;
+  description?: string;
+  created_at?: string;
+}
 
 export type Admin = { name: string; id: string; isAdmin: boolean };
 export type User = Student | Admin;
@@ -42,7 +52,8 @@ export type Page =
   | "admin_add_candidate"
   | "admin_edit_candidate"
   | "admin_election_settings"
-  | "admin_audit_logs";
+  | "admin_audit_logs"
+  | "admin_partylists";
 
 export const POSITIONS = [
   "President",

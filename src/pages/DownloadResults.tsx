@@ -252,7 +252,9 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
                   />
                   <div>
                     <strong style={{ fontSize: "13px", color: "var(--text-main)" }}>{r.candidate.name}</strong>
-                    <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>{r.candidate.position}</div>
+                    <div style={{ fontSize: "11.5px", color: "var(--text-muted)" }}>
+                      {r.candidate.position} {r.candidate.partylist ? `• ${r.candidate.partylist}` : "• Independent"}
+                    </div>
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -350,7 +352,10 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
         {results.map((r) => (
           <div key={r.candidate.id} style={{ padding: "10px 0", borderBottom: "1px solid #E2E8F0", display: "flex", justifyContent: "space-between" }}>
             <div>
-              <strong>{r.candidate.name}</strong> - <span>{r.candidate.position}</span>
+              <strong>{r.candidate.name}</strong> - <span>{r.candidate.position}</span>{" "}
+              <span style={{ fontSize: "12px", color: "#64748B" }}>
+                {r.candidate.partylist ? `(${r.candidate.partylist})` : "(Independent)"}
+              </span>
             </div>
             <strong style={{ color: "#0D7A3E" }}>{r.count} Votes</strong>
           </div>

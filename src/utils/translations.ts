@@ -23,6 +23,7 @@ export interface DropdownTranslations {
   // System-Wide UI & Navigation Translations
   navDashboard: string;
   navVotersList: string;
+  navPartylists?: string;
   navAddCandidate: string;
   navRegisterStudent: string;
   navCountdown: string;
@@ -164,6 +165,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     navDashboard: "Dashboard",
     navVotersList: "Voters List",
+    navPartylists: "Partylists",
     navAddCandidate: "Add Candidate",
     navRegisterStudent: "Register Student",
     navCountdown: "Election Countdown",
@@ -301,6 +303,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     navDashboard: "Dashboard",
     navVotersList: "Talaan ng Botante",
+    navPartylists: "Mga Partylist",
     navAddCandidate: "Magdagdag ng Kandidato",
     navRegisterStudent: "Magrehistro ng Mag-aaral",
     navCountdown: "Orasan ng Halalan",
@@ -438,6 +441,7 @@ export const translations: Record<LanguageCode, DropdownTranslations> = {
 
     navDashboard: "Dashboard",
     navVotersList: "Lista sa mga Botante",
+    navPartylists: "Mga Partylist",
     navAddCandidate: "Magdugang og Kandidato",
     navRegisterStudent: "Magrehistro og Estudyante",
     navCountdown: "Orasan sa Eleksyon",

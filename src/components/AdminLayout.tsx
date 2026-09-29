@@ -20,6 +20,7 @@ import {
   Shield,
   FileText,
   X,
+  Flag,
 } from "lucide-react";
 import { Page, User } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
@@ -208,6 +209,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const navItems: { label: string; page: Page; IconComponent: React.ComponentType<{ size?: number }> }[] = [
     { label: t.navDashboard || "Dashboard", page: "admin_setup", IconComponent: LayoutDashboard },
     { label: t.navVotersList || "Voters Registry", page: "admin_voters", IconComponent: Users },
+    { label: (t as any).navPartylists || "Partylists", page: "admin_partylists", IconComponent: Flag },
     { label: t.navAddCandidate || "Add Candidate", page: "admin_add_candidate", IconComponent: UserPlus },
     { label: t.navRegisterStudent || "Register Student", page: "admin_register", IconComponent: UserCheck },
     { label: t.navCountdown || "Election Settings", page: "admin_election_settings", IconComponent: Clock },

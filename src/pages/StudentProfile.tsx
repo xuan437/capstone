@@ -14,7 +14,6 @@ import {
   Vote,
   ShieldCheck,
   AlertCircle,
-  RefreshCw,
   Camera,
   Maximize2,
   Trash2,
@@ -33,10 +32,6 @@ const StudentProfile: React.FC<{
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isResetting, setIsResetting] = useState(false);
-  const [showResetAuthModal, setShowResetAuthModal] = useState(false);
-  const [resetAuthPassword, setResetAuthPassword] = useState("");
-  const [resetAuthError, setResetAuthError] = useState("");
 
   // Photo upload and preview states
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -49,6 +44,33 @@ const StudentProfile: React.FC<{
   const [resolvedVotedAt, setResolvedVotedAt] = useState<string | null>(null);
   const [resolvedLocation, setResolvedLocation] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  // View Access Password Authorization State
+  const [showPasswordAuthModal, setShowPasswordAuthModal] = useState(false);
+  const [passwordAuthInput, setPasswordAuthInput] = useState("");
+  const [passwordAuthError, setPasswordAuthError] = useState("");
+
+  const handleTogglePasswordView = () => {
+    if (showPassword) {
+      setShowPassword(false);
+    } else {
+      setShowPasswordAuthModal(true);
+      setPasswordAuthInput("");
+      setPasswordAuthError("");
+    }
+  };
+
+  const handleConfirmPasswordAuth = async () => {
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (passwordAuthInput !== ADMIN_PASSWORD) {
+      setPasswordAuthError("Incorrect administrator password. Access denied.");
+      return;
+    }
+    setShowPassword(true);
+    setShowPasswordAuthModal(false);
+    setPasswordAuthInput("");
+    setPasswordAuthError("");
+  };
 
   const fetchStudentProfile = async () => {
     setLoading(true);
@@ -194,34 +216,6 @@ const StudentProfile: React.FC<{
       setPhotoError(err.message || "Failed to remove photo.");
     } finally {
       setUploadingPhoto(false);
-    }
-  };
-
-  const handleResetStatus = () => {
-    setShowResetAuthModal(true);
-    setResetAuthPassword("");
-    setResetAuthError("");
-  };
-
-  const handleConfirmResetStatus = async () => {
-    const { ADMIN_PASSWORD } = await import("../types");
-    if (resetAuthPassword !== ADMIN_PASSWORD) {
-      setResetAuthError("Incorrect administrator password. Access denied.");
-      return;
-    }
-    setIsResetting(true);
-    setResetAuthError("");
-    try {
-      await supabase.from("votes").delete().eq("student_id", studentId);
-      await supabase.from("students").update({ has_voted: false, voted_at: null, vote_location: null }).eq("id", studentId);
-      await fetchStudentProfile();
-      setShowResetAuthModal(false);
-      setResetAuthPassword("");
-      alert(`Voting status for ${student?.name} has been reset successfully.`);
-    } catch (err: any) {
-      setResetAuthError("Failed to reset voting status: " + err.message);
-    } finally {
-      setIsResetting(false);
     }
   };
 
@@ -505,13 +499,6 @@ const StudentProfile: React.FC<{
             <RotateCw size={12} />
             Refresh
           </button>
-
-          {student.has_voted && (
-            <button className="btn-secondary" onClick={handleResetStatus} disabled={isResetting} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11.5px", color: "#EF4444", display: "flex", alignItems: "center", gap: "4px" }}>
-              <RefreshCw size={12} />
-              {isResetting ? "Resetting..." : "Reset Vote Status"}
-            </button>
-          )}
         </div>
 
         {/* Bottom 3-Column Stat Counter Grid */}
@@ -577,7 +564,7 @@ const StudentProfile: React.FC<{
                     {displayPw && (
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={handleTogglePasswordView}
                         style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "var(--text-muted)", display: "inline-flex", alignItems: "center" }}
                         title={showPassword ? "Hide Password" : "Show Password"}
                       >
@@ -699,64 +686,93 @@ const StudentProfile: React.FC<{
         />
       )}
 
-      {/* Admin Password Authorization Modal for Resetting Vote Status */}
-      {showResetAuthModal && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 99999, backdropFilter: "blur(4px)"
-        }}>
-          <div style={{
-            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
-            width: "100%", maxWidth: "360px", boxShadow: "0 10px 25px rgba(0,0,0,0.15)", border: "1px solid var(--border-subtle)"
-          }}>
+      {/* Admin Password Authorization Modal for Viewing Access Password */}
+      {showPasswordAuthModal && (
+        <div
+          className="policy-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPasswordAuthModal(false);
+              setPasswordAuthInput("");
+              setPasswordAuthError("");
+            }
+          }}
+        >
+          <div
+            className="policy-modal-content card-box"
+            style={{
+              width: "100%",
+              maxWidth: "360px",
+              padding: "24px",
+              borderRadius: "10px",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-modal)",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <Lock size={18} style={{ color: "var(--color-danger)" }} />
+              <Lock size={18} style={{ color: "var(--primary-navy)" }} />
               <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>
-                Confirm Vote Status Reset
+                Reveal Voter Password
               </h3>
             </div>
             <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.45" }}>
-              Resetting will clear all submitted ballots for <strong>{student.name}</strong> ({student.id}) and allow them to re-vote. Enter administrator password to authorize:
+              Enter administrator password to decrypt and view this student's access password.
             </p>
             <input
               type="password"
               placeholder="Enter admin password"
-              value={resetAuthPassword}
-              onChange={(e) => { setResetAuthPassword(e.target.value); setResetAuthError(""); }}
-              onKeyDown={(e) => e.key === "Enter" && handleConfirmResetStatus()}
+              value={passwordAuthInput}
+              onChange={(e) => {
+                setPasswordAuthInput(e.target.value);
+                setPasswordAuthError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmPasswordAuth()}
               autoFocus
               style={{
-                width: "100%", padding: "8px 10px", border: `1px solid ${resetAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
-                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
-                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
+                width: "100%",
+                padding: "9px 12px",
+                border: `1px solid ${passwordAuthError ? "var(--color-danger)" : "var(--border-subtle)"}`,
+                borderRadius: "6px",
+                fontSize: "13px",
+                boxSizing: "border-box",
+                outline: "none",
+                marginBottom: "6px",
+                background: "var(--bg-subtle)",
+                color: "var(--text-main)",
               }}
             />
-            {resetAuthError && (
+            {passwordAuthError && (
               <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11.5px", fontWeight: 500 }}>
-                {resetAuthError}
+                {passwordAuthError}
               </p>
             )}
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
               <button
+                type="button"
                 className="btn-secondary"
-                onClick={() => { setShowResetAuthModal(false); setResetAuthPassword(""); setResetAuthError(""); }}
+                onClick={() => {
+                  setShowPasswordAuthModal(false);
+                  setPasswordAuthInput("");
+                  setPasswordAuthError("");
+                }}
                 style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
               >
                 Cancel
               </button>
               <button
+                type="button"
                 className="btn-primary"
-                onClick={handleConfirmResetStatus}
-                disabled={isResetting}
-                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--color-danger)", borderColor: "var(--color-danger)" }}
+                onClick={handleConfirmPasswordAuth}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }}
               >
-                {isResetting ? "Resetting..." : "Authorize Reset"}
+                Reveal
               </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };

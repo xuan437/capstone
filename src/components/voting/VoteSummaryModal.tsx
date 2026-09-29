@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Candidate } from "../../types";
 import { BallotSelections, PositionVoteLimits } from "../../types/voting";
 import { base64ToImageUrl } from "../../utils/imageUtils";
+import { getPartyListBadgeDetails } from "../../utils/partylistUtils";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -12,6 +13,7 @@ import {
   X,
   ClipboardCheck,
   User,
+  Flag,
 } from "lucide-react";
 import "./VotingModals.css";
 
@@ -265,7 +267,31 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
                             <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)" }}>
                               {c.name}
                             </div>
-                            <div style={{ display: "flex", gap: "6px", marginTop: "2px" }}>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "2px", flexWrap: "wrap" }}>
+                              {/* Partylist Badge */}
+                              {(() => {
+                                const badge = getPartyListBadgeDetails(c.partylist);
+                                return (
+                                  <span
+                                    style={{
+                                      fontSize: "10px",
+                                      fontWeight: 700,
+                                      color: badge.color,
+                                      background: badge.bg,
+                                      border: `1px solid ${badge.border}`,
+                                      padding: "1px 5px",
+                                      borderRadius: "3px",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "3px",
+                                    }}
+                                  >
+                                    <Flag size={9} />
+                                    <span>{badge.isIndependent ? "Independent" : `[${badge.code}] ${badge.name}`}</span>
+                                  </span>
+                                );
+                              })()}
+
                               {c.section && (
                                 <span style={{ fontSize: "10.5px", color: "var(--color-success)", fontWeight: 500 }}>
                                   Section: {c.section}

@@ -7,9 +7,10 @@ import {
   X,
   PowerOff,
   CheckCircle2,
+  Flag,
 } from "lucide-react";
 import { supabase } from "../supabase";
-import { Candidate, Page, POSITIONS } from "../types";
+import { Candidate, Page, POSITIONS, PartyList } from "../types";
 import { base64ToImageUrl } from "../utils/imageUtils";
 import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 import { logAuditAction } from "../utils/auditLogger";
@@ -18,6 +19,7 @@ import {
   getCleanCampaignText,
   setCandidateDeactivatedLocal,
 } from "../utils/candidateUtils";
+import { fetchPartyLists, getPartyListBadgeDetails, removeCandidatePartylist } from "../utils/partylistUtils";
 
 interface AdminSetupProps {
   setPage: (p: Page) => void;
@@ -35,21 +37,23 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
   setSearchTerm,
 }) => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [collapsedPositions, setCollapsedPositions] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "deactivated">("all");
+  const [partylistFilter, setPartylistFilter] = useState<string>("all");
 
   const fetchCandidates = async () => {
     let { data, error } = await supabase
       .from("candidates")
-      .select("id, position, name, image_url, campaign_text, age, section")
+      .select("id, position, name, image_url, campaign_text, age, section, partylist")
       .order("position");
 
     if (!error && (!data || data.length === 0)) {
       await seedSampleCandidatesIfEmpty();
       const reFetch = await supabase
         .from("candidates")
-        .select("id, position, name, image_url, campaign_text, age, section")
+        .select("id, position, name, image_url, campaign_text, age, section, partylist")
         .order("position");
       data = reFetch.data || [];
     }
@@ -64,6 +68,7 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
 
   useEffect(() => {
     fetchCandidates();
+    fetchPartyLists().then((list) => setPartylists(list));
   }, []);
 
   const handleToggleDeactivate = async (candidate: Candidate) => {
@@ -101,6 +106,21 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
     }
   };
 
+  const handleRemoveCandidatePartylist = async (candidate: Candidate) => {
+    if (!window.confirm(`Remove partylist affiliation from ${candidate.name}? They will run as an Independent candidate.`)) {
+      return;
+    }
+    setCandidates((prev) =>
+      prev.map((c) => (c.id === candidate.id ? { ...c, partylist: undefined } : c))
+    );
+    try {
+      await removeCandidatePartylist(candidate.id);
+      await fetchCandidates();
+    } catch (err: any) {
+      console.error("Error removing candidate partylist:", err);
+    }
+  };
+
   // Multi-field search filtering (name, position, section, age, campaign text)
   const isSearchActive = Boolean(searchTerm && searchTerm.trim().length > 0);
   const normalizedSearch = searchTerm?.toLowerCase().trim() || "";
@@ -110,11 +130,22 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
     if (statusFilter === "active" && isDeactivated) return false;
     if (statusFilter === "deactivated" && !isDeactivated) return false;
 
+    // Partylist filtering
+    if (partylistFilter !== "all") {
+      if (partylistFilter === "independent") {
+        const isInd = !c.partylist || c.partylist.trim() === "" || c.partylist.trim().toLowerCase() === "independent";
+        if (!isInd) return false;
+      } else {
+        if (!c.partylist || c.partylist.toLowerCase() !== partylistFilter.toLowerCase()) return false;
+      }
+    }
+
     if (!isSearchActive) return true;
     const cleanCampaign = getCleanCampaignText(c.campaign_text);
     return (
       c.name.toLowerCase().includes(normalizedSearch) ||
       c.position.toLowerCase().includes(normalizedSearch) ||
+      (c.partylist && c.partylist.toLowerCase().includes(normalizedSearch)) ||
       (c.section && c.section.toLowerCase().includes(normalizedSearch)) ||
       cleanCampaign.toLowerCase().includes(normalizedSearch) ||
       (c.age && String(c.age).includes(normalizedSearch))
@@ -139,59 +170,89 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
           </h1>
         </div>
 
-        {/* Status Filter Toggle */}
-        <div style={{ display: "inline-flex", background: "var(--bg-subtle)", padding: "3px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
-          <button
-            type="button"
-            onClick={() => setStatusFilter("all")}
-            style={{
-              padding: "5px 12px",
-              borderRadius: "4px",
-              border: "none",
-              background: statusFilter === "all" ? "var(--bg-card)" : "transparent",
-              color: statusFilter === "all" ? "var(--primary-navy)" : "var(--text-muted)",
-              fontWeight: statusFilter === "all" ? 600 : 500,
-              fontSize: "12px",
-              cursor: "pointer",
-              boxShadow: statusFilter === "all" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-            }}
-          >
-            All ({candidates.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter("active")}
-            style={{
-              padding: "5px 12px",
-              borderRadius: "4px",
-              border: "none",
-              background: statusFilter === "active" ? "var(--bg-card)" : "transparent",
-              color: statusFilter === "active" ? "var(--color-success)" : "var(--text-muted)",
-              fontWeight: statusFilter === "active" ? 600 : 500,
-              fontSize: "12px",
-              cursor: "pointer",
-              boxShadow: statusFilter === "active" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-            }}
-          >
-            Active ({candidates.filter((c) => !isCandidateDeactivated(c)).length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter("deactivated")}
-            style={{
-              padding: "5px 12px",
-              borderRadius: "4px",
-              border: "none",
-              background: statusFilter === "deactivated" ? "var(--bg-card)" : "transparent",
-              color: statusFilter === "deactivated" ? "var(--color-warning)" : "var(--text-muted)",
-              fontWeight: statusFilter === "deactivated" ? 600 : 500,
-              fontSize: "12px",
-              cursor: "pointer",
-              boxShadow: statusFilter === "deactivated" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-            }}
-          >
-            Deactivated ({candidates.filter((c) => isCandidateDeactivated(c)).length})
-          </button>
+        {/* Status & Partylist Filters */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          {/* Partylist Filter Select */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <Flag size={13} style={{ color: "var(--primary-navy)" }} />
+            <select
+              value={partylistFilter}
+              onChange={(e) => setPartylistFilter(e.target.value)}
+              style={{
+                padding: "5px 10px",
+                borderRadius: "6px",
+                border: "1px solid var(--border-light)",
+                background: "var(--bg-card)",
+                color: "var(--text-main)",
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              <option value="all">All Partylists</option>
+              <option value="independent">Independent Only</option>
+              {partylists.map((party) => (
+                <option key={party.id} value={party.name}>
+                  {party.name} Slate
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Filter Toggle */}
+          <div style={{ display: "inline-flex", background: "var(--bg-subtle)", padding: "3px", borderRadius: "6px", border: "1px solid var(--border-light)" }}>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("all")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "4px",
+                border: "none",
+                background: statusFilter === "all" ? "var(--bg-card)" : "transparent",
+                color: statusFilter === "all" ? "var(--primary-navy)" : "var(--text-muted)",
+                fontWeight: statusFilter === "all" ? 600 : 500,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: statusFilter === "all" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
+              }}
+            >
+              All ({candidates.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("active")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "4px",
+                border: "none",
+                background: statusFilter === "active" ? "var(--bg-card)" : "transparent",
+                color: statusFilter === "active" ? "var(--color-success)" : "var(--text-muted)",
+                fontWeight: statusFilter === "active" ? 600 : 500,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: statusFilter === "active" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
+              }}
+            >
+              Active ({candidates.filter((c) => !isCandidateDeactivated(c)).length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("deactivated")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: "4px",
+                border: "none",
+                background: statusFilter === "deactivated" ? "var(--bg-card)" : "transparent",
+                color: statusFilter === "deactivated" ? "var(--color-warning)" : "var(--text-muted)",
+                fontWeight: statusFilter === "deactivated" ? 600 : 500,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: statusFilter === "deactivated" ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
+              }}
+            >
+              Deactivated ({candidates.filter((c) => isCandidateDeactivated(c)).length})
+            </button>
+          </div>
         </div>
       </div>
 
@@ -461,6 +522,53 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
                               )}
                             </div>
                             <div style={{ display: "flex", gap: "5px", alignItems: "center", flexWrap: "wrap" }}>
+                              {/* Partylist Badge */}
+                              {(() => {
+                                const badge = getPartyListBadgeDetails(c.partylist, partylists);
+                                return (
+                                  <span
+                                    style={{
+                                      fontSize: "10.5px",
+                                      fontWeight: 700,
+                                      color: badge.color,
+                                      background: badge.bg,
+                                      border: `1px solid ${badge.border}`,
+                                      padding: "1px 6px",
+                                      borderRadius: "4px",
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "3px",
+                                    }}
+                                  >
+                                    <Flag size={9} />
+                                    <span>{badge.isIndependent ? "Independent" : `[${badge.code}] ${badge.name}`}</span>
+                                    {!badge.isIndependent && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveCandidatePartylist(c);
+                                        }}
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          color: "inherit",
+                                          cursor: "pointer",
+                                          padding: "0 2px",
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          marginLeft: "2px",
+                                          opacity: 0.85,
+                                        }}
+                                        title={`Remove ${c.name} from ${badge.name} (Make Independent)`}
+                                      >
+                                        <X size={10} />
+                                      </button>
+                                    )}
+                                  </span>
+                                );
+                              })()}
+
                               {c.section && (
                                 <span
                                   style={{

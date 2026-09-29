@@ -539,20 +539,30 @@ const AdminVotersList: React.FC<{
 
       {/* View Password Authorization Modal */}
       {viewPasswordStudentId && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 99999, backdropFilter: "blur(4px)"
-        }}>
-          <div style={{
-            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
-            width: "100%", maxWidth: "340px", boxShadow: "var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.15))", border: "1px solid var(--border-subtle)"
-          }}>
+        <div
+          className="policy-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setViewPasswordStudentId(null);
+              setViewPasswordAuthInput("");
+              setViewPasswordAuthError("");
+            }
+          }}
+        >
+          <div
+            className="policy-modal-content card-box"
+            style={{
+              width: "100%",
+              maxWidth: "360px",
+              padding: "24px",
+              borderRadius: "10px",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
               <Lock size={18} style={{ color: "var(--primary-navy)" }} />
               <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reveal Voter Password</h3>
             </div>
-            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.4" }}>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.45" }}>
               Enter administrator password to decrypt and view this student's access password.
             </p>
             <input
@@ -563,9 +573,9 @@ const AdminVotersList: React.FC<{
               onKeyDown={(e) => e.key === "Enter" && handleViewPasswordAuthSubmit()}
               autoFocus
               style={{
-                width: "100%", padding: "8px 10px", border: `1px solid ${viewPasswordAuthError ? "var(--color-danger)" : "var(--border-light)"}`,
-                borderRadius: "6px", fontSize: "12.5px", boxSizing: "border-box",
-                outline: "none", marginBottom: "6px", background: "var(--bg-surface)", color: "var(--text-main)"
+                width: "100%", padding: "9px 12px", border: `1px solid ${viewPasswordAuthError ? "var(--color-danger)" : "var(--border-subtle)"}`,
+                borderRadius: "6px", fontSize: "13px", boxSizing: "border-box",
+                outline: "none", marginBottom: "6px", background: "var(--bg-subtle)", color: "var(--text-main)"
               }}
             />
             {viewPasswordAuthError && (
@@ -575,6 +585,7 @@ const AdminVotersList: React.FC<{
             )}
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
               <button
+                type="button"
                 className="btn-secondary"
                 onClick={() => { setViewPasswordStudentId(null); setViewPasswordAuthInput(""); setViewPasswordAuthError(""); }}
                 style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
@@ -582,9 +593,10 @@ const AdminVotersList: React.FC<{
                 Cancel
               </button>
               <button
+                type="button"
                 className="btn-primary"
                 onClick={handleViewPasswordAuthSubmit}
-                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }}
               >
                 Reveal
               </button>

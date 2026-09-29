@@ -629,13 +629,18 @@ select option {
 .modal-overlay {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   background-color: rgba(10, 25, 47, 0.85);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 300;
+  z-index: 99999;
   padding: var(--space-2-5);
+  box-sizing: border-box;
 }
 
 .modal-container {
@@ -643,10 +648,11 @@ select option {
   max-width: 720px;
   max-height: 85vh;
   overflow: auto;
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--bg-card, rgba(255, 255, 255, 0.98));
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-modal);
+  margin: auto;
   animation: fadeIn 0.25s ease forwards;
 }
 

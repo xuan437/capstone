@@ -19,6 +19,7 @@ import AdminAddCandidate from "./pages/AdminAddCandidate";
 import AdminEditCandidate from "./pages/AdminEditCandidate";
 import AdminElectionSettings from "./pages/AdminElectionSettings";
 import { AdminAuditLogs } from "./pages/AdminAuditLogs";
+import AdminPartylists from "./pages/AdminPartylists";
 import PrivacyModal from "./components/PrivacyModal";
 import AdminLayout from "./components/AdminLayout";
 import VoterLayout from "./components/VoterLayout";
@@ -90,6 +91,7 @@ const AppShell: React.FC = () => {
   const isAdminPage = [
     "admin_setup",
     "admin_voters",
+    "admin_partylists",
     "admin_register",
     "admin_add_candidate",
     "admin_edit_candidate",
@@ -136,6 +138,19 @@ const AppShell: React.FC = () => {
             onViewProfile={(id) => {
               setSelectedStudentId(id);
               handleNavigate("student_profile");
+            }}
+          />
+        );
+
+      case "admin_partylists":
+        return (
+          <AdminPartylists
+            setPage={handleNavigate}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onViewCandidate={(id) => {
+              setSelectedCandidateId(id);
+              handleNavigate("candidate_profile");
             }}
           />
         );

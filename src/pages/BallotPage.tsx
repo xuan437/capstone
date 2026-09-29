@@ -17,9 +17,11 @@ import {
   Eye,
   Search,
   X,
+  Flag,
 } from "lucide-react";
 import { supabase } from "../supabase";
-import { Student, Candidate, Page, POSITIONS } from "../types";
+import { Student, Candidate, Page, POSITIONS, PartyList } from "../types";
+import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
 import {
   BallotSelections,
   ConfirmationStep,
@@ -62,6 +64,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
   // Supports single or multi-seat positions, smooth deselect, and undervoting.
   const [selectedCandidates, setSelectedCandidates] = useState<BallotSelections>({});
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [positionLimits] = useState<PositionVoteLimits>(DEFAULT_POSITION_VOTE_LIMITS);
 
   // Transient warning notice displayed when user attempts to exceed a position's vote limit
@@ -132,6 +135,8 @@ const BallotPage: React.FC<BallotPageProps> = ({
           const allCandidates = (data || []) as Candidate[];
           setCandidates(allCandidates.filter((c) => !isCandidateDeactivated(c)));
         }
+
+        fetchPartyLists().then((list) => setPartylists(list));
       } catch (err: any) {
         console.error("Ballot loading error:", err);
         setError("Network connection issue. Please check your connection and refresh.");
@@ -221,6 +226,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
     return (
       c.name.toLowerCase().includes(normalizedSearch) ||
       c.position.toLowerCase().includes(normalizedSearch) ||
+      (c.partylist && c.partylist.toLowerCase().includes(normalizedSearch)) ||
       (c.section && c.section.toLowerCase().includes(normalizedSearch)) ||
       (c.campaign_text && c.campaign_text.toLowerCase().includes(normalizedSearch)) ||
       (c.age && String(c.age).includes(normalizedSearch))
@@ -1106,6 +1112,30 @@ const BallotPage: React.FC<BallotPageProps> = ({
                             {c.name}
                           </h4>
                           <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", alignItems: "center" }}>
+                            {/* Partylist Badge */}
+                            {(() => {
+                              const partyBadge = getPartyListBadgeDetails(c.partylist, partylists);
+                              return (
+                                <span
+                                  style={{
+                                    fontSize: "10.5px",
+                                    fontWeight: 700,
+                                    color: partyBadge.color,
+                                    background: partyBadge.bg,
+                                    border: `1px solid ${partyBadge.border}`,
+                                    padding: "1px 6px",
+                                    borderRadius: "4px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "3px",
+                                  }}
+                                >
+                                  <Flag size={9} />
+                                  <span>{partyBadge.isIndependent ? "Independent" : `[${partyBadge.code}] ${partyBadge.name}`}</span>
+                                </span>
+                              );
+                            })()}
+
                             {c.section && (
                               <span
                                 style={{

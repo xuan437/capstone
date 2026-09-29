@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
-import { Candidate, Page, POSITIONS } from "../types";
+import { Candidate, Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
+import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
 import {
   Edit3,
   CheckCircle2,
@@ -12,6 +13,8 @@ import {
   User,
   Upload,
   Eye,
+  Flag,
+  X,
 } from "lucide-react";
 
 interface AdminEditCandidateProps {
@@ -30,11 +33,13 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
     firstName: "",
     middleName: "",
     position: POSITIONS[0] as string,
+    partylist: "Independent",
     image_url: "",
     campaign_text: "",
     age: "",
     section: "",
   });
+  const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -95,6 +100,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           firstName: parsed.firstName,
           middleName: parsed.middleName,
           position: c.position,
+          partylist: c.partylist || "Independent",
           image_url: c.image_url || "",
           campaign_text: c.campaign_text || "",
           age: c.age !== undefined && c.age !== null ? String(c.age) : "",
@@ -104,6 +110,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
       setIsLoading(false);
     };
 
+    fetchPartyLists().then((list) => setPartylists(list));
     loadCandidate();
   }, [candidateId]);
 
@@ -159,16 +166,18 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
     }
 
     const finalFullName = getCombinedFullName();
+    const assignedPartylist = form.partylist === "Independent" ? null : form.partylist.trim();
 
     setIsSubmitting(true);
     setError("");
 
     try {
-      const { error: updateErr } = await supabase
+      let { error: updateErr } = await supabase
         .from("candidates")
         .update({
           name: finalFullName,
           position: form.position,
+          partylist: assignedPartylist,
           image_url: form.image_url,
           campaign_text: form.campaign_text.trim(),
           age: parsedAge,
@@ -177,13 +186,27 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
         .eq("id", candidateId);
 
       if (updateErr) {
-        throw updateErr;
+        // Fallback without partylist in case remote DB column not yet added
+        const fallbackRes = await supabase
+          .from("candidates")
+          .update({
+            name: finalFullName,
+            position: form.position,
+            image_url: form.image_url,
+            campaign_text: form.campaign_text.trim(),
+            age: parsedAge,
+            section: form.section.trim(),
+          })
+          .eq("id", candidateId);
+        if (fallbackRes.error) {
+          throw updateErr;
+        }
       }
 
       await logAuditAction(
         "CANDIDATE_UPDATED",
         "Admin",
-        `Updated candidate profile for ${finalFullName} (${form.position})`
+        `Updated candidate profile for ${finalFullName} (${form.position})${assignedPartylist ? ` - Slate: ${assignedPartylist}` : " - Independent"}`
       );
 
       setIsSubmitting(false);
@@ -575,6 +598,75 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Partylist Selector */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Flag size={14} style={{ color: "var(--primary-navy)" }} />
+                <span>Partylist Affiliation</span>
+              </label>
+              {form.partylist && form.partylist !== "Independent" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      ...(() => {
+                        const badge = getPartyListBadgeDetails(form.partylist, partylists);
+                        return {
+                          color: badge.color,
+                          background: badge.bg,
+                          border: `1px solid ${badge.border}`,
+                        };
+                      })(),
+                    }}
+                  >
+                    {form.partylist} Slate
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, partylist: "Independent" }))}
+                    style={{
+                      background: "var(--color-danger-bg)",
+                      border: "1px solid var(--color-danger-border)",
+                      color: "var(--color-danger)",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      padding: "2px 7px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "3px",
+                    }}
+                    title="Remove partylist (Make Independent)"
+                  >
+                    <X size={11} />
+                    <span>Remove</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <select
+              name="partylist"
+              value={form.partylist}
+              onChange={handleInputChange}
+              style={inputStyle}
+            >
+              <option value="Independent">Independent (No Partylist)</option>
+              {partylists.map((party) => (
+                <option key={party.id} value={party.name}>
+                  {party.name} {party.code ? `(${party.code})` : ""}
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "4px", display: "block" }}>
+              Change, remove, or assign this candidate's official partylist affiliation.
+            </span>
           </div>
 
           {/* Age & Section Row */}

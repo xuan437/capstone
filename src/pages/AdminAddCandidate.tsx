@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
-import { Page, POSITIONS } from "../types";
+import { Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
+import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
 import {
   UserPlus,
   CheckCircle2,
@@ -10,6 +11,8 @@ import {
   ArrowLeft,
   Save,
   Upload,
+  Flag,
+  X,
 } from "lucide-react";
 
 interface AdminAddCandidateProps {
@@ -22,14 +25,20 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     firstName: "",
     middleName: "",
     position: POSITIONS[0] as string,
+    partylist: "Independent",
     image_url: "",
     campaign_text: "",
     age: "",
     section: "",
   });
+  const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    fetchPartyLists().then((list) => setPartylists(list));
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -81,15 +90,17 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     }
 
     const finalFullName = getCombinedFullName();
+    const assignedPartylist = form.partylist === "Independent" ? null : form.partylist.trim();
 
     setIsSubmitting(true);
     setError("");
 
     try {
-      const { error: insertErr } = await supabase.from("candidates").insert([
+      let { error: insertErr } = await supabase.from("candidates").insert([
         {
           name: finalFullName,
           position: form.position,
+          partylist: assignedPartylist,
           image_url: form.image_url,
           campaign_text: form.campaign_text.trim(),
           age: parsedAge,
@@ -98,13 +109,26 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
       ]);
 
       if (insertErr) {
-        throw insertErr;
+        // Fallback without partylist column if remote DB has not yet applied migration
+        const fallbackRes = await supabase.from("candidates").insert([
+          {
+            name: finalFullName,
+            position: form.position,
+            image_url: form.image_url,
+            campaign_text: form.campaign_text.trim(),
+            age: parsedAge,
+            section: form.section.trim(),
+          },
+        ]);
+        if (fallbackRes.error) {
+          throw insertErr;
+        }
       }
 
       await logAuditAction(
         "CANDIDATE_REGISTERED",
         "Admin",
-        `Enrolled new candidate ${finalFullName} running for ${form.position}`
+        `Enrolled new candidate ${finalFullName} running for ${form.position}${assignedPartylist ? ` (${assignedPartylist})` : " (Independent)"}`
       );
 
       setIsSubmitting(false);
@@ -168,6 +192,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                   firstName: "",
                   middleName: "",
                   position: POSITIONS[0],
+                  partylist: "Independent",
                   image_url: "",
                   campaign_text: "",
                   age: "",
@@ -457,6 +482,75 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Partylist Selector */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-main)", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Flag size={14} style={{ color: "var(--primary-navy)" }} />
+                <span>Partylist Affiliation</span>
+              </label>
+              {form.partylist && form.partylist !== "Independent" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      ...(() => {
+                        const badge = getPartyListBadgeDetails(form.partylist, partylists);
+                        return {
+                          color: badge.color,
+                          background: badge.bg,
+                          border: `1px solid ${badge.border}`,
+                        };
+                      })(),
+                    }}
+                  >
+                    {form.partylist} Slate
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, partylist: "Independent" }))}
+                    style={{
+                      background: "var(--color-danger-bg)",
+                      border: "1px solid var(--color-danger-border)",
+                      color: "var(--color-danger)",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      padding: "2px 7px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "3px",
+                    }}
+                    title="Remove partylist (Make Independent)"
+                  >
+                    <X size={11} />
+                    <span>Remove</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <select
+              name="partylist"
+              value={form.partylist}
+              onChange={handleInputChange}
+              style={inputStyle}
+            >
+              <option value="Independent">Independent (No Partylist)</option>
+              {partylists.map((party) => (
+                <option key={party.id} value={party.name}>
+                  {party.name} {party.code ? `(${party.code})` : ""}
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "4px", display: "block" }}>
+              Assign candidate to an official partylist slate or keep as an Independent.
+            </span>
           </div>
 
           {/* Age & Section Row */}

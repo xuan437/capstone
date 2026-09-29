@@ -22,6 +22,8 @@ import {
   BookOpen,
   PowerOff,
   CheckCircle2,
+  Flag,
+  X,
 } from "lucide-react";
 import { logAuditAction } from "../utils/auditLogger";
 import {
@@ -29,6 +31,8 @@ import {
   getCleanCampaignText,
   setCandidateDeactivatedLocal,
 } from "../utils/candidateUtils";
+import { PartyList } from "../types";
+import { fetchPartyLists, getPartyListBadgeDetails, removeCandidatePartylist } from "../utils/partylistUtils";
 
 interface CandidateProfileProps {
   setPage: (p: Page) => void;
@@ -42,6 +46,7 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
   currentUser,
 }) => {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [voteCount, setVoteCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -56,19 +61,24 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
   useEffect(() => {
     const run = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("candidates")
-        .select("id, position, name, image_url, campaign_text, age, section")
-        .eq("id", candidateId)
-        .single();
+      const [candidateRes, fetchedParties] = await Promise.all([
+        supabase
+          .from("candidates")
+          .select("id, position, name, image_url, campaign_text, age, section, partylist")
+          .eq("id", candidateId)
+          .single(),
+        fetchPartyLists(),
+      ]);
 
-      if (error || !data) {
+      setPartylists(fetchedParties);
+
+      if (candidateRes.error || !candidateRes.data) {
         setCandidate(null);
         setLoading(false);
         return;
       }
 
-      setCandidate(data as Candidate);
+      setCandidate(candidateRes.data as Candidate);
 
       // Only fetch vote count if admin or if needed for stats
       const { count } = await supabase
@@ -171,6 +181,21 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
       alert(`Failed to ${actionLabel} candidate: ` + err.message);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleRemovePartylist = async () => {
+    if (!candidate) return;
+    if (!window.confirm(`Remove partylist affiliation from ${candidate.name}? Candidate will run as an Independent candidate.`)) {
+      return;
+    }
+    try {
+      await removeCandidatePartylist(candidate.id);
+      setCandidate((prev) => (prev ? { ...prev, partylist: undefined } : null));
+      setPhotoToast("Partylist affiliation removed (now Independent).");
+      setTimeout(() => setPhotoToast(null), 3000);
+    } catch (err: any) {
+      setPhotoError("Failed to remove partylist: " + (err.message || "Unknown error"));
     }
   };
 
@@ -544,8 +569,8 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
             {candidate.name}
           </h1>
 
-          {/* Position Pill */}
-          <div style={{ marginBottom: "16px" }}>
+          {/* Position Pill & Partylist Badge */}
+          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <span
               style={{
                 display: "inline-flex",
@@ -565,6 +590,31 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
               <Award size={15} />
               <span>Candidate for {candidate.position}</span>
             </span>
+
+            {/* Partylist Badge */}
+            {(() => {
+              const partyBadge = getPartyListBadgeDetails(candidate.partylist, partylists);
+              return (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "5px 14px",
+                    borderRadius: "99px",
+                    fontSize: "12.5px",
+                    fontWeight: 700,
+                    color: partyBadge.color,
+                    background: partyBadge.bg,
+                    border: `1.5px solid ${partyBadge.border}`,
+                    letterSpacing: "0.03em",
+                  }}
+                >
+                  <Flag size={13} />
+                  <span>{partyBadge.isIndependent ? "Independent Candidate" : `[${partyBadge.code}] ${partyBadge.name} Partylist`}</span>
+                </span>
+              );
+            })()}
           </div>
 
           {/* Admin Management Action Row */}
@@ -604,6 +654,26 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {isCandidateDeactivated(candidate) ? <CheckCircle2 size={14} /> : <PowerOff size={14} />}
                 <span>{isDeleting ? "Updating..." : (isCandidateDeactivated(candidate) ? "Reactivate Candidate" : "Deactivate Candidate")}</span>
               </button>
+
+              {candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent" && (
+                <button
+                  type="button"
+                  className="btn-secondary-modal"
+                  onClick={handleRemovePartylist}
+                  style={{
+                    padding: "0 16px",
+                    height: "36px",
+                    fontSize: "13px",
+                    color: "var(--color-danger)",
+                    borderColor: "var(--color-danger-border)",
+                    background: "var(--color-danger-bg)",
+                  }}
+                  title="Remove partylist affiliation (Make candidate Independent)"
+                >
+                  <X size={14} />
+                  <span>Remove Partylist</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -617,6 +687,63 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
               borderTop: "1px solid var(--border-light)",
             }}
           >
+            <div
+              style={{
+                background: "var(--bg-subtle)",
+                borderRadius: "var(--radius-md)",
+                padding: "12px 14px",
+                border: "1px solid var(--border-light)",
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "10.5px",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                  marginBottom: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <Flag size={12} style={{ color: "var(--primary-navy)" }} />
+                <span>Partylist Affiliation</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-main)" }}>
+                  {candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent"
+                    ? candidate.partylist
+                    : "Independent"}
+                </div>
+                {isAdmin && candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent" && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePartylist}
+                    style={{
+                      background: "var(--color-danger-bg)",
+                      border: "1px solid var(--color-danger-border)",
+                      color: "var(--color-danger)",
+                      borderRadius: "4px",
+                      fontSize: "10.5px",
+                      fontWeight: 600,
+                      padding: "2px 7px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "3px",
+                    }}
+                    title="Remove partylist (Make Independent)"
+                  >
+                    <X size={10} />
+                    <span>Remove</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div
               style={{
                 background: "var(--bg-subtle)",
