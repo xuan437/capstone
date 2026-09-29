@@ -312,7 +312,7 @@ const StudentProfile: React.FC<{
                     gap: "4px",
                   }}
                 >
-                  <RefreshCw size={18} style={{ animation: "spin 1s linear infinite" }} />
+                  <RotateCw size={18} style={{ animation: "spin 1s linear infinite" }} />
                   <span>Saving...</span>
                 </div>
               )}
