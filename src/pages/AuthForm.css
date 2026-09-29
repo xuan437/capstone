@@ -102,19 +102,20 @@
 /* Left Section - Compact High Density Form Panel */
 .linear-form-panel {
   flex: 1.1;
-  padding: 32px 36px;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0;
   box-sizing: border-box;
 }
 
 /* Brand Header */
 .linear-brand-header {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .linear-logo-chip {
@@ -135,16 +136,16 @@
 
 .linear-title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   color: var(--linear-text-primary);
   line-height: 1.2;
 }
 
 .linear-subtitle {
-  margin: 4px 0 0 0;
-  font-size: 12.5px;
+  margin: 2px 0 0 0;
+  font-size: 12px;
   color: var(--linear-text-secondary);
   line-height: 1.4;
   letter-spacing: -0.01em;
@@ -158,7 +159,7 @@
   border-radius: var(--linear-radius-md);
   border: 1px solid var(--linear-border);
   gap: 2px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .linear-tab-item {
@@ -193,13 +194,13 @@
 .linear-form-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .linear-field-stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 .linear-field-group {
@@ -277,13 +278,13 @@
 /* Primary Button */
 .linear-btn-primary {
   width: 100%;
-  height: 38px;
+  height: 37px;
   background: var(--linear-accent);
   color: #ffffff;
   border: none;
   border-radius: var(--linear-radius-md);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
@@ -291,7 +292,7 @@
   gap: 6px;
   cursor: pointer;
   transition: var(--linear-transition);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .linear-btn-primary:hover:not(:disabled) {
@@ -313,11 +314,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: var(--linear-radius-md);
   font-size: 12px;
   font-weight: 500;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .linear-alert-badge.error {
@@ -337,12 +338,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
-  padding: 6px 10px;
+  margin-top: 12px;
+  padding: 5px 10px;
   background: var(--linear-panel-bg);
   border: 1px solid var(--linear-border);
   border-radius: var(--linear-radius-sm);
   width: fit-content;
+  align-self: center;
 }
 
 .linear-status-pulse {
@@ -377,9 +379,10 @@
 .linear-footer-toolbar {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  margin-top: 20px;
-  padding-top: 14px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--linear-border);
 }
 
@@ -487,12 +490,39 @@
 
 .linear-timer-card {
   width: 100%;
-  background: var(--linear-input-bg);
-  border: 1px solid var(--linear-border);
-  border-radius: var(--linear-radius-lg);
-  padding: 16px;
   box-sizing: border-box;
-  box-shadow: var(--linear-shadow);
+}
+
+/* Countdown Dial Classes */
+.cd-dials-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cd-dial-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cd-dial-svg {
+  width: 120px;
+  height: 120px;
+}
+
+.cd-dial-num {
+  font-size: 30px;
+}
+
+.cd-dial-label {
+  font-size: 12px;
 }
 
 /* Linear / Raycast Style Modal Dialog */
@@ -666,26 +696,295 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Responsive Rules */
+/* ============================================================
+   RESPONSIVE — Tablet (≤ 768px)
+   ============================================================ */
 @media (max-width: 768px) {
-  .linear-portal-card {
-    flex-direction: column-reverse;
-    min-height: auto;
-    max-width: 460px;
+  .linear-portal-viewport {
+    padding: 16px 12px;
+    align-items: flex-start;
   }
-  
+
+  .linear-portal-card {
+    flex-direction: column;
+    min-height: auto;
+    max-width: 100%;
+    border-radius: var(--linear-radius-lg);
+  }
+
+  /* Info panel moves to top on mobile */
   .linear-info-panel {
     border-left: none;
     border-bottom: 1px solid var(--linear-border);
-    padding: 24px;
+    padding: 24px 20px;
+    order: -1;
   }
-  
+
   .linear-form-panel {
-    padding: 24px;
+    padding: 22px 20px;
+  }
+
+  .linear-avatar-ring {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
   }
 
   .linear-avatar-ring.large-logo {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 16px;
   }
+
+  .linear-info-title {
+    font-size: 14px;
+  }
+
+  .linear-info-subtitle {
+    font-size: 11px;
+  }
+
+  .linear-title {
+    font-size: 17px;
+  }
+
+  .linear-subtitle {
+    font-size: 11.5px;
+  }
+
+  .linear-tab-item {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .linear-input {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .linear-btn-primary {
+    height: 42px;
+    font-size: 13.5px;
+  }
+
+  .linear-modal-dialog {
+    max-width: 100%;
+    border-radius: var(--linear-radius-lg);
+    padding: 20px;
+  }
+
+  .linear-footer-toolbar {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+
+  .linear-status-row {
+    margin-top: 10px;
+  }
+
+  .cd-dial-ring, .cd-dial-svg {
+    width: 100px;
+    height: 100px;
+  }
+  .cd-dial-num { font-size: 24px; }
+  .cd-dial-label { font-size: 11px; }
+  .cd-dials-row { gap: 20px; }
 }
+
+/* ============================================================
+   RESPONSIVE — Mobile (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+  .linear-portal-viewport {
+    padding: 10px 8px;
+  }
+
+  .linear-portal-card {
+    border-radius: 10px;
+    border-left: none;
+    border-right: none;
+    border-radius: 12px;
+  }
+
+  .linear-form-panel {
+    padding: 18px 16px;
+  }
+
+  .linear-info-panel {
+    padding: 18px 16px;
+  }
+
+  .linear-avatar-ring {
+    width: 64px;
+    height: 64px;
+  }
+
+  .linear-avatar-ring.large-logo {
+    width: 110px;
+    height: 110px;
+  }
+
+  .linear-brand-header {
+    margin-bottom: 10px;
+  }
+
+  .linear-title {
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .linear-subtitle {
+    font-size: 11px;
+  }
+
+  .linear-tab-segmented {
+    margin-bottom: 10px;
+  }
+
+  .linear-tab-item {
+    font-size: 11.5px;
+    padding: 5px 8px;
+    gap: 4px;
+  }
+
+  .linear-field-label {
+    font-size: 11px;
+  }
+
+  .linear-input {
+    height: 42px;
+    font-size: 14px;
+    border-radius: var(--linear-radius-sm);
+  }
+
+  .linear-input-icon {
+    left: 9px;
+  }
+
+  .linear-btn-primary {
+    height: 44px;
+    font-size: 14px;
+    border-radius: var(--linear-radius-sm);
+  }
+
+  .linear-alert-badge {
+    font-size: 11.5px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .linear-status-text {
+    font-size: 10px;
+  }
+
+  .linear-link-button {
+    font-size: 11.5px;
+  }
+
+  .linear-field-stack {
+    gap: 8px;
+  }
+
+  .linear-form-body {
+    gap: 10px;
+  }
+
+  .linear-modal-dialog {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .linear-modal-title-group h3 {
+    font-size: 14px;
+  }
+
+  .linear-modal-description {
+    font-size: 12px;
+  }
+
+  .linear-step-title {
+    font-size: 12px;
+  }
+
+  .linear-step-desc {
+    font-size: 11.5px;
+  }
+
+  .linear-modal-tip {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .linear-toast-notification {
+    font-size: 11px;
+    padding: 7px 12px;
+    bottom: 16px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .cd-dial-ring, .cd-dial-svg {
+    width: 76px;
+    height: 76px;
+  }
+  .cd-dial-num { font-size: 20px; }
+  .cd-dial-label { font-size: 10px; letter-spacing: 0.15em; }
+  .cd-dials-row { gap: 12px; }
+}
+
+/* ============================================================
+   RESPONSIVE — Small Phone (≤ 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .linear-form-panel {
+    padding: 14px 12px;
+  }
+
+  .linear-info-panel {
+    padding: 14px 12px;
+  }
+
+  .linear-avatar-ring.large-logo {
+    width: 90px;
+    height: 90px;
+  }
+
+  .linear-title {
+    font-size: 15px;
+  }
+
+  .linear-tab-item {
+    font-size: 11px;
+    gap: 3px;
+    padding: 5px 6px;
+  }
+
+  .linear-input {
+    height: 40px;
+    font-size: 13.5px;
+  }
+
+  .linear-btn-primary {
+    height: 42px;
+    font-size: 13.5px;
+  }
+
+  .linear-info-title {
+    font-size: 13px;
+  }
+
+  .linear-info-subtitle {
+    font-size: 10.5px;
+  }
+
+  .linear-footer-toolbar {
+    gap: 8px;
+  }
+
+  .cd-dial-ring, .cd-dial-svg {
+    width: 64px;
+    height: 64px;
+  }
+  .cd-dial-num { font-size: 17px; }
+  .cd-dial-label { font-size: 9px; letter-spacing: 0.1em; }
+  .cd-dials-row { gap: 8px; }
+}

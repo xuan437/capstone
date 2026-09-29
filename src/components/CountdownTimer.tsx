@@ -15,47 +15,37 @@ interface CircularDialProps {
 }
 
 const CircularDial: React.FC<CircularDialProps> = ({ value, max, label }) => {
-  const r = 38;
+  const r = 48;
   const circ = 2 * Math.PI * r;
   const pct = Math.min(1, Math.max(0, value / max));
   const dashoffset = circ * (1 - pct);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-      <div
-        style={{
-          position: "relative",
-          width: "96px",
-          height: "96px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+    <div className="cd-dial" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+      <div className="cd-dial-ring">
         <svg
-          width="96"
-          height="96"
-          viewBox="0 0 100 100"
+          className="cd-dial-svg"
+          viewBox="0 0 110 110"
           style={{ transform: "rotate(-90deg)", overflow: "visible" }}
         >
           {/* Background Dotted Ring */}
           <circle
-            cx="50"
-            cy="50"
+            cx="55"
+            cy="55"
             r={r}
             fill="none"
             stroke="var(--border-light)"
             strokeWidth="3.5"
             strokeDasharray="4 4"
           />
-          {/* Active System Navy Progress Ring */}
+          {/* Active Progress Ring */}
           <circle
-            cx="50"
-            cy="50"
+            cx="55"
+            cy="55"
             r={r}
             fill="none"
             stroke="var(--primary-navy)"
-            strokeWidth="4"
+            strokeWidth="4.5"
             strokeDasharray={`${circ}`}
             strokeDashoffset={dashoffset}
             strokeLinecap="round"
@@ -68,9 +58,9 @@ const CircularDial: React.FC<CircularDialProps> = ({ value, max, label }) => {
 
         {/* Center Monospace Readout */}
         <span
+          className="cd-dial-num"
           style={{
             position: "absolute",
-            fontSize: "24px",
             fontWeight: 800,
             fontFamily: "var(--font-mono)",
             color: "var(--primary-navy)",
@@ -83,8 +73,8 @@ const CircularDial: React.FC<CircularDialProps> = ({ value, max, label }) => {
 
       {/* Unit Label */}
       <span
+        className="cd-dial-label"
         style={{
-          fontSize: "11px",
           fontWeight: 700,
           letterSpacing: "0.25em",
           color: "var(--text-muted)",
@@ -237,15 +227,15 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         alignItems: "center",
         justifyContent: "center",
         gap: "24px",
-        padding: "28px 24px",
-        background: isExpired ? "var(--color-danger-bg)" : "var(--bg-card)",
-        border: `1px solid ${isExpired ? "var(--color-danger-border)" : "var(--border-light)"}`,
-        borderRadius: "20px",
-        boxShadow: "var(--shadow-sm)",
+        padding: "0",
+        background: "transparent",
+        border: "none",
+        borderRadius: "0",
+        boxShadow: "none",
         width: "100%",
         maxWidth: "540px",
         boxSizing: "border-box",
-        margin: "0 auto 24px auto",
+        margin: "0 auto",
         transition: "all 0.3s ease",
         textAlign: "center",
       }}
@@ -268,16 +258,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       </div>
 
       {!isExpired && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "20px",
-            flexWrap: "wrap",
-            width: "100%",
-          }}
-        >
+        <div className="cd-dials-row">
           <CircularDial value={timeLeft.days} max={30} label="DAYS" />
           <CircularDial value={timeLeft.hours} max={24} label="HOURS" />
           <CircularDial value={timeLeft.minutes} max={60} label="MINUTES" />
