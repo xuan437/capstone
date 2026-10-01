@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-<<<<<<< HEAD
 import { createPortal } from "react-dom";
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import {
@@ -485,7 +482,6 @@ const AdminVotersList: React.FC<{
       </div>
 
       {/* PDF Password Authorization Modal */}
-<<<<<<< HEAD
       {showPdfAuth && typeof document !== "undefined" && createPortal(
         <div
           className="policy-modal-overlay"
@@ -504,18 +500,6 @@ const AdminVotersList: React.FC<{
               backgroundColor: "#FFFFFF",
             }}
           >
-=======
-      {showPdfAuth && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 99999, backdropFilter: "blur(4px)"
-        }}>
-          <div style={{
-            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
-            width: "100%", maxWidth: "340px", boxShadow: "var(--shadow-modal)", border: "1px solid var(--border-subtle)"
-          }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
               <Lock size={18} style={{ color: "var(--color-danger)" }} />
               <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Confirm PDF Export</h3>
@@ -559,20 +543,12 @@ const AdminVotersList: React.FC<{
               </button>
             </div>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
       )}
 
       {/* View Password Authorization Modal */}
       {viewPasswordStudentId && typeof document !== "undefined" && createPortal(
-=======
-        </div>
-      )}
-
-      {/* View Password Authorization Modal */}
-      {viewPasswordStudentId && (
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         <div
           className="policy-modal-overlay"
           onClick={(e) => {
@@ -584,21 +560,14 @@ const AdminVotersList: React.FC<{
           }}
         >
           <div
-<<<<<<< HEAD
             className="policy-modal-content"
-=======
-            className="policy-modal-content card-box"
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             style={{
               width: "100%",
               maxWidth: "360px",
               padding: "24px",
               borderRadius: "10px",
-<<<<<<< HEAD
               background: "#FFFFFF",
               backgroundColor: "#FFFFFF",
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
@@ -645,7 +614,6 @@ const AdminVotersList: React.FC<{
               </button>
             </div>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
       )}
@@ -674,22 +642,6 @@ const AdminVotersList: React.FC<{
               maxWidth: "350px",
             }}
           >
-=======
-        </div>
-      )}
-
-      {/* Reset Vote Status Authorization Modal */}
-      {resetVoteStudent && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 99999, backdropFilter: "blur(4px)"
-        }}>
-          <div style={{
-            background: "var(--bg-card)", color: "var(--text-main)", borderRadius: "10px", padding: "24px",
-            width: "100%", maxWidth: "350px", boxShadow: "var(--shadow-modal, 0 10px 25px rgba(0,0,0,0.15))", border: "1px solid var(--border-subtle)"
-          }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
               <Lock size={18} style={{ color: "var(--color-danger)" }} />
               <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reset Vote Status</h3>
@@ -733,12 +685,8 @@ const AdminVotersList: React.FC<{
               </button>
             </div>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
-=======
-        </div>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
       )}
 
       {/* Hidden PDF Printable Container - Printable Voter Access Pass Tickets */}

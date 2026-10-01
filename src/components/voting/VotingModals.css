@@ -13,16 +13,10 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-<<<<<<< HEAD
   background: transparent !important;
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-=======
-  background-color: rgba(6, 26, 20, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   display: flex;
   align-items: center;
   justify-content: center;

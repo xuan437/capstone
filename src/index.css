@@ -406,16 +406,10 @@ html, body {
   width: 100vw !important;
   height: 100vh !important;
   height: 100dvh !important;
-<<<<<<< HEAD
   background: transparent !important;
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-=======
-  background-color: rgba(0, 0, 0, 0.75) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -423,7 +417,6 @@ html, body {
   padding: 16px !important;
   box-sizing: border-box !important;
   animation: fadeIn 0.2s ease forwards;
-<<<<<<< HEAD
   pointer-events: auto;
 }
 
@@ -435,15 +428,6 @@ html, body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border-subtle);
-=======
-}
-
-.policy-modal-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-modal);
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   color: var(--text-main);
   animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   position: relative;

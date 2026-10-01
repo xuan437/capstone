@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { createPortal } from "react-dom";
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 import { ShieldCheck, Lock, Vote, CheckSquare, CheckCircle2 } from "lucide-react";
 
 interface PrivacyModalProps {
@@ -29,11 +26,7 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
 
   if (!visible) return null;
 
-<<<<<<< HEAD
   const modalContent = (
-=======
-  return (
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
     <div
       style={{
         position: "fixed",
@@ -41,13 +34,7 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         left: 0,
         right: 0,
         bottom: 0,
-<<<<<<< HEAD
         backgroundColor: "transparent",
-=======
-        backgroundColor: "rgba(0, 0, 0, 0.65)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         zIndex: 99999,
         display: "flex",
         alignItems: "center",
@@ -58,20 +45,12 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
     >
       <div
         style={{
-<<<<<<< HEAD
           backgroundColor: "#FFFFFF",
           background: "#FFFFFF",
           borderRadius: "8px",
           maxWidth: "520px",
           width: "100%",
           boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.25)",
-=======
-          backgroundColor: "var(--bg-surface)",
-          borderRadius: "8px",
-          maxWidth: "520px",
-          width: "100%",
-          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.4)",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -82,11 +61,7 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         {/* Header */}
         <div
           style={{
-<<<<<<< HEAD
             backgroundColor: "#FFFFFF",
-=======
-            backgroundColor: "var(--bg-card)",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             color: "var(--text-main)",
             padding: "14px 18px",
             display: "flex",
@@ -237,13 +212,10 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
       </div>
     </div>
   );
-<<<<<<< HEAD
 
   return typeof document !== "undefined"
     ? createPortal(modalContent, document.body)
     : modalContent;
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 };
 
 export default PrivacyModal;

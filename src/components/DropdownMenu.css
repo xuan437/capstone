@@ -213,13 +213,8 @@
 .dropdown-detail-modal-overlay {
   position: fixed;
   inset: 0;
-<<<<<<< HEAD
   background: transparent !important;
   backdrop-filter: none !important;
-=======
-  background: rgba(10, 25, 47, 0.65);
-  backdrop-filter: blur(8px);
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   display: flex;
   align-items: center;
   justify-content: center;

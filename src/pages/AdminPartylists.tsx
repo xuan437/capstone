@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { createPortal } from "react-dom";
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 import {
   Flag,
   Plus,
@@ -741,11 +738,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                       <div
                         style={{
                           display: "grid",
-<<<<<<< HEAD
                           gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-=======
-                          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                           gap: "10px",
                         }}
                       >
@@ -762,10 +755,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-<<<<<<< HEAD
                                 justifyContent: "space-between",
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                 gap: "10px",
                                 padding: "10px 12px",
                                 background: "var(--bg-card)",
@@ -790,11 +780,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                   )}&background=059669&color=ffffff&size=150`;
                                 }}
                               />
-<<<<<<< HEAD
                               <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>
-=======
-                              <div style={{ flex: 1, minWidth: 0 }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                 <div
                                   style={{
                                     fontSize: "13px",
@@ -804,18 +790,11 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                     textOverflow: "ellipsis",
                                     whiteSpace: "nowrap",
                                   }}
-<<<<<<< HEAD
                                   title={c.name}
                                 >
                                   {c.name}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", minWidth: 0 }}>
-=======
-                                >
-                                  {c.name}
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                   <span
                                     style={{
                                       fontSize: "10.5px",
@@ -826,21 +805,16 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                       borderRadius: "4px",
                                       display: "inline-block",
                                       whiteSpace: "nowrap",
-<<<<<<< HEAD
                                       overflow: "hidden",
                                       textOverflow: "ellipsis",
                                       maxWidth: "120px",
                                       flexShrink: 0,
                                     }}
                                     title={c.position}
-=======
-                                    }}
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                   >
                                     {c.position}
                                   </span>
                                   {c.section && (
-<<<<<<< HEAD
                                     <span
                                       style={{
                                         fontSize: "10.5px",
@@ -852,19 +826,12 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                       }}
                                       title={c.section}
                                     >
-=======
-                                    <span style={{ fontSize: "10.5px", color: "var(--text-muted)" }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                       {c.section}
                                     </span>
                                   )}
                                 </div>
                               </div>
-<<<<<<< HEAD
                               <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, marginLeft: "auto" }}>
-=======
-                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                                 {onViewCandidate && (
                                   <button
                                     type="button"
@@ -994,11 +961,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                 <div
                   style={{
                     display: "grid",
-<<<<<<< HEAD
                     gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-=======
-                    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                     gap: "10px",
                   }}
                 >
@@ -1015,10 +978,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                         style={{
                           display: "flex",
                           alignItems: "center",
-<<<<<<< HEAD
                           justifyContent: "space-between",
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                           gap: "10px",
                           padding: "10px 12px",
                           background: "var(--bg-card)",
@@ -1038,11 +998,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                             flexShrink: 0,
                           }}
                         />
-<<<<<<< HEAD
                         <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>
-=======
-                        <div style={{ flex: 1, minWidth: 0 }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                           <div
                             style={{
                               fontSize: "13px",
@@ -1052,18 +1008,11 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
                             }}
-<<<<<<< HEAD
                             title={c.name}
                           >
                             {c.name}
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px", minWidth: 0 }}>
-=======
-                          >
-                            {c.name}
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                             <span
                               style={{
                                 fontSize: "10.5px",
@@ -1075,16 +1024,12 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                 border: "1px solid var(--border-light)",
                                 display: "inline-block",
                                 whiteSpace: "nowrap",
-<<<<<<< HEAD
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 maxWidth: "120px",
                                 flexShrink: 0,
                               }}
                               title={c.position}
-=======
-                              }}
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                             >
                               {c.position}
                             </span>
@@ -1096,18 +1041,14 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                 background: "rgba(100, 116, 139, 0.1)",
                                 padding: "1px 5px",
                                 borderRadius: "3px",
-<<<<<<< HEAD
                                 whiteSpace: "nowrap",
                                 flexShrink: 0,
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                               }}
                             >
                               Independent
                             </span>
                           </div>
                         </div>
-<<<<<<< HEAD
                         <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, marginLeft: "auto" }}>
                           {onViewCandidate && (
                             <button
@@ -1126,24 +1067,6 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                             </button>
                           )}
                         </div>
-=======
-                        {onViewCandidate && (
-                          <button
-                            type="button"
-                            onClick={() => onViewCandidate(c.id)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "var(--text-muted)",
-                              cursor: "pointer",
-                              fontSize: "11px",
-                              padding: "4px",
-                            }}
-                          >
-                            View
-                          </button>
-                        )}
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
                       </div>
                     );
                   })}
@@ -1157,11 +1080,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
       {/* -------------------------------------------------------------
           MODAL: Create / Edit Partylist
           ------------------------------------------------------------- */}
-<<<<<<< HEAD
       {isFormModalOpen && typeof document !== "undefined" && createPortal(
-=======
-      {isFormModalOpen && (
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         <div
           className="policy-modal-overlay"
           onClick={(e) => {
@@ -1169,22 +1088,15 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
           }}
         >
           <div
-<<<<<<< HEAD
             className="policy-modal-content"
-=======
-            className="policy-modal-content card-box"
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             style={{
               maxWidth: "520px",
               width: "100%",
               padding: "24px",
               maxHeight: "90vh",
               overflowY: "auto",
-<<<<<<< HEAD
               background: "#FFFFFF",
               backgroundColor: "#FFFFFF",
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             }}
           >
             {/* Modal Header */}
@@ -1477,22 +1389,14 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
               </div>
             </form>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
-=======
-        </div>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
       )}
 
       {/* -------------------------------------------------------------
           MODAL: Manage Slate / Assign Candidates
           ------------------------------------------------------------- */}
-<<<<<<< HEAD
       {isAssignModalOpen && assigningParty && typeof document !== "undefined" && createPortal(
-=======
-      {isAssignModalOpen && assigningParty && (
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         <div
           className="policy-modal-overlay"
           onClick={(e) => {
@@ -1500,22 +1404,15 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
           }}
         >
           <div
-<<<<<<< HEAD
             className="policy-modal-content"
-=======
-            className="policy-modal-content card-box"
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             style={{
               maxWidth: "680px",
               width: "100%",
               padding: "24px",
               maxHeight: "85vh",
               overflowY: "auto",
-<<<<<<< HEAD
               background: "#FFFFFF",
               backgroundColor: "#FFFFFF",
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             }}
           >
             {/* Modal Header */}
@@ -1678,12 +1575,8 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
               </button>
             </div>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
-=======
-        </div>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
       )}
     </div>
   );
