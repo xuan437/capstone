@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-<<<<<<< HEAD
 import { createPortal } from "react-dom";
-=======
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 import { supabase } from "../supabase";
 import { Student, Page } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
@@ -691,11 +688,7 @@ const StudentProfile: React.FC<{
       )}
 
       {/* Admin Password Authorization Modal for Viewing Access Password */}
-<<<<<<< HEAD
       {showPasswordAuthModal && typeof document !== "undefined" && createPortal(
-=======
-      {showPasswordAuthModal && (
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         <div
           className="policy-modal-overlay"
           onClick={(e) => {
@@ -707,26 +700,16 @@ const StudentProfile: React.FC<{
           }}
         >
           <div
-<<<<<<< HEAD
             className="policy-modal-content"
-=======
-            className="policy-modal-content card-box"
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             style={{
               width: "100%",
               maxWidth: "360px",
               padding: "24px",
               borderRadius: "10px",
-<<<<<<< HEAD
               background: "#FFFFFF",
               backgroundColor: "#FFFFFF",
               border: "1px solid var(--border-subtle)",
               boxShadow: "0 20px 50px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border-subtle)",
-=======
-              background: "var(--bg-card)",
-              border: "1px solid var(--border-subtle)",
-              boxShadow: "var(--shadow-modal)",
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
@@ -789,12 +772,8 @@ const StudentProfile: React.FC<{
               </button>
             </div>
           </div>
-<<<<<<< HEAD
         </div>,
         document.body
-=======
-        </div>
->>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
       )}
 
     </div>
