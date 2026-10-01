@@ -706,10 +706,10 @@ const StudentProfile: React.FC<{
               maxWidth: "360px",
               padding: "24px",
               borderRadius: "10px",
-              background: "#FFFFFF",
-              backgroundColor: "#FFFFFF",
+              background: "var(--bg-card)",
+              backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border-subtle)",
-              boxShadow: "0 20px 50px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border-subtle)",
+              boxShadow: "var(--shadow-modal)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>

@@ -18,7 +18,9 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "transparent",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -29,13 +31,13 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
     >
       <div
         style={{
-          backgroundColor: "#FFFFFF",
-          background: "#FFFFFF",
+          backgroundColor: "var(--bg-card)",
+          background: "var(--bg-card)",
           borderRadius: "14px",
           maxWidth: "460px",
           width: "100%",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          border: "1px solid var(--border-subtle, rgba(0, 0, 0, 0.1))",
+          boxShadow: "var(--shadow-modal)",
+          border: "1px solid var(--border-subtle)",
           overflow: "hidden",
           animation: "modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}

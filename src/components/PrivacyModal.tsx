@@ -34,7 +34,9 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "transparent",
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
         zIndex: 99999,
         display: "flex",
         alignItems: "center",
@@ -45,12 +47,12 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
     >
       <div
         style={{
-          backgroundColor: "#FFFFFF",
-          background: "#FFFFFF",
+          backgroundColor: "var(--bg-card)",
+          background: "var(--bg-card)",
           borderRadius: "8px",
           maxWidth: "520px",
           width: "100%",
-          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.25)",
+          boxShadow: "var(--shadow-modal)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -61,7 +63,7 @@ const PrivacyModal: React.FC<PrivacyModalProps> = ({ onAgree }) => {
         {/* Header */}
         <div
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "var(--bg-surface)",
             color: "var(--text-main)",
             padding: "14px 18px",
             display: "flex",

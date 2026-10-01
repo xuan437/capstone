@@ -406,10 +406,10 @@ html, body {
   width: 100vw !important;
   height: 100vh !important;
   height: 100dvh !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -421,13 +421,13 @@ html, body {
 }
 
 .policy-modal-content {
-  background: #FFFFFF !important;
-  background-color: #FFFFFF !important;
+  background: var(--bg-card) !important;
+  background-color: var(--bg-card) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border-subtle);
+  box-shadow: var(--shadow-modal);
   color: var(--text-main);
   animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   position: relative;
