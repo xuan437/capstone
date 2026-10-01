@@ -323,7 +323,10 @@ select option {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+<<<<<<< HEAD
   transform: none !important;
+=======
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 }
 
 .content-max-width {
@@ -633,10 +636,16 @@ select option {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
+<<<<<<< HEAD
   background: transparent !important;
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+=======
+  background-color: rgba(10, 25, 47, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   display: flex;
   justify-content: center;
   align-items: center;
@@ -650,8 +659,12 @@ select option {
   max-width: 720px;
   max-height: 85vh;
   overflow: auto;
+<<<<<<< HEAD
   background: #FFFFFF !important;
   background-color: #FFFFFF !important;
+=======
+  background: var(--bg-card, rgba(255, 255, 255, 0.98));
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-modal);
@@ -730,9 +743,17 @@ select option {
 @keyframes fadeIn {
   from {
     opacity: 0;
+<<<<<<< HEAD
   }
   to {
     opacity: 1;
+=======
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
   }
 }
 

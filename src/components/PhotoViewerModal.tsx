@@ -1,5 +1,8 @@
 import React from "react";
+<<<<<<< HEAD
 import { createPortal } from "react-dom";
+=======
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 import { X, ZoomIn } from "lucide-react";
 
 interface PhotoViewerModalProps {
@@ -13,12 +16,22 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
   title = "Profile Photo",
   onClose,
 }) => {
+<<<<<<< HEAD
   const modalContent = (
+=======
+  return (
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
     <div
       style={{
         position: "fixed",
         inset: 0,
+<<<<<<< HEAD
         backgroundColor: "transparent",
+=======
+        backgroundColor: "rgba(10, 25, 47, 0.8)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -29,6 +42,7 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
     >
       <div
         style={{
+<<<<<<< HEAD
           backgroundColor: "#FFFFFF",
           background: "#FFFFFF",
           borderRadius: "14px",
@@ -36,6 +50,14 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
           width: "100%",
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           border: "1px solid var(--border-subtle, rgba(0, 0, 0, 0.1))",
+=======
+          backgroundColor: "var(--bg-surface, #ffffff)",
+          borderRadius: "14px",
+          maxWidth: "460px",
+          width: "100%",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
+          border: "1px solid var(--border-subtle, rgba(255, 255, 255, 0.1))",
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
           overflow: "hidden",
           animation: "modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
@@ -105,10 +127,13 @@ const PhotoViewerModal: React.FC<PhotoViewerModalProps> = ({
       </div>
     </div>
   );
+<<<<<<< HEAD
 
   return typeof document !== "undefined"
     ? createPortal(modalContent, document.body)
     : modalContent;
+=======
+>>>>>>> 7940577e7a37f2290b7c2e36b55f731f0d0f5ddd
 };
 
 export default PhotoViewerModal;
