@@ -4,7 +4,6 @@ import { Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
-import { ALL_CANDIDATE_SECTIONS } from "../utils/sectionConstants";
 import {
   UserPlus,
   CheckCircle2,
