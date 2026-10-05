@@ -592,7 +592,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Search size={15} style={{ color: "var(--primary-navy)" }} />
             <span style={{ fontSize: "12.5px", color: "var(--text-main)" }}>
-              Filtering ballot for "<strong>{searchTerm}</strong>" — <strong>{filteredCandidates.length}</strong> candidate(s) found across {matchingPositions.length} position(s).
+              Filtering ballot for "<strong>{searchTerm}</strong>" â€” <strong>{filteredCandidates.length}</strong> candidate(s) found across {matchingPositions.length} position(s).
             </span>
           </div>
           {setSearchTerm && (
@@ -718,7 +718,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
         >
           <Info size={15} style={{ color: "var(--primary-navy)", flexShrink: 0 }} />
           <span>
-            <strong>Voting Rules:</strong> You may <strong>undervote</strong> (leave positions blank or select fewer candidates). <strong>Overvoting is strictly prevented</strong>—deselect a candidate first if you wish to change choices.
+            <strong>Voting Rules:</strong> You may <strong>undervote</strong> (leave positions blank or select fewer candidates). <strong>Overvoting is strictly prevented</strong>â€”deselect a candidate first if you wish to change choices.
           </span>
         </div>
 
@@ -793,7 +793,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
             </p>
           ) : (
             <p style={{ margin: 0, fontSize: "11.5px", color: "var(--color-success)", fontWeight: 600 }}>
-              ✓ All positions have candidate selections. Ready to review!
+              âœ“ All positions have candidate selections. Ready to review!
             </p>
           )}
         </div>
@@ -834,7 +834,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
         const isBlank = posSelections.length === 0;
 
         return (
-          <div key={position} id={`pos-section-${position}`} style={{ marginBottom: "18px" }}>
+          <div key={position} id={`pos-section-${position}`} style={{ marginBottom: "32px" }}>
             {/* Position Header Banner */}
             <div
               onClick={() => {
@@ -846,86 +846,71 @@ const BallotPage: React.FC<BallotPageProps> = ({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "10px 14px",
+                padding: "14px 18px",
                 background: "var(--bg-card)",
-                borderRadius: "6px",
-                border: "1px solid var(--border-light)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border-subtle)",
+                borderLeft: `4px solid var(--primary-navy)`,
                 cursor: isSearchActive ? "default" : "pointer",
                 userSelect: "none",
-                marginBottom: isCollapsed ? "0" : "12px",
-                transition: "all 0.15s ease",
+                marginBottom: isCollapsed ? "0" : "16px",
+                boxShadow: "var(--shadow-xs)",
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span
-                  style={{
-                    padding: "3px 8px",
-                    background: "var(--primary-navy)",
-                    color: "#FFFFFF",
-                    borderRadius: "4px",
-                    fontSize: "11.5px",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                {/* Position pill */}
+                <span style={{
+                  padding: "4px 12px",
+                  background: "var(--primary-navy)",
+                  color: "#fff",
+                  borderRadius: "var(--radius-sm)",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                }}>
                   {position}
                 </span>
 
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    color: "var(--text-muted)",
-                    background: "var(--bg-subtle)",
-                    padding: "2px 7px",
-                    borderRadius: "4px",
-                    border: "1px solid var(--border-light)",
-                  }}
-                >
+                {/* Candidate count */}
+                <span style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  background: "var(--bg-subtle)",
+                  padding: "3px 10px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border-light)",
+                }}>
+                  {posCandidates.length} candidate{posCandidates.length !== 1 ? "s" : ""}
+                </span>
+
+                {/* Vote limit badge */}
+                <span style={{
+                  fontSize: "11.5px",
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  background: "var(--bg-subtle)",
+                  padding: "3px 9px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border-light)",
+                }}>
                   Limit: {maxAllowed}
                 </span>
 
-                {/* Status Badge */}
+                {/* Status badge */}
                 {isLimitReached ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      color: "var(--color-success)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-success)", fontSize: "12px", fontWeight: 600 }}>
                     <CheckCircle2 size={13} />
                     <span>Selected ({posSelections.length}/{maxAllowed})</span>
                   </div>
                 ) : !isBlank ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      color: "var(--color-warning)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-warning)", fontSize: "12px", fontWeight: 600 }}>
                     <AlertTriangle size={13} />
                     <span>Undervoted ({posSelections.length}/{maxAllowed})</span>
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      color: "var(--text-light)",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                    }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--text-light)", fontSize: "12px", fontWeight: 500 }}>
                     <Circle size={13} />
                     <span>No Selection (Blank)</span>
                   </div>
@@ -962,7 +947,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
 
                 {!isSearchActive && (
                   <ChevronDown
-                    size={15}
+                    size={16}
                     style={{
                       transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)",
                       transition: "transform 0.15s ease",
@@ -998,13 +983,13 @@ const BallotPage: React.FC<BallotPageProps> = ({
               </div>
             )}
 
-            {/* Bigger Candidate Cards Grid */}
+            {/* Candidate Cards Grid */}
             {!isCollapsed && (
               <div
                 className="candidate-grid"
                 style={{
-                  gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-                  gap: "14px",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                  gap: "18px",
                 }}
               >
                 {posCandidates.map((c) => {
@@ -1016,266 +1001,202 @@ const BallotPage: React.FC<BallotPageProps> = ({
                   const isSelected = posSelections.includes(c.id);
                   const isSelectionDisabled = isLimitReached && !isSelected;
 
-                  return (
-                    <div
-                      key={c.id}
-                      onClick={() => handleToggleCandidate(position, c.id)}
-                      className="candidate-card-box"
-                      style={{
-                        padding: "16px 18px",
-                        opacity: isTimerExpired ? 0.6 : isSelectionDisabled ? 0.65 : 1,
-                        cursor: isTimerExpired
-                          ? "not-allowed"
-                          : isSelectionDisabled
-                          ? "not-allowed"
-                          : "pointer",
-                        border: isSelected
-                          ? "2px solid var(--primary-navy)"
-                          : "1px solid var(--border-light)",
-                        background: isSelected ? "var(--color-success-bg)" : "var(--bg-card)",
-                        position: "relative",
-                        transition: "all 0.18s ease",
-                        boxShadow: isSelected ? "0 4px 12px rgba(5, 150, 105, 0.15)" : "var(--shadow-xs)",
-                      }}
-                    >
-                      {/* Selection Badge / Indicator */}
-                      {isSelected ? (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            padding: "3px 10px",
-                            borderRadius: "99px",
-                            background: "var(--primary-navy)",
-                            color: "#FFFFFF",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            fontSize: "11px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          <Check size={12} />
-                          <span>Selected</span>
-                        </div>
-                      ) : isSelectionDisabled ? (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            padding: "3px 8px",
-                            borderRadius: "4px",
-                            background: "var(--bg-subtle)",
-                            color: "var(--text-light)",
-                            fontSize: "10.5px",
-                            fontWeight: 600,
-                            border: "1px solid var(--border-light)",
-                          }}
-                        >
-                          Limit Reached
-                        </div>
-                      ) : null}
+                  return (() => {
+                    const partyBadge = getPartyListBadgeDetails(c.partylist, partylists);
+                    const nickname = `@${c.name.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9]/g, "")}`;
 
-                      {/* Bigger Candidate Avatar (64x64) & Bio Info */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                        <img
-                          src={avatar}
-                          alt={c.name}
-                          style={{
-                            width: "64px",
-                            height: "64px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid var(--border-subtle)",
-                            flexShrink: 0,
-                            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              c.name
-                            )}&background=059669&color=ffffff&size=250`;
-                          }}
-                        />
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => handleToggleCandidate(position, c.id)}
+                        style={{
+                          position: "relative",
+                          background: isSelected ? "var(--color-success-bg)" : "var(--bg-card)",
+                          border: isSelected ? "2px solid var(--primary-navy)" : "1px solid var(--border-light)",
+                          borderRadius: "var(--radius-lg)",
+                          padding: 0,
+                          overflow: "hidden",
+                          cursor: isTimerExpired ? "not-allowed" : isSelectionDisabled ? "not-allowed" : "pointer",
+                          opacity: isTimerExpired ? 0.6 : isSelectionDisabled ? 0.65 : 1,
+                          transition: "all 0.18s ease",
+                          boxShadow: isSelected ? "0 4px 16px rgba(5, 150, 105, 0.18)" : "var(--shadow-xs)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "stretch",
+                        }}
+                      >
+                        {/* Top accent bar â€” emerald when selected, subtle when not */}
+                        <div style={{
+                          height: "3px",
+                          background: isSelected
+                            ? "var(--primary-navy)"
+                            : `linear-gradient(90deg, ${partyBadge.color || "var(--border-light)"}, transparent)`,
+                          transition: "background 0.2s ease",
+                        }} />
 
-                        <div style={{ minWidth: 0, flex: 1, paddingRight: isSelected ? "75px" : "0" }}>
-                          <h4
-                            style={{
-                              fontSize: "15px",
-                              margin: "0 0 3px 0",
-                              color: "var(--text-main)",
-                              fontWeight: 700,
-                              lineHeight: 1.25,
-                            }}
-                          >
+                        {/* Card body */}
+                        <div style={{ padding: "28px 22px 20px", display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+
+                          {/* Selection indicator badge */}
+                          {isSelected ? (
+                            <div style={{
+                              position: "absolute", top: "12px", right: "12px",
+                              padding: "3px 10px", borderRadius: "99px",
+                              background: "var(--primary-navy)", color: "#fff",
+                              display: "flex", alignItems: "center", gap: "4px",
+                              fontSize: "11px", fontWeight: 700, zIndex: 2,
+                            }}>
+                              <Check size={12} /><span>Selected</span>
+                            </div>
+                          ) : isSelectionDisabled ? (
+                            <div style={{
+                              position: "absolute", top: "12px", right: "12px",
+                              padding: "3px 9px", borderRadius: "4px",
+                              background: "var(--bg-subtle)", color: "var(--text-light)",
+                              fontSize: "10.5px", fontWeight: 600, border: "1px solid var(--border-light)", zIndex: 2,
+                            }}>
+                              Limit Reached
+                            </div>
+                          ) : null}
+
+                          {/* Avatar — bigger ring */}
+                          <div style={{
+                            width: "110px", height: "110px", borderRadius: "50%",
+                            padding: "3px",
+                            background: isSelected
+                              ? "conic-gradient(var(--primary-navy) 0%, var(--primary-navy) 100%)"
+                              : "conic-gradient(var(--border-subtle) 0%, var(--border-light) 100%)",
+                            marginBottom: "14px", flexShrink: 0,
+                            transition: "background 0.2s ease",
+                          }}>
+                            <img
+                              src={avatar}
+                              alt={c.name}
+                              style={{
+                                width: "100%", height: "100%", borderRadius: "50%",
+                                objectFit: "cover", display: "block",
+                                background: "var(--bg-subtle)",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=059669&color=ffffff&size=250`;
+                              }}
+                            />
+                          </div>
+
+                          {/* Name */}
+                          <h4 style={{
+                            fontSize: "17px", fontWeight: 700, color: "var(--text-main)",
+                            margin: "0 0 10px 0", textAlign: "center", lineHeight: 1.25,
+                          }}>
                             {c.name}
                           </h4>
-                          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", alignItems: "center" }}>
-                            {/* Partylist Badge */}
-                            {(() => {
-                              const partyBadge = getPartyListBadgeDetails(c.partylist, partylists);
-                              return (
-                                <span
-                                  style={{
-                                    fontSize: "10.5px",
-                                    fontWeight: 700,
-                                    color: partyBadge.color,
-                                    background: partyBadge.bg,
-                                    border: `1px solid ${partyBadge.border}`,
-                                    padding: "1px 6px",
-                                    borderRadius: "4px",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "3px",
-                                  }}
-                                >
-                                  <Flag size={9} />
-                                  <span>{partyBadge.isIndependent ? "Independent" : `[${partyBadge.code}] ${partyBadge.name}`}</span>
-                                </span>
-                              );
-                            })()}
 
+                          {/* Badges row: partylist + section */}
+                          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", justifyContent: "center", marginBottom: "8px" }}>
+                            <span style={{
+                              fontSize: "10px", fontWeight: 700,
+                              color: partyBadge.color, background: partyBadge.bg,
+                              border: `1px solid ${partyBadge.border}`,
+                              padding: "2px 7px", borderRadius: "4px",
+                              display: "inline-flex", alignItems: "center", gap: "3px",
+                            }}>
+                              <Flag size={9} />
+                              {partyBadge.isIndependent ? "Independent" : `[${partyBadge.code}] ${partyBadge.name}`}
+                            </span>
                             {c.section && (
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  background: "var(--color-success-bg)",
-                                  color: "var(--color-success)",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  fontWeight: 600,
-                                  border: "1px solid var(--color-success-border)",
-                                }}
-                              >
+                              <span style={{
+                                fontSize: "10px", fontWeight: 600,
+                                background: "var(--color-success-bg)", color: "var(--color-success)",
+                                padding: "2px 7px", borderRadius: "4px",
+                                border: "1px solid var(--color-success-border)",
+                              }}>
                                 {c.section}
                               </span>
                             )}
                             {c.age && (
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  background: "var(--bg-subtle)",
-                                  color: "var(--text-muted)",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  fontWeight: 500,
-                                  border: "1px solid var(--border-light)",
-                                }}
-                              >
+                              <span style={{
+                                fontSize: "10px", background: "var(--bg-subtle)",
+                                color: "var(--text-muted)", padding: "2px 6px", borderRadius: "4px",
+                                border: "1px solid var(--border-light)", fontWeight: 500,
+                              }}>
                                 Age {c.age}
                               </span>
                             )}
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Campaign Platform Accordion Preview */}
-                      {c.campaign_text && (
-                        <div
-                          style={{
-                            borderTop: "1px solid var(--border-light)",
-                            paddingTop: "8px",
-                            marginTop: "8px",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedCampaign(expandedCampaign === c.id ? null : c.id);
-                            }}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: "var(--primary-navy)",
-                              fontSize: "11.5px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                              padding: 0,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "3px",
-                            }}
-                          >
-                            <span>{expandedCampaign === c.id ? "Hide Platform" : "View Platform"}</span>
-                            {expandedCampaign === c.id ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                          </button>
-
-                          {expandedCampaign === c.id && (
-                            <div
-                              style={{
-                                fontSize: "12px",
-                                color: "var(--text-muted)",
-                                marginTop: "6px",
-                                lineHeight: 1.4,
-                                background: "var(--bg-subtle)",
-                                padding: "8px 10px",
-                                borderRadius: "4px",
-                                border: "1px solid var(--border-light)",
-                                fontStyle: "italic",
-                                whiteSpace: "pre-wrap",
-                              }}
-                            >
-                              "{c.campaign_text}"
+                          {/* Campaign Platform preview */}
+                          {c.campaign_text && (
+                            <div style={{ width: "100%", marginBottom: "8px" }}>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setExpandedCampaign(expandedCampaign === c.id ? null : c.id); }}
+                                style={{
+                                  background: "none", border: "none",
+                                  color: "var(--primary-navy)", fontSize: "11px", fontWeight: 600,
+                                  cursor: "pointer", padding: 0, display: "flex",
+                                  alignItems: "center", gap: "3px", width: "100%", justifyContent: "center",
+                                }}
+                              >
+                                {expandedCampaign === c.id ? "Hide Platform" : "View Platform"}
+                                {expandedCampaign === c.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                              </button>
+                              {expandedCampaign === c.id && (
+                                <div style={{
+                                  fontSize: "11.5px", color: "var(--text-muted)", marginTop: "6px",
+                                  lineHeight: 1.45, background: "var(--bg-subtle)", padding: "8px 10px",
+                                  borderRadius: "var(--radius-sm)", border: "1px solid var(--border-light)",
+                                  fontStyle: "italic", whiteSpace: "pre-wrap", textAlign: "center",
+                                }}>
+                                  "{c.campaign_text}"
+                                </div>
+                              )}
                             </div>
                           )}
+
+                          {/* Nickname pill */}
+                          <div style={{
+                            display: "inline-flex", alignItems: "center",
+                            background: "var(--bg-subtle)", border: "1px solid var(--border-light)",
+                            borderRadius: "var(--radius-full)", padding: "4px 16px",
+                            fontSize: "12px", fontWeight: 600, color: "var(--text-muted)",
+                            marginTop: "auto", marginBottom: "4px",
+                          }}>
+                            {nickname}
+                          </div>
                         </div>
-                      )}
 
-                      {/* Action Bar: "View Full Profile" & Selection Hint */}
-                      <div
-                        style={{
-                          marginTop: "8px",
-                          paddingTop: "8px",
+                        {/* Footer action bar */}
+                        <div style={{
                           borderTop: "1px solid var(--border-light)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        {onViewCandidate && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onViewCandidate(c.id);
-                            }}
-                            style={{
-                              background: "var(--bg-subtle)",
-                              border: "1px solid var(--border-subtle)",
-                              borderRadius: "4px",
-                              padding: "3px 8px",
-                              fontSize: "11px",
-                              fontWeight: 600,
-                              color: "var(--text-main)",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
-                            <Eye size={12} style={{ color: "var(--primary-navy)" }} />
-                            <span>View Full Profile</span>
-                          </button>
-                        )}
-
-                        <div
-                          style={{
-                            fontSize: "11px",
+                          padding: "8px 14px",
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          background: "var(--bg-subtle)",
+                        }}>
+                          {onViewCandidate ? (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onViewCandidate(c.id); }}
+                              style={{
+                                background: "none", border: "none",
+                                color: "var(--primary-navy)", fontSize: "11px",
+                                fontWeight: 600, cursor: "pointer", padding: 0,
+                                display: "inline-flex", alignItems: "center", gap: "4px",
+                              }}
+                            >
+                              <Eye size={12} />
+                              <span>View Profile</span>
+                            </button>
+                          ) : <span />}
+                          <span style={{
+                            fontSize: "10.5px", fontWeight: 600,
                             color: isSelected ? "var(--primary-navy)" : "var(--text-light)",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {isSelected
-                            ? "Click to Deselect"
-                            : isSelectionDisabled
-                            ? "Limit Reached"
-                            : "Click to Select"}
+                          }}>
+                            {isSelected ? "âœ“ Selected â€” click to deselect" : isSelectionDisabled ? "Limit reached" : "Click to select"}
+                          </span>
                         </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  })()
                 })}
               </div>
             )}

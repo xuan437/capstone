@@ -333,6 +333,17 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 position: "relative",
               }}
             >
+              {/* Golden Yellow Halo Ring matching Reference Design */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "-6px",
+                  borderRadius: "50%",
+                  border: "2.5px solid #facc15",
+                  boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.15)",
+                  pointerEvents: "none",
+                }}
+              />
               <div
                 style={{
                   width: "100%",

@@ -308,9 +308,9 @@ export function getPartyListBadgeDetails(
     return {
       name: "Independent",
       code: "IND",
-      color: "#64748B",
-      bg: "rgba(100, 116, 139, 0.08)",
-      border: "rgba(100, 116, 139, 0.25)",
+      color: "#EF4444",
+      bg: "rgba(239, 68, 68, 0.08)",
+      border: "rgba(239, 68, 68, 0.25)",
       isIndependent: true,
     };
   }

@@ -450,10 +450,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
             overflow: "hidden",
             userSelect: isDragging ? "none" : "auto",
             opacity: isModalRendered ? 1 : 0,
-            transform: isModalRendered ? "scale(1)" : "scale(0.96)",
-            transition: isDragging
-              ? "none"
-              : "opacity 0.15s ease, transform 0.15s ease",
+            transition: "opacity 0.15s ease",
           }}
         >
           {/* Header Handle */}

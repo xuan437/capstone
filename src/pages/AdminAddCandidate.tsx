@@ -4,6 +4,7 @@ import { Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
+import { ALL_CANDIDATE_SECTIONS } from "../utils/sectionConstants";
 import {
   UserPlus,
   CheckCircle2,
@@ -29,7 +30,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     image_url: "",
     campaign_text: "",
     age: "",
-    section: "",
+    section: "Grade 12 - GAS",
   });
   const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,21 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "position") {
+      let defaultSec = form.section;
+      if (value.includes("Gr 8") || value.includes("Grade 8")) defaultSec = "Grade 8 - Sapa";
+      else if (value.includes("Gr 9") || value.includes("Grade 9")) defaultSec = "Grade 9 - Libaton";
+      else if (value.includes("Gr 10") || value.includes("Grade 10")) defaultSec = "Grade 10 - Timowain";
+      else if (value.includes("Gr 11") || value.includes("Grade 11")) defaultSec = "Grade 11 - TechPro";
+      else if (value.includes("Gr 12") || value.includes("Grade 12")) defaultSec = "Grade 12 - GAS";
+
+      setForm({ ...form, position: value, section: defaultSec });
+      setError("");
+      return;
+    }
+
+    setForm({ ...form, [name]: value });
     setError("");
   };
 
@@ -554,7 +569,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
           </div>
 
           {/* Age & Section Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "10px" }}>
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
                 Age *
@@ -572,15 +587,40 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             </div>
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-                Section / Strand *
+                Official Grade & Section *
               </label>
-              <input
+              <select
                 name="section"
-                placeholder="e.g. STEM-A / Grade 12"
                 value={form.section}
                 onChange={handleInputChange}
                 style={inputStyle}
-              />
+              >
+                <option value="">-- Choose Official Section --</option>
+                <optgroup label="Grade 7">
+                  <option value="Grade 7 - Lopez">Gr. 7 - Lopez</option>
+                  <option value="Grade 7 - Ebora">Gr. 7 - Ebora</option>
+                </optgroup>
+                <optgroup label="Grade 8">
+                  <option value="Grade 8 - Sapa">Gr. 8 - Sapa</option>
+                  <option value="Grade 8 - Bautista">Gr. 8 - Bautista</option>
+                </optgroup>
+                <optgroup label="Grade 9">
+                  <option value="Grade 9 - Libaton">Gr. 9 - Libaton</option>
+                  <option value="Grade 9 - Fuentes">Gr. 9 - Fuentes</option>
+                </optgroup>
+                <optgroup label="Grade 10">
+                  <option value="Grade 10 - Timowain">Gr. 10 - Timowain</option>
+                  <option value="Grade 10 - Ambot">Gr. 10 - Ambot</option>
+                </optgroup>
+                <optgroup label="Grade 11">
+                  <option value="Grade 11 - TechPro">Gr. 11 - TechPro</option>
+                  <option value="Grade 11 - ACADS">Gr. 11 - ACADS</option>
+                </optgroup>
+                <optgroup label="Grade 12">
+                  <option value="Grade 12 - GAS">Gr. 12 - GAS</option>
+                  <option value="Grade 12 - TVL">Gr. 12 - TVL</option>
+                </optgroup>
+              </select>
             </div>
           </div>
 

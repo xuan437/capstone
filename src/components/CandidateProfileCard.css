@@ -1,0 +1,274 @@
+/* ==========================================================================
+   CANDIDATE PROFILE CARD — System Design Token Compliant
+   Follows the Linear / Vercel Compact Spatial Scale
+   ========================================================================== */
+
+.candidate-showcase-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  padding: 24px 20px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  min-height: 390px;
+}
+
+.candidate-showcase-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-blue);
+}
+
+/* Bottom accent lip — uses system primary color */
+.candidate-showcase-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-navy);
+  border-bottom-left-radius: var(--radius-xl);
+  border-bottom-right-radius: var(--radius-xl);
+  pointer-events: none;
+  transition: background 0.2s ease;
+}
+
+/* Deactivated → warning color lip */
+.candidate-showcase-card.is-deactivated::after {
+  background: var(--color-warning);
+}
+
+/* Top-left monogram circle badge */
+.showcase-monogram {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--primary-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+  z-index: 2;
+}
+
+/* Top-right action & status bar */
+.showcase-top-actions {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+}
+
+.showcase-status-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.showcase-status-pill.active {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
+}
+
+.showcase-status-pill.deactivated {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning-border);
+}
+
+.showcase-quick-btn {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.showcase-quick-btn:hover {
+  background: var(--primary-navy);
+  color: #ffffff;
+  border-color: var(--primary-navy);
+}
+
+/* Avatar with accent ring */
+.showcase-avatar-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 12px auto 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.showcase-avatar-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--primary-navy);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.showcase-avatar-wrapper:hover .showcase-avatar-ring {
+  opacity: 1;
+}
+
+.showcase-avatar-img {
+  width: 92px;
+  height: 92px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--bg-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.showcase-avatar-wrapper:hover .showcase-avatar-img {
+  box-shadow: var(--shadow-md);
+}
+
+/* Candidate name */
+.showcase-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+.showcase-name:hover {
+  color: var(--primary-navy);
+}
+
+/* Role / subtitle row */
+.showcase-role {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.showcase-party-tag {
+  color: var(--primary-navy);
+  font-weight: 600;
+}
+
+/* Bio text */
+.showcase-bio {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 14px 0;
+  padding: 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 52px;
+}
+
+/* Highlight keywords in bio */
+.showcase-bio-highlight {
+  color: var(--primary-navy);
+  font-weight: 600;
+}
+
+/* Nickname pill — replaces email pill */
+.showcase-email-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 16px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.showcase-email-pill:hover {
+  background: var(--primary-navy);
+  color: #ffffff;
+  border-color: var(--primary-navy);
+}
+
+/* Bottom 6 action icons row */
+.showcase-icons-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: auto;
+  padding-bottom: 6px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+}
+
+.showcase-icon-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+  border-radius: var(--radius-sm);
+}
+
+.showcase-icon-btn:hover {
+  color: var(--primary-navy);
+  background: var(--color-success-bg);
+}

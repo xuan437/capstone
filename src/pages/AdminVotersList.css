@@ -62,21 +62,22 @@
   font-weight: 500 !important;
   border-radius: var(--radius-sm) !important;
   border: 1px solid var(--border-light) !important;
-  background-color: var(--bg-subtle) !important;
+  background-color: var(--bg-card) !important;
   color: var(--text-main) !important;
   cursor: pointer;
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-  background-image: url("data:image/svg+xml;utf8,<svg fill='%236366F1' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2310B981' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") !important;
   background-repeat: no-repeat !important;
   background-position: right 6px center !important;
   background-size: 16px 16px !important;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .filter-select:hover {
   border-color: var(--border-blue) !important;
-  background-color: var(--bg-card) !important;
+  background-color: var(--bg-subtle) !important;
 }
 
 .voters-table-container {

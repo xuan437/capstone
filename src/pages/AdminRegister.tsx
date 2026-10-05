@@ -6,6 +6,7 @@ import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { useLanguage } from "../context/LanguageContext";
 import { UserPlus, UploadCloud, CheckCircle2, FileText, Download, Key, AlertCircle, List, UserCheck, Upload, User } from "lucide-react";
+import { getSectionsForGrade, FIXED_GRADE_LEVELS } from "../utils/sectionConstants";
 
 interface ParsedCsvStudent {
   lrn: string;
@@ -27,7 +28,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
     name: "",
     lrn: "",
     grade: "G7",
-    section: "",
+    section: "Lopez",
     age: "",
     password: "",
   });
@@ -49,7 +50,16 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    if (name === "grade") {
+      const allowed = getSectionsForGrade(value);
+      setForm((prev) => ({
+        ...prev,
+        grade: value,
+        section: allowed[0] || "",
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +145,14 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
 
   // --- Bulk Excel & CSV Parser ---
   const downloadSampleCsv = () => {
-    const csvContent = "data:text/csv;charset=utf-8,lrn,name,grade,section,age\n109876543201,Maria Santos,G10,Sampaguita,16\n109876543202,Juan dela Cruz,G9,Rizal,15\n109876543203,Ana Reyes,G12,Luna,18\n";
+    const csvContent =
+      "data:text/csv;charset=utf-8,lrn,name,grade,section,age\n" +
+      "109876543201,Maria Santos,G7,Lopez,13\n" +
+      "109876543202,Juan dela Cruz,G8,Sapa,14\n" +
+      "109876543203,Ana Reyes,G9,Libaton,15\n" +
+      "109876543204,Carlo Gomez,G10,Timowain,16\n" +
+      "109876543205,Jessica Cruz,G11,TechPro,17\n" +
+      "109876543206,Mark Bautista,G12,GAS,18\n";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -148,9 +165,12 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   const downloadSampleExcel = () => {
     const templateData = [
       ["lrn", "name", "grade", "section", "age"],
-      ["109876543201", "Maria Santos", "G10", "Sampaguita", 16],
-      ["109876543202", "Juan dela Cruz", "G9", "Rizal", 15],
-      ["109876543203", "Ana Reyes", "G12", "Luna", 18],
+      ["109876543201", "Maria Santos", "G7", "Lopez", 13],
+      ["109876543202", "Juan dela Cruz", "G8", "Sapa", 14],
+      ["109876543203", "Ana Reyes", "G9", "Libaton", 15],
+      ["109876543204", "Carlo Gomez", "G10", "Timowain", 16],
+      ["109876543205", "Jessica Cruz", "G11", "TechPro", 17],
+      ["109876543206", "Mark Bautista", "G12", "GAS", 18],
     ];
     const ws = XLSX.utils.aoa_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
@@ -201,11 +221,19 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
           const ageNum = parseInt(ageRaw || "16", 10);
           const pwd = generatePassword(6);
 
+          const cleanGrade = gradeRaw ? (gradeRaw.startsWith("G") ? gradeRaw : `G${gradeRaw}`) : "G7";
+          const allowedSections = getSectionsForGrade(cleanGrade);
+          const matchedSection =
+            allowedSections.find((s) => s.toLowerCase() === sectionRaw.toLowerCase()) ||
+            sectionRaw ||
+            allowedSections[0] ||
+            "Lopez";
+
           rows.push({
             lrn: lrnClean || lrnRaw,
             name: nameRaw || `Student ${i}`,
-            grade: gradeRaw ? (gradeRaw.startsWith("G") ? gradeRaw : `G${gradeRaw}`) : "G7",
-            section: sectionRaw || "Regular",
+            grade: cleanGrade,
+            section: matchedSection,
             age: isNaN(ageNum) ? 16 : ageNum,
             password: pwd,
             valid: isValidLrn && !!nameRaw,
@@ -296,7 +324,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   };
 
   const resetForm = () => {
-    setForm({ name: "", lrn: "", grade: "G7", section: "", age: "", password: "" });
+    setForm({ name: "", lrn: "", grade: "G7", section: "Lopez", age: "", password: "" });
     setPreviewUrl(null);
     setPhotoBase64(null);
     setSuccess(false);
@@ -558,11 +586,10 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
 
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Section / Class Track *
+                  Official Section *
                 </label>
-                <input
+                <select
                   name="section"
-                  placeholder="e.g. Sampaguita / Grade 10-B"
                   value={form.section}
                   onChange={handleChange}
                   style={{
@@ -572,9 +599,18 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
                     border: "1px solid var(--border-subtle)",
                     backgroundColor: "var(--bg-main)",
                     color: "var(--text-main)",
-                    fontSize: "13px"
+                    fontSize: "12.5px"
                   }}
-                />
+                >
+                  {getSectionsForGrade(form.grade).map((sec) => (
+                    <option key={sec} value={sec}>
+                      {sec}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "4px", display: "block" }}>
+                  Fixed sections for {FIXED_GRADE_LEVELS.find((g) => g.code === form.grade)?.label || form.grade}: {getSectionsForGrade(form.grade).join(", ")}
+                </span>
               </div>
             </div>
 

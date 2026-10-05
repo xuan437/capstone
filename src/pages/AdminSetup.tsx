@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   ChevronDown,
-  Edit3,
-  Eye,
   Search,
   X,
-  PowerOff,
-  CheckCircle2,
   Flag,
 } from "lucide-react";
 import { supabase } from "../supabase";
 import { Candidate, Page, POSITIONS, PartyList } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
 import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 import { logAuditAction } from "../utils/auditLogger";
 import {
@@ -19,7 +14,9 @@ import {
   getCleanCampaignText,
   setCandidateDeactivatedLocal,
 } from "../utils/candidateUtils";
-import { fetchPartyLists, getPartyListBadgeDetails, removeCandidatePartylist } from "../utils/partylistUtils";
+import { fetchPartyLists, removeCandidatePartylist } from "../utils/partylistUtils";
+import CandidateProfileCard from "../components/CandidateProfileCard";
+import { ALL_UNIQUE_SECTIONS } from "../utils/sectionConstants";
 
 interface AdminSetupProps {
   setPage: (p: Page) => void;
@@ -42,6 +39,7 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "deactivated">("all");
   const [partylistFilter, setPartylistFilter] = useState<string>("all");
+  const [sectionFilter, setSectionFilter] = useState<string>("all");
 
   const fetchCandidates = async () => {
     let { data, error } = await supabase
@@ -140,6 +138,14 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
       }
     }
 
+    // Section filtering
+    if (sectionFilter !== "all") {
+      if (!c.section) return false;
+      const sectionLower = c.section.toLowerCase();
+      // Match if section contains the filter name (handles both "Lopez" and "Grade 7 - Lopez" formats)
+      if (!sectionLower.includes(sectionFilter.toLowerCase())) return false;
+    }
+
     if (!isSearchActive) return true;
     const cleanCampaign = getCleanCampaignText(c.campaign_text);
     return (
@@ -170,24 +176,25 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
           </h1>
         </div>
 
-        {/* Status & Partylist Filters */}
+        {/* Status, Section & Partylist Filters */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          {/* Section Filter Select */}
+          <select
+            value={sectionFilter}
+            onChange={(e) => setSectionFilter(e.target.value)}
+          >
+            <option value="all">All Sections</option>
+            {ALL_UNIQUE_SECTIONS.map((sec) => (
+              <option key={sec} value={sec}>{sec}</option>
+            ))}
+          </select>
+
           {/* Partylist Filter Select */}
           <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
             <Flag size={13} style={{ color: "var(--primary-navy)" }} />
             <select
               value={partylistFilter}
               onChange={(e) => setPartylistFilter(e.target.value)}
-              style={{
-                padding: "5px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--border-light)",
-                background: "var(--bg-card)",
-                color: "var(--text-main)",
-                fontSize: "12px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
             >
               <option value="all">All Partylists</option>
               <option value="independent">Independent Only</option>
@@ -428,303 +435,31 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
                 )}
               </div>
 
-              {/* Big Candidate Cards Grid */}
+              {/* Candidate Showcase Profile Cards Grid */}
               {!isCollapsed && (
-                <div className="candidate-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "14px" }}>
-                  {posCandidates.map((c) => {
-                    const avatar =
-                      base64ToImageUrl(c.image_url) ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        c.name
-                      )}&background=059669&color=ffffff&size=200`;
-
-                    return (
-                      <div
-                        key={c.id}
-                        className="candidate-card-box"
-                        style={{
-                          padding: "18px",
-                          gap: "14px",
-                          borderRadius: "var(--radius-md)",
-                          border: `1px solid ${isCandidateDeactivated(c) ? "var(--color-warning-border, #FDE68A)" : "var(--border-light)"}`,
-                          background: "var(--bg-card)",
-                          boxShadow: "var(--shadow-xs)",
-                          opacity: isCandidateDeactivated(c) ? 0.88 : 1,
-                        }}
-                      >
-                        {/* Header: Large Avatar (64x64) and Info */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                          <img
-                            src={avatar}
-                            alt={c.name}
-                            style={{
-                              width: "64px",
-                              height: "64px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                              border: `2px solid ${isCandidateDeactivated(c) ? "var(--color-warning)" : "var(--border-subtle)"}`,
-                              flexShrink: 0,
-                              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                              filter: isCandidateDeactivated(c) ? "grayscale(40%)" : "none",
-                            }}
-                            onError={(e) => {
-                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                c.name
-                              )}&background=059669&color=ffffff&size=200`;
-                            }}
-                          />
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap" }}>
-                              <h4
-                                style={{
-                                  margin: 0,
-                                  fontSize: "15px",
-                                  color: "var(--text-main)",
-                                  fontWeight: 700,
-                                  lineHeight: 1.25,
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {c.name}
-                              </h4>
-                              {isCandidateDeactivated(c) ? (
-                                <span
-                                  style={{
-                                    fontSize: "9.5px",
-                                    fontWeight: 700,
-                                    color: "var(--color-warning, #D97706)",
-                                    background: "var(--color-warning-bg, #FEF3C7)",
-                                    border: "1px solid var(--color-warning-border, #FDE68A)",
-                                    padding: "1px 6px",
-                                    borderRadius: "4px",
-                                    letterSpacing: "0.03em",
-                                  }}
-                                >
-                                  DEACTIVATED
-                                </span>
-                              ) : (
-                                <span
-                                  style={{
-                                    fontSize: "9.5px",
-                                    fontWeight: 700,
-                                    color: "var(--color-success)",
-                                    background: "var(--color-success-bg)",
-                                    border: "1px solid var(--color-success-border)",
-                                    padding: "1px 6px",
-                                    borderRadius: "4px",
-                                    letterSpacing: "0.03em",
-                                  }}
-                                >
-                                  ACTIVE
-                                </span>
-                              )}
-                            </div>
-                            <div style={{ display: "flex", gap: "5px", alignItems: "center", flexWrap: "wrap" }}>
-                              {/* Partylist Badge */}
-                              {(() => {
-                                const badge = getPartyListBadgeDetails(c.partylist, partylists);
-                                return (
-                                  <span
-                                    style={{
-                                      fontSize: "10.5px",
-                                      fontWeight: 700,
-                                      color: badge.color,
-                                      background: badge.bg,
-                                      border: `1px solid ${badge.border}`,
-                                      padding: "1px 6px",
-                                      borderRadius: "4px",
-                                      display: "inline-flex",
-                                      alignItems: "center",
-                                      gap: "3px",
-                                    }}
-                                  >
-                                    <Flag size={9} />
-                                    <span>{badge.isIndependent ? "Independent" : `[${badge.code}] ${badge.name}`}</span>
-                                    {!badge.isIndependent && (
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleRemoveCandidatePartylist(c);
-                                        }}
-                                        style={{
-                                          background: "none",
-                                          border: "none",
-                                          color: "inherit",
-                                          cursor: "pointer",
-                                          padding: "0 2px",
-                                          display: "inline-flex",
-                                          alignItems: "center",
-                                          marginLeft: "2px",
-                                          opacity: 0.85,
-                                        }}
-                                        title={`Remove ${c.name} from ${badge.name} (Make Independent)`}
-                                      >
-                                        <X size={10} />
-                                      </button>
-                                    )}
-                                  </span>
-                                );
-                              })()}
-
-                              {c.section && (
-                                <span
-                                  style={{
-                                    fontSize: "11px",
-                                    background: "var(--color-success-bg)",
-                                    color: "var(--color-success)",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    fontWeight: 600,
-                                    border: "1px solid var(--color-success-border)",
-                                  }}
-                                >
-                                  {c.section}
-                                </span>
-                              )}
-                              {c.age && (
-                                <span
-                                  style={{
-                                    fontSize: "11px",
-                                    background: "var(--bg-subtle)",
-                                    color: "var(--text-muted)",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    fontWeight: 500,
-                                    border: "1px solid var(--border-light)",
-                                  }}
-                                >
-                                  Age {c.age}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Platform / Bio Preview Quote Box */}
-                        {getCleanCampaignText(c.campaign_text) ? (
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              color: "var(--text-muted)",
-                              fontStyle: "italic",
-                              background: "var(--bg-subtle)",
-                              padding: "8px 12px",
-                              borderRadius: "6px",
-                              border: "1px solid var(--border-light)",
-                              lineHeight: 1.45,
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            "{getCleanCampaignText(c.campaign_text).length > 90 ? getCleanCampaignText(c.campaign_text).slice(0, 90) + "..." : getCleanCampaignText(c.campaign_text)}"
-                          </div>
-                        ) : (
-                          <div
-                            style={{
-                              fontSize: "11.5px",
-                              color: "var(--text-light)",
-                              fontStyle: "italic",
-                              padding: "4px 8px",
-                            }}
-                          >
-                            No platform text submitted.
-                          </div>
-                        )}
-
-                        {/* Action Buttons Row */}
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            justifyContent: "space-between",
-                            paddingTop: "10px",
-                            borderTop: "1px solid var(--border-light)",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => onViewCandidate(c.id)}
-                            style={{
-                              flex: 1.2,
-                              height: "34px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              background: "var(--primary-navy)",
-                              color: "#FFFFFF",
-                              border: "1px solid var(--primary-navy)",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "6px",
-                              boxShadow: "0 1px 2px rgba(5, 150, 105, 0.2)",
-                              transition: "background 0.15s ease",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--navy-hover)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--primary-navy)")}
-                          >
-                            <Eye size={14} style={{ color: "#FFFFFF" }} />
-                            <span style={{ color: "#FFFFFF", fontWeight: 600 }}>View Profile</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn-inner-action outline"
-                            onClick={() => {
-                              onEditCandidate(c.id);
-                              setPage("admin_edit_candidate");
-                            }}
-                            style={{
-                              flex: 1,
-                              height: "32px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "4px",
-                            }}
-                          >
-                            <Edit3 size={13} />
-                            <span>Edit</span>
-                          </button>
-
-                          {/* Deactivate / Reactivate Action */}
-                          <button
-                            type="button"
-                            className="btn-inner-action"
-                            onClick={() => handleToggleDeactivate(c)}
-                            disabled={isSubmitting}
-                            style={{
-                              flex: 1.1,
-                              height: "32px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "4px",
-                              color: isCandidateDeactivated(c) ? "var(--color-success, #059669)" : "var(--color-warning, #D97706)",
-                              borderColor: isCandidateDeactivated(c) ? "var(--color-success-border, rgba(5, 150, 105, 0.3))" : "var(--color-warning-border, rgba(217, 119, 6, 0.3))",
-                              background: isCandidateDeactivated(c) ? "var(--color-success-bg, rgba(5, 150, 105, 0.08))" : "var(--color-warning-bg, rgba(217, 119, 6, 0.08))",
-                            }}
-                            title={isCandidateDeactivated(c) ? "Reactivate candidate" : "Deactivate candidate (preserves records & votes)"}
-                          >
-                            {isCandidateDeactivated(c) ? <CheckCircle2 size={13} /> : <PowerOff size={13} />}
-                            <span>{isCandidateDeactivated(c) ? "Reactivate" : "Deactivate"}</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div
+                  className="candidate-grid"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+                    gap: "22px",
+                    marginTop: "10px",
+                  }}
+                >
+                  {posCandidates.map((c) => (
+                    <CandidateProfileCard
+                      key={c.id}
+                      candidate={c}
+                      partylists={partylists}
+                      onViewCandidate={onViewCandidate}
+                      onEditCandidate={(id) => {
+                        onEditCandidate(id);
+                        setPage("admin_edit_candidate");
+                      }}
+                      onToggleDeactivate={handleToggleDeactivate}
+                      onRemovePartylist={handleRemoveCandidatePartylist}
+                      isSubmitting={isSubmitting}
+                    />
+                  ))}
                 </div>
               )}
             </div>
