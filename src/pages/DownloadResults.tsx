@@ -4,7 +4,7 @@ import { jsPDF } from "jspdf";
 import { supabase } from "../supabase";
 import { POSITIONS } from "../types";
 import type { Candidate, Page } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
 import { logAuditAction } from "../utils/auditLogger";
 import { useLanguage } from "../context/LanguageContext";
@@ -246,9 +246,10 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
               <div key={r.candidate.id} style={{ padding: "10px 0", borderBottom: index < results.length - 1 ? "1px solid var(--border-subtle)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <img
-                    src={base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=6366F1&color=ffffff`}
+                    src={getCandidatePhoto(r.candidate.image_url, r.candidate.name, r.candidate.id)}
                     alt={r.candidate.name}
                     style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }}
+                    onError={(e) => { e.currentTarget.src = getRealisticFallbackPhoto(r.candidate.name, r.candidate.id); }}
                   />
                   <div>
                     <strong style={{ fontSize: "13px", color: "var(--text-main)" }}>{r.candidate.name}</strong>

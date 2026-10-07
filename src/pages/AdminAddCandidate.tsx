@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { Page, POSITIONS, PartyList } from "../types";
-import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
+import { fileToBase64, getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
 import {
@@ -307,13 +307,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             }}
           >
             <img
-              src={
-                base64ToImageUrl(form.image_url) ||
-                form.image_url ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  candidateDisplayName
-                )}&background=059669&color=ffffff&size=160`
-              }
+              src={getCandidatePhoto(form.image_url, candidateDisplayName)}
               alt="Candidate Preview"
               style={{
                 width: "60px",
@@ -325,9 +319,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
               }}
               onError={(e) => {
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  candidateDisplayName
-                )}&background=059669&color=ffffff&size=160`;
+                e.currentTarget.src = getRealisticFallbackPhoto(candidateDisplayName);
               }}
             />
             <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>

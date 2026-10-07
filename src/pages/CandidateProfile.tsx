@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
+import "./CandidateProfile.css";
 import { supabase } from "../supabase";
 import type { Candidate, Page, User, Student } from "../types";
-import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
+import { fileToBase64, getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
 import PhotoViewerModal from "../components/PhotoViewerModal";
 import {
@@ -80,7 +81,6 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
 
       setCandidate(candidateRes.data as Candidate);
 
-      // Only fetch vote count if admin or if needed for stats
       const { count } = await supabase
         .from("votes")
         .select("*", { count: "exact", head: true })
@@ -191,6 +191,11 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
     }
     try {
       await removeCandidatePartylist(candidate.id);
+      await logAuditAction(
+        "CANDIDATE_PARTYLIST_REMOVED",
+        "Admin",
+        `Removed partylist affiliation from ${candidate.name} (${candidate.position}) — set to Independent`
+      );
       setCandidate((prev) => (prev ? { ...prev, partylist: undefined } : null));
       setPhotoToast("Partylist affiliation removed (now Independent).");
       setTimeout(() => setPhotoToast(null), 3000);
@@ -246,16 +251,14 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
     );
   }
 
-  const avatar =
-    base64ToImageUrl(candidate.image_url) ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      candidate.name
-    )}&background=059669&color=ffffff&size=300`;
+  const avatar = getCandidatePhoto(candidate.image_url, candidate.name, candidate.id);
+  const partyBadge = getPartyListBadgeDetails(candidate.partylist, partylists);
+  const isDeactivated = isCandidateDeactivated(candidate);
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "20px 24px" }}>
-      {/* Top Breadcrumb Navigation */}
-      <div style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="cp-page">
+      {/* ── Top navigation ── */}
+      <div className="cp-topnav">
         <button
           type="button"
           onClick={handleReturn}
@@ -268,7 +271,7 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
             height: "34px",
             fontSize: "12.5px",
             fontWeight: 600,
-            borderRadius: "6px",
+            borderRadius: "8px",
             cursor: "pointer",
           }}
         >
@@ -276,202 +279,127 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
           <span>{isAdmin ? "Back to Candidate Roster" : "Back to Official Ballot"}</span>
         </button>
 
-        <span
-          style={{
-            fontSize: "11px",
-            color: "var(--text-muted)",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "5px",
-          }}
-        >
-          <ShieldCheck size={14} style={{ color: "var(--primary-navy)" }} />
+        <span className="cp-topnav-badge">
+          <ShieldCheck size={13} style={{ color: "var(--primary-navy)" }} />
           Official SSLG Candidate Profile
         </span>
       </div>
 
-      {/* Hero Profile Card */}
-      <div
-        className="card-box"
-        style={{
-          borderRadius: "var(--radius-xl)",
-          padding: "36px 32px 28px",
-          marginBottom: "20px",
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-md)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Subtle decorative background gradient accent */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "100px",
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.04) 100%)",
-            borderBottom: "1px solid var(--border-light)",
-          }}
-        />
+      {/* ── Hero card ── */}
+      <div className="cp-hero">
+        {/* Banner */}
+        <div className="cp-hero-banner">
+          <div className="cp-hero-banner-mesh" />
 
-        {/* Candidate Portrait & Top Controls */}
-        <div style={{ position: "relative", textAlign: "center", paddingTop: "20px" }}>
-          {/* Avatar Ring */}
-          <div style={{ position: "relative", display: "inline-block", marginBottom: "16px" }}>
+          {/* Deactivated ribbon */}
+          {isDeactivated && (
             <div
               style={{
-                width: "140px",
-                height: "140px",
-                borderRadius: "50%",
-                padding: "4px",
-                background: "linear-gradient(135deg, var(--primary-navy), #34D399)",
-                boxShadow: "0 8px 24px rgba(5, 150, 105, 0.25)",
-                margin: "0 auto",
-                position: "relative",
+                position: "absolute",
+                top: 18,
+                right: -36,
+                background: "#d97706",
+                color: "#fff",
+                fontSize: "10px",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                padding: "5px 48px",
+                transform: "rotate(45deg)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
               }}
             >
-              {/* Golden Yellow Halo Ring matching Reference Design */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: "-6px",
-                  borderRadius: "50%",
-                  border: "2.5px solid #facc15",
-                  boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.15)",
-                  pointerEvents: "none",
+              Deactivated
+            </div>
+          )}
+        </div>
+
+        {/* Avatar */}
+        <div className="cp-avatar-wrap">
+          <div className="cp-avatar-ring">
+            <div
+              className="cp-avatar-inner"
+              onClick={() => setShowPhotoViewer(true)}
+              title="Click to view full photo"
+            >
+              <img
+                src={avatar}
+                alt={candidate.name}
+                className="cp-avatar-img"
+                onError={(e) => {
+                  e.currentTarget.src = getRealisticFallbackPhoto(candidate.name, candidate.id);
                 }}
               />
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  position: "relative",
-                  cursor: "pointer",
-                  backgroundColor: "var(--bg-card)",
-                }}
-                onClick={() => setShowPhotoViewer(true)}
-                title="Click to view full photo"
-              >
-                <img
-                  src={avatar}
-                  alt={candidate.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                    transition: "transform 0.2s ease",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                  onError={(e) => {
-                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      candidate.name
-                    )}&background=059669&color=ffffff&size=300`;
-                  }}
-                />
-
-                {uploadingPhoto && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      backgroundColor: "rgba(0, 0, 0, 0.65)",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#ffffff",
-                      fontSize: "11px",
-                      gap: "6px",
-                    }}
-                  >
-                    <RefreshCw size={20} className="spin" />
-                    <span>Uploading...</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Admin Camera Quick Action */}
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  disabled={uploadingPhoto}
-                  title="Upload or replace candidate photo"
-                  style={{
-                    position: "absolute",
-                    bottom: "2px",
-                    right: "2px",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--primary-navy)",
-                    color: "#ffffff",
-                    border: "3px solid var(--bg-card)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
-                    padding: 0,
-                    transition: "transform 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                >
-                  <Camera size={16} />
-                </button>
+              {uploadingPhoto && (
+                <div className="cp-avatar-upload-overlay">
+                  <RefreshCw size={20} className="spin" />
+                  <span>Uploading...</span>
+                </div>
               )}
             </div>
 
-            {/* Hidden File Input for Admin */}
             {isAdmin && (
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handlePhotoUpload}
-                accept="image/png, image/jpeg, image/webp"
-                style={{ display: "none" }}
-              />
+              <button
+                type="button"
+                className="cp-camera-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                disabled={uploadingPhoto}
+                title="Upload or replace candidate photo"
+              >
+                <Camera size={14} />
+              </button>
             )}
           </div>
 
-          {/* Quick Photo Actions Ribbon for Admin & Full View for Student */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              marginBottom: "16px",
-              flexWrap: "wrap",
-            }}
-          >
+          {isAdmin && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handlePhotoUpload}
+              accept="image/png, image/jpeg, image/webp"
+              style={{ display: "none" }}
+            />
+          )}
+        </div>
+
+        {/* Hero body */}
+        <div className="cp-hero-body">
+          {/* Name */}
+          <h1 className="cp-name">{candidate.name}</h1>
+
+          {/* Pills */}
+          <div className="cp-pills">
+            <span className="cp-pill-position">
+              <Award size={14} />
+              <span>Candidate for {candidate.position}</span>
+            </span>
+
+            <span
+              className="cp-pill-partylist"
+              style={{
+                color: partyBadge.color,
+                background: partyBadge.bg,
+                borderColor: partyBadge.border,
+              }}
+            >
+              <Flag size={13} />
+              <span>
+                {partyBadge.isIndependent
+                  ? "Independent Candidate"
+                  : `[${partyBadge.code}] ${partyBadge.name} Partylist`}
+              </span>
+            </span>
+          </div>
+
+          {/* Photo action ribbon */}
+          <div className="cp-photo-actions">
             <button
               type="button"
+              className="cp-photo-btn cp-photo-btn-view"
               onClick={() => setShowPhotoViewer(true)}
-              style={{
-                background: "var(--bg-subtle)",
-                border: "1px solid var(--border-light)",
-                borderRadius: "20px",
-                padding: "4px 12px",
-                fontSize: "11.5px",
-                fontWeight: 600,
-                color: "var(--text-muted)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-              }}
             >
               <Maximize2 size={12} />
               <span>View Full Resolution</span>
@@ -481,21 +409,9 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
               <>
                 <button
                   type="button"
+                  className="cp-photo-btn cp-photo-btn-upload"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingPhoto}
-                  style={{
-                    background: "var(--color-success-bg)",
-                    border: "1px solid var(--color-success-border)",
-                    borderRadius: "20px",
-                    padding: "4px 12px",
-                    fontSize: "11.5px",
-                    fontWeight: 600,
-                    color: "var(--primary-navy)",
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                  }}
                 >
                   <Upload size={12} />
                   <span>{candidate.image_url ? "Change Photo" : "Upload Photo"}</span>
@@ -504,21 +420,9 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
                 {candidate.image_url && (
                   <button
                     type="button"
+                    className="cp-photo-btn cp-photo-btn-remove"
                     onClick={handleRemovePhoto}
                     disabled={uploadingPhoto}
-                    style={{
-                      background: "var(--color-danger-bg)",
-                      border: "1px solid var(--color-danger-border)",
-                      borderRadius: "20px",
-                      padding: "4px 12px",
-                      fontSize: "11.5px",
-                      fontWeight: 600,
-                      color: "var(--color-danger)",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
                   >
                     <Trash2 size={12} />
                     <span>Remove Photo</span>
@@ -528,117 +432,21 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
             )}
           </div>
 
-          {/* Toast / Feedback */}
+          {/* Toast / error */}
           {photoToast && (
-            <div
-              style={{
-                marginBottom: "12px",
-                fontSize: "12px",
-                color: "var(--color-success)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                fontWeight: 600,
-                background: "var(--color-success-bg)",
-                padding: "4px 12px",
-                borderRadius: "4px",
-              }}
-            >
+            <div className="cp-toast cp-toast-success">
               <Check size={14} /> {photoToast}
             </div>
           )}
-
           {photoError && (
-            <div
-              style={{
-                marginBottom: "12px",
-                fontSize: "12px",
-                color: "var(--color-danger)",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                fontWeight: 600,
-                background: "var(--color-danger-bg)",
-                padding: "4px 12px",
-                borderRadius: "4px",
-              }}
-            >
+            <div className="cp-toast cp-toast-error">
               <AlertCircle size={14} /> {photoError}
             </div>
           )}
 
-          {/* Candidate Name & Position */}
-          <h1
-            style={{
-              margin: "0 0 6px 0",
-              fontSize: "26px",
-              fontWeight: 700,
-              color: "var(--text-main)",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            {candidate.name}
-          </h1>
-
-          {/* Position Pill & Partylist Badge */}
-          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "5px 16px",
-                background: "var(--primary-navy)",
-                color: "#FFFFFF",
-                borderRadius: "99px",
-                fontSize: "13px",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                boxShadow: "0 2px 8px rgba(5, 150, 105, 0.25)",
-              }}
-            >
-              <Award size={15} />
-              <span>Candidate for {candidate.position}</span>
-            </span>
-
-            {/* Partylist Badge */}
-            {(() => {
-              const partyBadge = getPartyListBadgeDetails(candidate.partylist, partylists);
-              return (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    padding: "5px 14px",
-                    borderRadius: "99px",
-                    fontSize: "12.5px",
-                    fontWeight: 700,
-                    color: partyBadge.color,
-                    background: partyBadge.bg,
-                    border: `1.5px solid ${partyBadge.border}`,
-                    letterSpacing: "0.03em",
-                  }}
-                >
-                  <Flag size={13} />
-                  <span>{partyBadge.isIndependent ? "Independent Candidate" : `[${partyBadge.code}] ${partyBadge.name} Partylist`}</span>
-                </span>
-              );
-            })()}
-          </div>
-
-          {/* Admin Management Action Row */}
+          {/* Admin action buttons */}
           {isAdmin && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "10px",
-                marginBottom: "24px",
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="cp-admin-actions">
               <button
                 type="button"
                 className="btn-confirm-modal"
@@ -658,323 +466,155 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
                   padding: "0 16px",
                   height: "36px",
                   fontSize: "13px",
-                  color: isCandidateDeactivated(candidate) ? "var(--color-success)" : "var(--color-warning, #D97706)",
-                  borderColor: isCandidateDeactivated(candidate) ? "var(--color-success-border)" : "var(--color-warning-border, rgba(217, 119, 6, 0.3))",
+                  color: isDeactivated ? "var(--color-success)" : "var(--color-warning, #D97706)",
+                  borderColor: isDeactivated
+                    ? "var(--color-success-border)"
+                    : "var(--color-warning-border, rgba(217, 119, 6, 0.3))",
                 }}
               >
-                {isCandidateDeactivated(candidate) ? <CheckCircle2 size={14} /> : <PowerOff size={14} />}
-                <span>{isDeleting ? "Updating..." : (isCandidateDeactivated(candidate) ? "Reactivate Candidate" : "Deactivate Candidate")}</span>
+                {isDeactivated ? <CheckCircle2 size={14} /> : <PowerOff size={14} />}
+                <span>
+                  {isDeleting
+                    ? "Updating..."
+                    : isDeactivated
+                    ? "Reactivate Candidate"
+                    : "Deactivate Candidate"}
+                </span>
               </button>
 
-              {candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent" && (
-                <button
-                  type="button"
-                  className="btn-secondary-modal"
-                  onClick={handleRemovePartylist}
-                  style={{
-                    padding: "0 16px",
-                    height: "36px",
-                    fontSize: "13px",
-                    color: "var(--color-danger)",
-                    borderColor: "var(--color-danger-border)",
-                    background: "var(--color-danger-bg)",
-                  }}
-                  title="Remove partylist affiliation (Make candidate Independent)"
-                >
-                  <X size={14} />
-                  <span>Remove Partylist</span>
-                </button>
-              )}
+              {candidate.partylist &&
+                candidate.partylist.trim().toLowerCase() !== "independent" && (
+                  <button
+                    type="button"
+                    className="btn-secondary-modal"
+                    onClick={handleRemovePartylist}
+                    style={{
+                      padding: "0 16px",
+                      height: "36px",
+                      fontSize: "13px",
+                      color: "var(--color-danger)",
+                      borderColor: "var(--color-danger-border)",
+                      background: "var(--color-danger-bg)",
+                    }}
+                    title="Remove partylist affiliation (Make candidate Independent)"
+                  >
+                    <X size={14} />
+                    <span>Remove Partylist</span>
+                  </button>
+                )}
             </div>
           )}
 
-          {/* 4-Column Stat Counter Grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: "12px",
-              paddingTop: "20px",
-              borderTop: "1px solid var(--border-light)",
-            }}
-          >
-            <div
-              style={{
-                background: "var(--bg-subtle)",
-                borderRadius: "var(--radius-md)",
-                padding: "12px 14px",
-                border: "1px solid var(--border-light)",
-                textAlign: "left",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <Flag size={12} style={{ color: "var(--primary-navy)" }} />
-                <span>Partylist Affiliation</span>
+          <hr className="cp-divider" />
+
+          {/* ── Stat grid ── */}
+          <div className="cp-stats-grid">
+            {/* Partylist */}
+            <div className="cp-stat-card">
+              <div className="cp-stat-label">
+                <Flag size={11} style={{ color: "var(--primary-navy)" }} />
+                Partylist Affiliation
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-                <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-main)" }}>
-                  {candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent"
-                    ? candidate.partylist
-                    : "Independent"}
-                </div>
-                {isAdmin && candidate.partylist && candidate.partylist.trim().toLowerCase() !== "independent" && (
+              <div className="cp-stat-value">
+                {candidate.partylist &&
+                candidate.partylist.trim().toLowerCase() !== "independent"
+                  ? candidate.partylist
+                  : "Independent"}
+              </div>
+              {isAdmin &&
+                candidate.partylist &&
+                candidate.partylist.trim().toLowerCase() !== "independent" && (
                   <button
                     type="button"
+                    className="cp-remove-party-btn"
                     onClick={handleRemovePartylist}
-                    style={{
-                      background: "var(--color-danger-bg)",
-                      border: "1px solid var(--color-danger-border)",
-                      color: "var(--color-danger)",
-                      borderRadius: "4px",
-                      fontSize: "10.5px",
-                      fontWeight: 600,
-                      padding: "2px 7px",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "3px",
-                    }}
                     title="Remove partylist (Make Independent)"
                   >
                     <X size={10} />
                     <span>Remove</span>
                   </button>
                 )}
+            </div>
+
+            {/* Section */}
+            <div className="cp-stat-card">
+              <div className="cp-stat-label">
+                <BookOpen size={11} style={{ color: "var(--primary-navy)" }} />
+                Section / Strand
+              </div>
+              <div className="cp-stat-value">{candidate.section || "—"}</div>
+            </div>
+
+            {/* Age */}
+            <div className="cp-stat-card">
+              <div className="cp-stat-label">
+                <Calendar size={11} style={{ color: "var(--primary-navy)" }} />
+                Age
+              </div>
+              <div className="cp-stat-value">
+                {candidate.age ? `${candidate.age} Years Old` : "—"}
               </div>
             </div>
 
-            <div
-              style={{
-                background: "var(--bg-subtle)",
-                borderRadius: "var(--radius-md)",
-                padding: "12px 14px",
-                border: "1px solid var(--border-light)",
-                textAlign: "left",
-              }}
-            >
+            {/* Ballot Status */}
+            <div className="cp-stat-card">
+              <div className="cp-stat-label">
+                <UserIcon size={11} style={{ color: "var(--primary-navy)" }} />
+                Ballot Status
+              </div>
               <div
+                className="cp-stat-value"
                 style={{
-                  fontSize: "10.5px",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
+                  color: isDeactivated
+                    ? "var(--color-warning, #D97706)"
+                    : "var(--color-success)",
                 }}
               >
-                <BookOpen size={12} style={{ color: "var(--primary-navy)" }} />
-                <span>Section / Strand</span>
-              </div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-main)" }}>
-                {candidate.section || "Grade School"}
+                {isDeactivated ? "Deactivated" : "Active Candidate"}
               </div>
             </div>
 
-            <div
-              style={{
-                background: "var(--bg-subtle)",
-                borderRadius: "var(--radius-md)",
-                padding: "12px 14px",
-                border: "1px solid var(--border-light)",
-                textAlign: "left",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <Calendar size={12} style={{ color: "var(--primary-navy)" }} />
-                <span>Age</span>
-              </div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-main)" }}>
-                {candidate.age ? `${candidate.age} Years Old` : "Registered"}
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: "var(--bg-subtle)",
-                borderRadius: "var(--radius-md)",
-                padding: "12px 14px",
-                border: "1px solid var(--border-light)",
-                textAlign: "left",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "10.5px",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.04em",
-                  marginBottom: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <UserIcon size={12} style={{ color: "var(--primary-navy)" }} />
-                <span>Ballot Status</span>
-              </div>
-              <div style={{ fontSize: "14px", fontWeight: 700, color: isCandidateDeactivated(candidate) ? "var(--color-warning, #D97706)" : "var(--color-success)" }}>
-                {isCandidateDeactivated(candidate) ? "Deactivated" : "Active Candidate"}
-              </div>
-            </div>
-
+            {/* Votes — admin only */}
             {isAdmin && (
-              <div
-                style={{
-                  background: "var(--color-success-bg)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "12px 14px",
-                  border: "1px solid var(--color-success-border)",
-                  textAlign: "left",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "10.5px",
-                    fontWeight: 600,
-                    color: "var(--color-success)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Recorded Votes
-                </div>
-                <div style={{ fontSize: "18px", fontWeight: 800, color: "var(--color-success)" }}>
-                  {voteCount}
-                </div>
+              <div className="cp-stat-card cp-stat-card-votes">
+                <div className="cp-stat-label">Recorded Votes</div>
+                <div className="cp-stat-value">{voteCount}</div>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Official Campaign Platform & Statement Box */}
-      <div
-        className="card-box"
-        style={{
-          borderRadius: "var(--radius-xl)",
-          padding: "24px 28px",
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border-subtle)",
-          boxShadow: "var(--shadow-sm)",
-          marginBottom: "24px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "16px",
-            paddingBottom: "12px",
-            borderBottom: "1px solid var(--border-light)",
-          }}
-        >
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              backgroundColor: "var(--color-success-bg)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--primary-navy)",
-            }}
-          >
+      {/* ── Campaign Platform ── */}
+      <div className="cp-campaign-card">
+        <div className="cp-campaign-header">
+          <div className="cp-campaign-icon-box">
             <Megaphone size={18} />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>
-              Campaign Platform & Goals
-            </h3>
-            <p style={{ margin: "2px 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
+            <h3 className="cp-campaign-title">Campaign Platform &amp; Goals</h3>
+            <p className="cp-campaign-sub">
               Official agenda, advocacy, and student government platform for {candidate.name}.
             </p>
           </div>
         </div>
 
         {getCleanCampaignText(candidate.campaign_text) ? (
-          <div
-            style={{
-              padding: "20px 24px",
-              backgroundColor: "var(--bg-surface)",
-              borderRadius: "var(--radius-md)",
-              border: "1px solid var(--border-light)",
-              borderLeft: "4px solid var(--primary-navy)",
-              lineHeight: "1.75",
-              fontSize: "14.5px",
-              color: "var(--text-main)",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-              position: "relative",
-            }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "16px",
-                fontSize: "44px",
-                color: "var(--border-subtle)",
-                fontFamily: "Georgia, serif",
-                lineHeight: 1,
-                userSelect: "none",
-              }}
-            >
-              “
-            </span>
-            "{getCleanCampaignText(candidate.campaign_text)}"
+          <div className="cp-campaign-text-box">
+            <span className="cp-campaign-quote-mark">"</span>
+            {getCleanCampaignText(candidate.campaign_text)}
           </div>
         ) : (
-          <div
-            style={{
-              padding: "36px 20px",
-              textAlign: "center",
-              backgroundColor: "var(--bg-surface)",
-              borderRadius: "var(--radius-md)",
-              border: "1px dashed var(--border-light)",
-            }}
-          >
-            <Megaphone size={28} style={{ color: "var(--text-light)", marginBottom: "8px" }} />
-            <p style={{ margin: 0, color: "var(--text-muted)", fontWeight: 500, fontSize: "13px" }}>
-              No campaign platform text has been submitted for this candidate yet.
-            </p>
+          <div className="cp-campaign-empty">
+            <Megaphone size={28} style={{ color: "var(--text-light)", marginBottom: "8px", display: "block", margin: "0 auto 8px" }} />
+            No campaign platform text has been submitted for this candidate yet.
           </div>
         )}
       </div>
 
-      {/* Return Button Footer for Student / Voter */}
+      {/* ── Return footer (students only) ── */}
       {!isAdmin && (
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+        <div className="cp-return-footer">
           <button
             type="button"
             className="btn-primary"
@@ -984,7 +624,7 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
               height: "42px",
               fontSize: "13.5px",
               fontWeight: 600,
-              borderRadius: "6px",
+              borderRadius: "8px",
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
@@ -996,7 +636,7 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
         </div>
       )}
 
-      {/* Full Resolution Photo Viewer Modal */}
+      {/* Full-resolution photo viewer */}
       {showPhotoViewer && (
         <PhotoViewerModal
           imageUrl={avatar}

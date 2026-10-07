@@ -16,7 +16,7 @@ import {
 import { Page, User, Student } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
 import { translations, LanguageCode } from "../utils/translations";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getStudentPhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import "./AdminLayout.css";
 
 interface VoterLayoutProps {
@@ -339,9 +339,13 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
         <div className="admin-sidebar-footer">
           {/* Student Profile Chip inside Sidebar */}
           <div className="admin-user-badge-sidebar">
-            {currentUser && "photo_url" in currentUser && currentUser.photo_url ? (
+            {currentUser ? (
               <img
-                src={base64ToImageUrl(currentUser.photo_url) || undefined}
+                src={getStudentPhoto(
+                  "photo_url" in currentUser ? currentUser.photo_url : null,
+                  currentUser.name,
+                  "id" in currentUser ? String(currentUser.id) : undefined
+                )}
                 alt={currentUser.name}
                 style={{
                   width: "28px",
@@ -352,12 +356,12 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
                   flexShrink: 0,
                 }}
                 onError={(e) => {
-                  e.currentTarget.style.display = "none";
+                  e.currentTarget.src = getRealisticFallbackPhoto(currentUser.name);
                 }}
               />
             ) : (
               <div className="admin-avatar-circle-sidebar">
-                {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "V"}
+                V
               </div>
             )}
             <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>

@@ -11,7 +11,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 17,
     partylist: "SANDIGAN",
     campaign_text: "Empowering Student Voice through Digital Governance, Campus Sustainability, and Transparent Leadership for all DLMHS Learners.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=MariaSantos",
+    image_url: "https://randomuser.me/api/portraits/women/23.jpg",
   },
   {
     id: "cand-pres-2",
@@ -21,7 +21,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 18,
     partylist: "TAGUMPAY",
     campaign_text: "Transparent Leadership, Financial Accountability, and Enhanced Student Welfare & Academic Support Services.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=EthanReyes",
+    image_url: "https://randomuser.me/api/portraits/men/1.jpg",
   },
   {
     id: "cand-vp-1",
@@ -31,7 +31,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 17,
     partylist: "SANDIGAN",
     campaign_text: "Fostering Student Innovation, Campus Mental Health Advocacy, and Sports & Arts Development Programs.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=SamanthaCruz",
+    image_url: "https://randomuser.me/api/portraits/women/27.jpg",
   },
   {
     id: "cand-vp-2",
@@ -41,7 +41,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "TAGUMPAY",
     campaign_text: "Strengthening Student Clubs, Leadership Training, and Interactive Learning Workshops across all grade levels.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=JoshuaDelRosario",
+    image_url: "https://randomuser.me/api/portraits/men/33.jpg",
   },
   {
     id: "cand-sec-1",
@@ -51,7 +51,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "SANDIGAN",
     campaign_text: "Accurate Meeting Documentation, Open Student Records, and Timely Digital Announcement Updates.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=AngelicaMendoza",
+    image_url: "https://randomuser.me/api/portraits/women/5.jpg",
   },
   {
     id: "cand-sec-2",
@@ -61,7 +61,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 17,
     partylist: "ALAB",
     campaign_text: "Streamlined Communication Channels, Prompt Student Inquiries Response, and Organized Archiving.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=GabrielTorralba",
+    image_url: "https://randomuser.me/api/portraits/men/25.jpg",
   },
   {
     id: "cand-treas-1",
@@ -71,7 +71,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "SANDIGAN",
     campaign_text: "Transparent Financial Accountability, Strict Budget Auditing, and Financial Support for Student Events.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=BeaLim",
+    image_url: "https://randomuser.me/api/portraits/women/7.jpg",
   },
   {
     id: "cand-treas-2",
@@ -81,7 +81,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 17,
     partylist: "TAGUMPAY",
     campaign_text: "Open Budget Reporting, Fair Resource Allocation, and Project Grants for Student Organizations.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=MarcusTan",
+    image_url: "https://randomuser.me/api/portraits/men/41.jpg",
   },
   {
     id: "cand-pio-1",
@@ -91,7 +91,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "ALAB",
     campaign_text: "Dynamic Social Media Information Drives, School Bulletin Graphics, and Real-Time Event Broadcasts.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=ChloeGarcia",
+    image_url: "https://randomuser.me/api/portraits/women/9.jpg",
   },
   {
     id: "cand-pio-2",
@@ -101,7 +101,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "SANDIGAN",
     campaign_text: "Clear Campus Updates, Student Suggestion Inbox, and Weekly Gazette Highlights.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=DanielFernandez",
+    image_url: "https://randomuser.me/api/portraits/men/17.jpg",
   },
   {
     id: "cand-pub-1",
@@ -111,7 +111,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "TAGUMPAY",
     campaign_text: "Ensuring Peace, Order, Safety Protocols, and Orderly School Assembly Procedures.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=JulianBautista",
+    image_url: "https://randomuser.me/api/portraits/men/7.jpg",
   },
   {
     id: "cand-pub-2",
@@ -121,7 +121,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 15,
     partylist: "ALAB",
     campaign_text: "Campus Discipline with Compassion, Peaceful Conflict Resolution, and Student Safety Advocacy.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=SofiaVillanueva",
+    image_url: "https://randomuser.me/api/portraits/women/13.jpg",
   },
   {
     id: "cand-gr8-1",
@@ -131,7 +131,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 14,
     partylist: "SANDIGAN",
     campaign_text: "Dedicated Representation for Grade 8 Learners, Class Feedback Listening, and Academic Tutoring Circles.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=LucasValenzuela",
+    image_url: "https://randomuser.me/api/portraits/men/39.jpg",
   },
   {
     id: "cand-gr9-1",
@@ -141,7 +141,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 15,
     partylist: "TAGUMPAY",
     campaign_text: "Active Grade 9 Student Representation, Orientation Mentorship, and Student Rights Defense.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=PatriciaNavarro",
+    image_url: "https://randomuser.me/api/portraits/women/25.jpg",
   },
   {
     id: "cand-gr10-1",
@@ -151,7 +151,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 16,
     partylist: "SANDIGAN",
     campaign_text: "Promoting Grade 10 Readiness, Moving-Up Ceremony Support, and Peer Academic Collaboration.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=KennethCastelo",
+    image_url: "https://randomuser.me/api/portraits/men/37.jpg",
   },
   {
     id: "cand-gr11-1",
@@ -161,7 +161,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 17,
     partylist: "ALAB",
     campaign_text: "Senior High Track Integration, Work Immersion Guidance, and Tech Skills Development Workshops.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=AlyssaMercado",
+    image_url: "https://randomuser.me/api/portraits/women/1.jpg",
   },
   {
     id: "cand-gr12-1",
@@ -171,7 +171,7 @@ export const SAMPLE_CANDIDATES: Partial<Candidate>[] = [
     age: 18,
     partylist: "TAGUMPAY",
     campaign_text: "Graduating Class Representation, College Entrance Exam Reviews, and Graduation Committee Coordination.",
-    image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=BenjaminSoriano",
+    image_url: "https://randomuser.me/api/portraits/men/3.jpg",
   },
 ];
 

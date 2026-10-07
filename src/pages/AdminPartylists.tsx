@@ -26,7 +26,7 @@ import {
   assignCandidatePartylist,
   PRESET_PARTYLIST_COLORS,
 } from "../utils/partylistUtils";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 
 interface AdminPartylistsProps {
   setPage: (p: Page) => void;
@@ -743,11 +743,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                         }}
                       >
                         {partyCandidates.map((c) => {
-                          const avatar =
-                            base64ToImageUrl(c.image_url) ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              c.name
-                            )}&background=059669&color=ffffff&size=150`;
+                          const avatar = getCandidatePhoto(c.image_url, c.name, c.id);
 
                           return (
                             <div
@@ -775,9 +771,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                                   flexShrink: 0,
                                 }}
                                 onError={(e) => {
-                                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    c.name
-                                  )}&background=059669&color=ffffff&size=150`;
+                                  e.currentTarget.src = getRealisticFallbackPhoto(c.name, c.id);
                                 }}
                               />
                               <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>
@@ -966,11 +960,7 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                   }}
                 >
                   {independentCandidates.map((c) => {
-                    const avatar =
-                      base64ToImageUrl(c.image_url) ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        c.name
-                      )}&background=64748B&color=ffffff&size=150`;
+                    const avatar = getCandidatePhoto(c.image_url, c.name, c.id);
 
                     return (
                       <div
@@ -996,6 +986,9 @@ export const AdminPartylists: React.FC<AdminPartylistsProps> = ({
                             objectFit: "cover",
                             border: "1.5px solid #94A3B8",
                             flexShrink: 0,
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.src = getRealisticFallbackPhoto(c.name, c.id);
                           }}
                         />
                         <div style={{ flex: "1 1 auto", minWidth: 0, overflow: "hidden" }}>

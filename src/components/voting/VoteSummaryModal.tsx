@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Candidate } from "../../types";
 import { BallotSelections, PositionVoteLimits } from "../../types/voting";
-import { base64ToImageUrl } from "../../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../../utils/imageUtils";
 import { getPartyListBadgeDetails } from "../../utils/partylistUtils";
 import {
   CheckCircle2,
@@ -245,11 +245,7 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
                 {item.chosenCandidates.length > 0 ? (
                   <div className="summary-candidate-chips">
                     {item.chosenCandidates.map((c) => {
-                      const avatar =
-                        base64ToImageUrl(c.image_url) ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          c.name
-                        )}&background=E8F0FE&color=0A192F`;
+                      const avatar = getCandidatePhoto(c.image_url, c.name, c.id);
 
                       return (
                         <div key={c.id} className="summary-candidate-row">
@@ -258,9 +254,7 @@ export const VoteSummaryModal: React.FC<VoteSummaryModalProps> = ({
                             alt={c.name}
                             className="summary-candidate-img"
                             onError={(e) => {
-                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                c.name
-                              )}&background=E8F0FE&color=0A192F`;
+                              e.currentTarget.src = getRealisticFallbackPhoto(c.name, c.id);
                             }}
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>

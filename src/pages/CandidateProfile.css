@@ -1,0 +1,498 @@
+/* ==========================================================================
+   CANDIDATE PROFILE PAGE — Modern Redesign
+   Colorway: Green/Teal (--primary-navy), Gold accent (#facc15)
+   ========================================================================== */
+
+/* ── Page wrapper ─────────────────────────────────────────────── */
+.cp-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 24px 48px;
+}
+
+/* ── Top nav bar ──────────────────────────────────────────────── */
+.cp-topnav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.cp-topnav-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+/* ── Hero card ────────────────────────────────────────────────── */
+.cp-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 24px rgba(5, 150, 105, 0.08), 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+
+/* Gradient banner strip at top */
+.cp-hero-banner {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #059669 0%, #047857 40%, #065f46 100%);
+  overflow: hidden;
+}
+
+/* Decorative blobs inside banner */
+.cp-hero-banner::before {
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  top: -80px;
+  right: -60px;
+}
+.cp-hero-banner::after {
+  content: '';
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(250, 204, 21, 0.12);
+  bottom: -60px;
+  left: 40px;
+}
+
+/* Mesh pattern overlay */
+.cp-hero-banner-mesh {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* ── Avatar container  ─────────────────────────────────────────── */
+.cp-avatar-wrap {
+  position: absolute;
+  top: 160px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.cp-avatar-ring {
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
+  padding: 4px;
+  /* Dual-tone gradient ring */
+  background: linear-gradient(135deg, #facc15 0%, #34d399 50%, #059669 100%);
+  box-shadow: 0 8px 32px rgba(5, 150, 105, 0.35), 0 2px 8px rgba(0,0,0,0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.cp-avatar-ring:hover {
+  box-shadow: 0 12px 40px rgba(5, 150, 105, 0.45), 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.cp-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  border: 3px solid var(--bg-card);
+  cursor: pointer;
+  position: relative;
+}
+
+.cp-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.cp-avatar-inner:hover .cp-avatar-img {
+  transform: scale(1.06);
+}
+
+.cp-avatar-upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  gap: 6px;
+  border-radius: 50%;
+}
+
+/* Camera quick-action badge */
+.cp-camera-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-navy);
+  color: #fff;
+  border: 3px solid var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  padding: 0;
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 2;
+}
+.cp-camera-btn:hover {
+  transform: scale(1.12);
+  background: #047857;
+}
+
+/* ── Hero body (below banner) ──────────────────────────────────── */
+.cp-hero-body {
+  padding: 76px 32px 28px;
+  text-align: center;
+}
+
+/* Name */
+.cp-name {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+/* Pill row (position + partylist) */
+.cp-pills {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.cp-pill-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 18px;
+  background: var(--primary-navy);
+  color: #fff;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.cp-pill-partylist {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1.5px solid;
+}
+
+/* Photo quick-action ribbon */
+.cp-photo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.cp-photo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: 99px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.18s ease;
+}
+
+.cp-photo-btn-view {
+  background: var(--bg-subtle);
+  border-color: var(--border-light);
+  color: var(--text-muted);
+}
+.cp-photo-btn-view:hover {
+  background: var(--bg-hover, #f0fdf4);
+  border-color: var(--primary-navy);
+  color: var(--primary-navy);
+}
+
+.cp-photo-btn-upload {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--primary-navy);
+}
+.cp-photo-btn-upload:hover {
+  background: var(--primary-navy);
+  color: #fff;
+  border-color: var(--primary-navy);
+}
+
+.cp-photo-btn-remove {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+.cp-photo-btn-remove:hover {
+  background: var(--color-danger);
+  color: #fff;
+  border-color: var(--color-danger);
+}
+
+/* Toast / error inline */
+.cp-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.cp-toast-success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+.cp-toast-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+/* Admin action row */
+.cp-admin-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+/* Divider */
+.cp-divider {
+  border: none;
+  border-top: 1px solid var(--border-light);
+  margin: 0 0 20px;
+}
+
+/* ── Stat grid ─────────────────────────────────────────────────── */
+.cp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 12px;
+}
+
+.cp-stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: left;
+  position: relative;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.cp-stat-card:hover {
+  box-shadow: 0 4px 16px rgba(5,150,105,0.1);
+  transform: translateY(-1px);
+  border-color: rgba(5,150,105,0.25);
+}
+
+/* Decorative top-left glow dot */
+.cp-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--primary-navy);
+  border-radius: 14px 0 0 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.cp-stat-card:hover::before {
+  opacity: 1;
+}
+
+.cp-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cp-stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+/* Votes card — highlighted green */
+.cp-stat-card-votes {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-color: var(--color-success-border);
+}
+.cp-stat-card-votes::before {
+  background: var(--color-success);
+  opacity: 1;
+}
+.cp-stat-card-votes .cp-stat-label {
+  color: var(--color-success);
+}
+.cp-stat-card-votes .cp-stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-success);
+}
+
+/* Remove partylist mini btn inside stat card */
+.cp-remove-party-btn {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  transition: background 0.15s ease;
+}
+.cp-remove-party-btn:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+/* ── Campaign box ──────────────────────────────────────────────── */
+.cp-campaign-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  margin-bottom: 24px;
+}
+
+.cp-campaign-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cp-campaign-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--color-success-bg), #d1fae5);
+  border: 1px solid var(--color-success-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-navy);
+  flex-shrink: 0;
+}
+
+.cp-campaign-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.cp-campaign-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.cp-campaign-text-box {
+  position: relative;
+  padding: 22px 26px;
+  background: var(--bg-surface);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--primary-navy);
+  line-height: 1.8;
+  font-size: 14.5px;
+  color: var(--text-main);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cp-campaign-quote-mark {
+  position: absolute;
+  top: 8px;
+  right: 18px;
+  font-size: 52px;
+  color: var(--border-subtle);
+  font-family: Georgia, serif;
+  line-height: 1;
+  user-select: none;
+}
+
+.cp-campaign-empty {
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: 12px;
+  border: 1px dashed var(--border-light);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── Return footer ─────────────────────────────────────────────── */
+.cp-return-footer {
+  text-align: center;
+  margin-bottom: 8px;
+}

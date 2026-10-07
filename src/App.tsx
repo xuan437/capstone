@@ -23,6 +23,7 @@ import AdminPartylists from "./pages/AdminPartylists";
 import PrivacyModal from "./components/PrivacyModal";
 import AdminLayout from "./components/AdminLayout";
 import VoterLayout from "./components/VoterLayout";
+import { logAuditAction } from "./utils/auditLogger";
 
 const AppShell: React.FC = () => {
   const [page, setPage] = useState<Page>("login");
@@ -34,6 +35,14 @@ const AppShell: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const handleLogout = () => {
+    if (currentUser) {
+      if ("isAdmin" in currentUser && currentUser.isAdmin) {
+        logAuditAction("ADMIN_LOGOUT", "Faculty Admin", "Administrator session ended (logged out)");
+      } else if ("name" in currentUser) {
+        const student = currentUser as Student;
+        logAuditAction("STUDENT_LOGOUT", student.name, `Student session ended (LRN: ${student.id})`);
+      }
+    }
     localStorage.removeItem("currentUser");
     setCurrentUser(null);
     setPage("login");

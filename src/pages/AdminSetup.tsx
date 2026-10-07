@@ -113,6 +113,11 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
     );
     try {
       await removeCandidatePartylist(candidate.id);
+      await logAuditAction(
+        "CANDIDATE_PARTYLIST_REMOVED",
+        "Admin",
+        `Removed partylist affiliation from candidate ${candidate.name} (${candidate.position}) — set to Independent`
+      );
       await fetchCandidates();
     } catch (err: any) {
       console.error("Error removing candidate partylist:", err);

@@ -11,7 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Candidate, PartyList } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import {
   isCandidateDeactivated,
   getCleanCampaignText,
@@ -41,11 +41,7 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
   const badge = getPartyListBadgeDetails(candidate.partylist, partylists);
 
   // Avatar URL
-  const avatar =
-    base64ToImageUrl(candidate.image_url) ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      candidate.name
-    )}&background=059669&color=ffffff&size=200`;
+  const avatar = getCandidatePhoto(candidate.image_url, candidate.name, candidate.id);
 
   // First name initial for the stylish top-left monogram circle
   const initial = (candidate.name.trim().charAt(0) || "C").toLowerCase();
@@ -143,9 +139,7 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
           alt={candidate.name}
           className="showcase-avatar-img"
           onError={(e) => {
-            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              candidate.name
-            )}&background=059669&color=ffffff&size=200`;
+            e.currentTarget.src = getRealisticFallbackPhoto(candidate.name, candidate.id);
           }}
         />
       </div>

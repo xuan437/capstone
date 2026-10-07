@@ -29,7 +29,7 @@ import {
   OvervoteNotice,
   PositionVoteLimits,
 } from "../types/voting";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import { isCandidateDeactivated } from "../utils/candidateUtils";
 import { CountdownTimer } from "../components/CountdownTimer";
 import { generateReceiptCode, saveVoteReceipt } from "../utils/receiptVerifier";
@@ -592,7 +592,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Search size={15} style={{ color: "var(--primary-navy)" }} />
             <span style={{ fontSize: "12.5px", color: "var(--text-main)" }}>
-              Filtering ballot for "<strong>{searchTerm}</strong>" â€” <strong>{filteredCandidates.length}</strong> candidate(s) found across {matchingPositions.length} position(s).
+              Filtering ballot for "<strong>{searchTerm}</strong>" — <strong>{filteredCandidates.length}</strong> candidate(s) found across {matchingPositions.length} position(s).
             </span>
           </div>
           {setSearchTerm && (
@@ -718,7 +718,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
         >
           <Info size={15} style={{ color: "var(--primary-navy)", flexShrink: 0 }} />
           <span>
-            <strong>Voting Rules:</strong> You may <strong>undervote</strong> (leave positions blank or select fewer candidates). <strong>Overvoting is strictly prevented</strong>â€”deselect a candidate first if you wish to change choices.
+            <strong>Voting Rules:</strong> You may <strong>undervote</strong> (leave positions blank or select fewer candidates). <strong>Overvoting is strictly prevented</strong> — deselect a candidate first if you wish to change choices.
           </span>
         </div>
 
@@ -792,8 +792,9 @@ const BallotPage: React.FC<BallotPageProps> = ({
               {blankPositions.length} position(s) currently unselected (undervoted). You can proceed to review at any time.
             </p>
           ) : (
-            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--color-success)", fontWeight: 600 }}>
-              âœ“ All positions have candidate selections. Ready to review!
+            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--color-success)", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "5px" }}>
+              <Check size={13} />
+              <span>All positions have candidate selections. Ready to review!</span>
             </p>
           )}
         </div>
@@ -993,11 +994,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
                 }}
               >
                 {posCandidates.map((c) => {
-                  const avatar =
-                    base64ToImageUrl(c.image_url) ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      c.name
-                    )}&background=059669&color=ffffff&size=250`;
+                  const avatar = getCandidatePhoto(c.image_url, c.name, c.id);
                   const isSelected = posSelections.includes(c.id);
                   const isSelectionDisabled = isLimitReached && !isSelected;
 
@@ -1025,7 +1022,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
                           alignItems: "stretch",
                         }}
                       >
-                        {/* Top accent bar â€” emerald when selected, subtle when not */}
+                        {/* Top accent bar — emerald when selected, subtle when not */}
                         <div style={{
                           height: "3px",
                           background: isSelected
@@ -1078,7 +1075,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
                                 background: "var(--bg-subtle)",
                               }}
                               onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=059669&color=ffffff&size=250`;
+                                e.currentTarget.src = getRealisticFallbackPhoto(c.name, c.id);
                               }}
                             />
                           </div>
@@ -1190,8 +1187,20 @@ const BallotPage: React.FC<BallotPageProps> = ({
                           <span style={{
                             fontSize: "10.5px", fontWeight: 600,
                             color: isSelected ? "var(--primary-navy)" : "var(--text-light)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px",
                           }}>
-                            {isSelected ? "âœ“ Selected â€” click to deselect" : isSelectionDisabled ? "Limit reached" : "Click to select"}
+                            {isSelected ? (
+                              <>
+                                <Check size={12} />
+                                <span>Selected — click to deselect</span>
+                              </>
+                            ) : isSelectionDisabled ? (
+                              "Limit reached"
+                            ) : (
+                              "Click to select"
+                            )}
                           </span>
                         </div>
                       </div>

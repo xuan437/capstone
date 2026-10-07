@@ -20,9 +20,10 @@ import {
 import { supabase } from "../supabase";
 import "./AdminVotersList.css";
 import type { Student, Page } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getStudentPhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
 import { useLanguage } from "../context/LanguageContext";
+import { logAuditAction } from "../utils/auditLogger";
 
 const AdminVotersList: React.FC<{
   setPage: (p: Page) => void;
@@ -72,12 +73,23 @@ const AdminVotersList: React.FC<{
 
   const handleViewPasswordAuthSubmit = async () => {
     const { ADMIN_PASSWORD } = await import("../types");
+    const targetStudent = students.find((s) => s.id === viewPasswordStudentId);
     if (viewPasswordAuthInput !== ADMIN_PASSWORD) {
       setViewPasswordAuthError("Incorrect admin password. Access denied.");
+      await logAuditAction(
+        "SECURITY_ACCESS_KEY_DENIED",
+        "Admin",
+        `Denied unauthorized attempt to reveal access password for voter ${targetStudent?.name || viewPasswordStudentId} (LRN: ${viewPasswordStudentId})`
+      );
       return;
     }
     if (viewPasswordStudentId) {
       setShowPasswords((prev) => ({ ...prev, [viewPasswordStudentId]: true }));
+      await logAuditAction(
+        "SECURITY_ACCESS_KEY_REVEALED",
+        "Admin",
+        `Administrator revealed access passcode for voter ${targetStudent?.name || viewPasswordStudentId} (LRN: ${viewPasswordStudentId})`
+      );
     }
     setViewPasswordStudentId(null);
     setViewPasswordAuthInput("");
@@ -89,6 +101,11 @@ const AdminVotersList: React.FC<{
     const { ADMIN_PASSWORD } = await import("../types");
     if (resetVoteAuthInput !== ADMIN_PASSWORD) {
       setResetVoteAuthError("Incorrect admin password. Access denied.");
+      await logAuditAction(
+        "VOTE_RESET_DENIED",
+        "Admin",
+        `Denied unauthorized vote reset attempt on voter ${resetVoteStudent.name} (LRN: ${resetVoteStudent.id}) — incorrect admin password`
+      );
       return;
     }
     setIsResettingVote(true);
@@ -98,6 +115,11 @@ const AdminVotersList: React.FC<{
       await supabase.from("students").update({ has_voted: false, voted_at: null, vote_location: null }).eq("id", resetVoteStudent.id);
       setStudents((prev) =>
         prev.map((s) => (s.id === resetVoteStudent.id ? { ...s, has_voted: false, voted_at: undefined, vote_location: undefined } : s))
+      );
+      await logAuditAction(
+        "VOTE_STATUS_RESET",
+        "Admin",
+        `Reset voting status and cleared cast votes for voter ${resetVoteStudent.name} (LRN: ${resetVoteStudent.id})`
       );
       setResetVoteStudent(null);
       setResetVoteAuthInput("");
@@ -174,9 +196,20 @@ const AdminVotersList: React.FC<{
     const { ADMIN_PASSWORD } = await import("../types");
     if (pdfAuthInput !== ADMIN_PASSWORD) {
       setPdfAuthError("Incorrect password. Access denied.");
+      await logAuditAction(
+        "SECURITY_EXPORT_DENIED",
+        "Admin",
+        `Denied attempt to export student credentials PDF — incorrect admin password`
+      );
       return;
     }
     setShowPdfAuth(false);
+    setPdfAuthInput("");
+    await logAuditAction(
+      "SECURITY_CREDENTIALS_EXPORTED",
+      "Admin",
+      `Exported student voter access passcodes list as PDF (Filter: ${gradeFilter})`
+    );
     downloadPDF();
   };
 
@@ -385,14 +418,11 @@ const AdminVotersList: React.FC<{
                     <td>
                       <div className="voter-avatar-cell">
                         <img
-                          src={
-                            base64ToImageUrl(student.photo_url) ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=E8F0FE&color=0A192F`
-                          }
+                          src={getStudentPhoto(student.photo_url, student.name, student.id)}
                           alt={student.name}
                           className="voter-avatar-img"
                           onError={(e) => {
-                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=E8F0FE&color=0A192F`;
+                            e.currentTarget.src = getRealisticFallbackPhoto(student.name, student.id);
                           }}
                         />
                         <div>
@@ -757,13 +787,31 @@ const AdminVotersList: React.FC<{
                 </div>
 
                 {/* Ticket Main Content */}
-                <div style={{ marginBottom: "12px" }}>
-                  <h3 style={{ margin: "0 0 4px 0", fontSize: "15px", fontWeight: 800, color: "#0F172A", textTransform: "uppercase" }}>
-                    {s.name}
-                  </h3>
-                  <p style={{ margin: 0, fontSize: "11.5px", color: "#475569", fontWeight: 600 }}>
-                    LRN / ID: <strong>{s.id}</strong> {s.age ? `| Age: ${s.age}` : ""}
-                  </p>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "12px" }}>
+                  <img
+                    src={getStudentPhoto(s.photo_url, s.name, s.id)}
+                    alt={s.name}
+                    crossOrigin="anonymous"
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "6px",
+                      objectFit: "cover",
+                      border: "1px solid #CBD5E1",
+                      flexShrink: 0,
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.src = getRealisticFallbackPhoto(s.name, s.id);
+                    }}
+                  />
+                  <div>
+                    <h3 style={{ margin: "0 0 4px 0", fontSize: "15px", fontWeight: 800, color: "#0F172A", textTransform: "uppercase" }}>
+                      {s.name}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: "11.5px", color: "#475569", fontWeight: 600 }}>
+                      LRN / ID: <strong>{s.id}</strong> {s.age ? `| Age: ${s.age}` : ""}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Password / Access Key Ticket Stub Box */}

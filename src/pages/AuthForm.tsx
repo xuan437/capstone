@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "../types";
 import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { logAuditAction } from "../utils/auditLogger";
 import "./AuthForm.css";
 
 // Crisp 14px-16px SVG Micro Icons (Linear / Raycast Style)
@@ -195,9 +196,20 @@ const AuthForm: React.FC<{
       const nextAttempts = failedAttempts + 1;
       setFailedAttempts(nextAttempts);
 
+      await logAuditAction(
+        "STUDENT_LOGIN_FAILED",
+        "Unauthenticated",
+        `Failed voter login attempt for LRN ${identifier} (Attempt ${nextAttempts}/3)`
+      );
+
       if (nextAttempts >= 3) {
         setLockoutSeconds(15);
         setError("Too many failed password attempts. Please wait 15 seconds to try again.");
+        await logAuditAction(
+          "SECURITY_LOCKOUT",
+          "System",
+          `Temporary 15-second lockout enforced for LRN ${identifier} after 3 failed attempts`
+        );
       } else {
         const remaining = 3 - nextAttempts;
         setError(`Invalid LRN or password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before temporary 15s lockout.`);
@@ -214,13 +226,19 @@ const AuthForm: React.FC<{
       id: String(student.id),
     };
 
+    await logAuditAction(
+      "STUDENT_LOGIN",
+      studentUser.name,
+      `Student voter signed in (LRN: ${studentUser.id}, Grade: ${studentUser.grade || "N/A"}${studentUser.section ? ` - ${studentUser.section}` : ""}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
+    );
+
     localStorage.setItem("currentUser", JSON.stringify(studentUser));
     setCurrentUser(studentUser);
     setPage(studentUser.has_voted ? "confirm" : "ballot");
     setLoading(false);
   };
 
-  const handleFacultyLogin = () => {
+  const handleFacultyLogin = async () => {
     setLoading(true);
     setError("");
     const { email, password } = facultyForm;
@@ -234,11 +252,21 @@ const AuthForm: React.FC<{
       password === ADMIN_PASSWORD
     ) {
       const adminUser: Admin = { name: "Faculty Admin", id: "admin", isAdmin: true };
+      await logAuditAction(
+        "ADMIN_LOGIN",
+        "Faculty Admin",
+        `Administrator session started via ${cleanEmail}`
+      );
       localStorage.setItem("currentUser", JSON.stringify(adminUser));
       setCurrentUser(adminUser);
       setLoading(false);
       setPage("admin_setup");
     } else {
+      await logAuditAction(
+        "ADMIN_LOGIN_FAILED",
+        "Unauthenticated",
+        `Failed administrator login attempt using identifier: ${cleanEmail || "(blank)"}`
+      );
       setError("Invalid faculty credentials. Please try again.");
       setLoading(false);
     }

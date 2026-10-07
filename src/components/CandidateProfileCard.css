@@ -1,58 +1,71 @@
 /* ==========================================================================
-   CANDIDATE PROFILE CARD — System Design Token Compliant
-   Follows the Linear / Vercel Compact Spatial Scale
+   CANDIDATE SHOWCASE CARD — Modern Redesign
+   Colorway: Green/Teal primary, Gold accent
    ========================================================================== */
 
 .candidate-showcase-card {
   position: relative;
-  border-radius: var(--radius-xl);
+  border-radius: 18px;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-md);
-  padding: 24px 20px 22px 20px;
+  box-shadow: 0 2px 12px rgba(5, 150, 105, 0.06), 0 1px 3px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
   min-height: 390px;
 }
 
 .candidate-showcase-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: var(--border-blue);
+  box-shadow: 0 8px 32px rgba(5, 150, 105, 0.14), 0 2px 8px rgba(0,0,0,0.07);
+  transform: translateY(-3px);
+  border-color: rgba(5, 150, 105, 0.3);
 }
 
-/* Bottom accent lip — uses system primary color */
-.candidate-showcase-card::after {
-  content: "";
+/* Gradient banner top strip */
+.candidate-showcase-card::before {
+  content: '';
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: var(--primary-navy);
-  border-bottom-left-radius: var(--radius-xl);
-  border-bottom-right-radius: var(--radius-xl);
+  height: 72px;
+  background: linear-gradient(135deg, #059669 0%, #047857 60%, #065f46 100%);
+  z-index: 0;
+}
+
+/* Mesh dot overlay on banner */
+.candidate-showcase-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+  background-size: 18px 18px;
+  z-index: 1;
   pointer-events: none;
-  transition: background 0.2s ease;
 }
 
-/* Deactivated → warning color lip */
-.candidate-showcase-card.is-deactivated::after {
-  background: var(--color-warning);
+/* Deactivated — muted orange overlay strip */
+.candidate-showcase-card.is-deactivated::before {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
 }
 
-/* Top-left monogram circle badge */
+/* ── Monogram badge ──────────────────────────────────────────── */
 .showcase-monogram {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-full);
-  background: var(--primary-navy);
+  top: 14px;
+  left: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,147 +73,154 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
-  box-shadow: var(--shadow-sm);
   user-select: none;
-  z-index: 2;
+  z-index: 3;
 }
 
-/* Top-right action & status bar */
+/* ── Top-right action & status bar ──────────────────────────── */
 .showcase-top-actions {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   gap: 5px;
-  z-index: 2;
+  z-index: 3;
 }
 
 .showcase-status-pill {
   font-size: 9px;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  backdrop-filter: blur(4px);
 }
 
 .showcase-status-pill.active {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-  border: 1px solid var(--color-success-border);
+  background: rgba(255,255,255,0.18);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .showcase-status-pill.deactivated {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-  border: 1px solid var(--color-warning-border);
+  background: rgba(255,255,255,0.18);
+  color: #fef3c7;
+  border: 1px solid rgba(255,255,255,0.25);
 }
 
 .showcase-quick-btn {
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(4px);
+  border-radius: 7px;
   width: 26px;
   height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
+  color: rgba(255,255,255,0.85);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .showcase-quick-btn:hover {
-  background: var(--primary-navy);
+  background: rgba(255,255,255,0.3);
   color: #ffffff;
-  border-color: var(--primary-navy);
 }
 
-/* Avatar with accent ring */
+/* ── Avatar ──────────────────────────────────────────────────── */
 .showcase-avatar-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
-  margin: 12px auto 12px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 90px;
+  height: 90px;
+  /* Overlaps the banner strip — margin-top positions it straddling the strip */
+  margin: 40px auto 12px;
+  z-index: 4;
   cursor: pointer;
 }
 
+/* Gradient ring around avatar */
 .showcase-avatar-ring {
   position: absolute;
-  inset: -3px;
-  border-radius: var(--radius-full);
-  border: 2px solid var(--primary-navy);
-  opacity: 0.5;
+  inset: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #facc15 0%, #34d399 50%, #059669 100%);
+  opacity: 0.85;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .showcase-avatar-wrapper:hover .showcase-avatar-ring {
   opacity: 1;
+  transform: scale(1.05);
 }
 
 .showcase-avatar-img {
-  width: 92px;
-  height: 92px;
-  border-radius: var(--radius-full);
+  position: relative;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
   object-fit: cover;
+  border: 3px solid var(--bg-card);
   background: var(--bg-subtle);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  display: block;
+  margin: 4px auto 0;
+  transition: transform 0.25s ease;
 }
 
 .showcase-avatar-wrapper:hover .showcase-avatar-img {
-  box-shadow: var(--shadow-md);
+  transform: scale(1.04);
 }
 
-/* Candidate name */
+/* ── Candidate name ──────────────────────────────────────────── */
 .showcase-name {
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 700;
   color: var(--text-main);
   margin: 0 0 4px 0;
-  line-height: 1.25;
+  line-height: 1.3;
   cursor: pointer;
   transition: color 0.15s ease;
   font-family: var(--font-heading);
   letter-spacing: -0.02em;
+  padding: 0 12px;
 }
 
 .showcase-name:hover {
   color: var(--primary-navy);
 }
 
-/* Role / subtitle row */
+/* ── Role / subtitle ──────────────────────────────────────────── */
 .showcase-role {
-  font-size: 11.5px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-muted);
   margin: 0 0 10px 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: wrap;
+  padding: 0 12px;
 }
 
 .showcase-party-tag {
   color: var(--primary-navy);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* Bio text */
+/* ── Bio text ─────────────────────────────────────────────────── */
 .showcase-bio {
   font-size: 11.5px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--text-muted);
   margin: 0 0 14px 0;
-  padding: 0 4px;
+  padding: 0 14px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -208,28 +228,27 @@
   min-height: 52px;
 }
 
-/* Highlight keywords in bio */
 .showcase-bio-highlight {
   color: var(--primary-navy);
   font-weight: 600;
 }
 
-/* Nickname pill — replaces email pill */
+/* ── Nickname pill ─────────────────────────────────────────────── */
 .showcase-email-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   padding: 5px 16px;
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-  color: var(--text-main);
+  border-radius: 99px;
+  background: var(--color-success-bg);
+  color: var(--primary-navy);
   font-size: 11.5px;
-  font-weight: 600;
-  border: 1px solid var(--border-subtle);
+  font-weight: 700;
+  border: 1px solid var(--color-success-border);
   cursor: pointer;
-  margin-bottom: 16px;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  margin-bottom: 14px;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   max-width: 92%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -240,35 +259,38 @@
   background: var(--primary-navy);
   color: #ffffff;
   border-color: var(--primary-navy);
+  transform: scale(1.03);
 }
 
-/* Bottom 6 action icons row */
+/* ── Bottom icon row ──────────────────────────────────────────── */
 .showcase-icons-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 4px;
   width: 100%;
   margin-top: auto;
-  padding-bottom: 6px;
+  padding: 10px 12px 12px;
   border-top: 1px solid var(--border-light);
-  padding-top: 12px;
+  background: var(--bg-surface);
 }
 
 .showcase-icon-btn {
   background: transparent;
   border: none;
-  padding: 6px;
+  padding: 7px;
   color: var(--text-light);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease, background 0.15s ease;
-  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  border-radius: 8px;
+  flex: 1;
 }
 
 .showcase-icon-btn:hover {
   color: var(--primary-navy);
   background: var(--color-success-bg);
+  transform: translateY(-1px);
 }

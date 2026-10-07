@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { Student, Page } from "../types";
-import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
+import { fileToBase64, getStudentPhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
 import PhotoViewerModal from "../components/PhotoViewerModal";
 import {
@@ -22,6 +22,7 @@ import {
   Check,
   Lock,
 } from "lucide-react";
+import { logAuditAction } from "../utils/auditLogger";
 
 const StudentProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -65,12 +66,72 @@ const StudentProfile: React.FC<{
     const { ADMIN_PASSWORD } = await import("../types");
     if (passwordAuthInput !== ADMIN_PASSWORD) {
       setPasswordAuthError("Incorrect administrator password. Access denied.");
+      if (student) {
+        await logAuditAction(
+          "SECURITY_ACCESS_KEY_DENIED",
+          "Admin",
+          `Denied attempt to reveal access passcode for voter ${student.name} (LRN: ${student.id}) — incorrect admin password`
+        );
+      }
       return;
     }
     setShowPassword(true);
     setShowPasswordAuthModal(false);
     setPasswordAuthInput("");
     setPasswordAuthError("");
+    if (student) {
+      await logAuditAction(
+        "SECURITY_ACCESS_KEY_REVEALED",
+        "Admin",
+        `Administrator revealed access passcode for voter ${student.name} (LRN: ${student.id})`
+      );
+    }
+  };
+
+  // View Votes Cast Record Authorization State
+  const [showVotesCast, setShowVotesCast] = useState(false);
+  const [showVotesAuthModal, setShowVotesAuthModal] = useState(false);
+  const [votesAuthInput, setVotesAuthInput] = useState("");
+  const [votesAuthError, setVotesAuthError] = useState("");
+
+  const handleToggleVotesCast = () => {
+    if (showVotesCast) {
+      setShowVotesCast(false);
+    } else {
+      setShowVotesAuthModal(true);
+      setVotesAuthInput("");
+      setVotesAuthError("");
+    }
+  };
+
+  const handleConfirmVotesAuth = async () => {
+    const { ADMIN_PASSWORD } = await import("../types");
+    if (votesAuthInput !== ADMIN_PASSWORD) {
+      setVotesAuthError("Incorrect administrator password. Access denied.");
+      if (student) {
+        await logAuditAction(
+          "BALLOT_ACCESS_DENIED",
+          "Admin",
+          `Denied attempt to inspect votes cast record for voter ${student.name} (LRN: ${student.id}) — incorrect admin password`
+        );
+      }
+      return;
+    }
+    setShowVotesCast(true);
+    setShowVotesAuthModal(false);
+    setVotesAuthInput("");
+    setVotesAuthError("");
+    try {
+      if (student) {
+        await logAuditAction(
+          "VOTES_CAST_RECORD_VIEWED",
+          "Admin",
+          `Admin authorized access to view votes cast record for voter ${student.name} (${student.id})`
+        );
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const fetchStudentProfile = async () => {
@@ -235,9 +296,7 @@ const StudentProfile: React.FC<{
     );
   }
 
-  const avatarUrl =
-    base64ToImageUrl(student.photo_url) ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff&size=200`;
+  const avatarUrl = getStudentPhoto(student.photo_url, student.name, student.id);
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px 20px" }}>
@@ -294,7 +353,7 @@ const StudentProfile: React.FC<{
                   display: "block",
                 }}
                 onError={(e) => {
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366F1&color=ffffff&size=200`;
+                  e.currentTarget.src = getRealisticFallbackPhoto(student.name, student.id);
                 }}
               />
 
@@ -610,12 +669,65 @@ const StudentProfile: React.FC<{
 
       {/* Votes Cast Breakdown */}
       <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "16px", boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
-          <Vote size={16} style={{ color: "var(--accent-primary)" }} />
-          <div>
-            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>Votes Cast Record</h3>
-            <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>Official ballot record of candidate choices.</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Vote size={16} style={{ color: "var(--accent-primary)" }} />
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>Votes Cast Record</h3>
+                {votes.length > 0 && (
+                  <span style={{
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    background: showVotesCast ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+                    color: showVotesCast ? "#10B981" : "#D97706",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.03em",
+                  }}>
+                    {showVotesCast ? <Check size={11} /> : <Lock size={11} />}
+                    {showVotesCast ? "Unlocked" : "Protected"}
+                  </span>
+                )}
+              </div>
+              <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>Official ballot record of candidate choices (Protected by Ballot Secrecy).</p>
+            </div>
           </div>
+
+          {votes.length > 0 && (
+            <button
+              type="button"
+              className={showVotesCast ? "btn-secondary" : "btn-primary"}
+              onClick={handleToggleVotesCast}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                fontSize: "12px",
+                fontWeight: 600,
+                padding: "5px 12px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                ...(showVotesCast ? {} : { background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }),
+              }}
+            >
+              {showVotesCast ? (
+                <>
+                  <EyeOff size={13} />
+                  <span>Hide Votes</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={13} />
+                  <span>View Votes Record</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         {votes.length === 0 ? (
@@ -625,6 +737,58 @@ const StudentProfile: React.FC<{
             <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
               This student has not submitted a ballot in the current election.
             </p>
+          </div>
+        ) : !showVotesCast ? (
+          <div style={{
+            padding: "28px 16px",
+            textAlign: "center",
+            backgroundColor: "var(--bg-main)",
+            borderRadius: "6px",
+            border: "1px dashed var(--border-subtle)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              background: "rgba(5, 150, 105, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--primary-navy)",
+              marginBottom: "10px",
+            }}>
+              <Lock size={20} />
+            </div>
+            <h4 style={{ margin: "0 0 4px 0", color: "var(--text-main)", fontSize: "13.5px", fontWeight: 600 }}>
+              Ballot Secrecy Protected
+            </h4>
+            <p style={{ margin: "0 0 14px 0", color: "var(--text-muted)", fontSize: "12px", maxWidth: "420px", lineHeight: "1.45" }}>
+              Candidate choices are confidential under SSLG election guidelines. Administrator password authorization is required to audit and inspect this voter's choices.
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={handleToggleVotesCast}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 16px",
+                borderRadius: "6px",
+                fontSize: "12.5px",
+                fontWeight: 600,
+                background: "var(--primary-navy)",
+                borderColor: "var(--primary-navy)",
+                cursor: "pointer",
+              }}
+            >
+              <Lock size={13} />
+              <span>Enter Admin Password to View</span>
+            </button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -769,6 +933,95 @@ const StudentProfile: React.FC<{
                 style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }}
               >
                 Reveal
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Admin Password Authorization Modal for Viewing Votes Cast Record */}
+      {showVotesAuthModal && typeof document !== "undefined" && createPortal(
+        <div
+          className="policy-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowVotesAuthModal(false);
+              setVotesAuthInput("");
+              setVotesAuthError("");
+            }
+          }}
+        >
+          <div
+            className="policy-modal-content"
+            style={{
+              width: "100%",
+              maxWidth: "360px",
+              padding: "24px",
+              borderRadius: "10px",
+              background: "var(--bg-card)",
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              boxShadow: "var(--shadow-modal)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <Lock size={18} style={{ color: "var(--primary-navy)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>
+                Authorize Ballot Access
+              </h3>
+            </div>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.45" }}>
+              Enter administrator password to inspect the official votes cast record for <strong>{student.name}</strong>.
+            </p>
+            <input
+              type="password"
+              placeholder="Enter admin password"
+              value={votesAuthInput}
+              onChange={(e) => {
+                setVotesAuthInput(e.target.value);
+                setVotesAuthError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && handleConfirmVotesAuth()}
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "9px 12px",
+                border: `1px solid ${votesAuthError ? "var(--color-danger)" : "var(--border-subtle)"}`,
+                borderRadius: "6px",
+                fontSize: "13px",
+                boxSizing: "border-box",
+                outline: "none",
+                marginBottom: "6px",
+                background: "var(--bg-subtle)",
+                color: "var(--text-main)",
+              }}
+            />
+            {votesAuthError && (
+              <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11.5px", fontWeight: 500 }}>
+                {votesAuthError}
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setShowVotesAuthModal(false);
+                  setVotesAuthInput("");
+                  setVotesAuthError("");
+                }}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleConfirmVotesAuth}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }}
+              >
+                Unlock & View
               </button>
             </div>
           </div>

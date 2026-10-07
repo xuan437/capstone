@@ -8,7 +8,7 @@ VALUES
     'Grade 12 - STEM-A',
     17,
     'Empowering Student Voice through Digital Governance, Campus Sustainability, and Transparent Leadership for all DLMHS Learners.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=MariaSantos'
+    'https://randomuser.me/api/portraits/women/23.jpg'
   ),
   (
     'cand-pres-2',
@@ -17,7 +17,7 @@ VALUES
     'Grade 12 - ABM-B',
     18,
     'Transparent Leadership, Financial Accountability, and Enhanced Student Welfare & Academic Support Services.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=EthanReyes'
+    'https://randomuser.me/api/portraits/men/1.jpg'
   ),
   (
     'cand-vp-1',
@@ -26,7 +26,7 @@ VALUES
     'Grade 11 - STEM-B',
     17,
     'Fostering Student Innovation, Campus Mental Health Advocacy, and Sports & Arts Development Programs.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=SamanthaCruz'
+    'https://randomuser.me/api/portraits/women/27.jpg'
   ),
   (
     'cand-vp-2',
@@ -35,7 +35,7 @@ VALUES
     'Grade 11 - HUMSS-A',
     16,
     'Strengthening Student Clubs, Leadership Training, and Interactive Learning Workshops across all grade levels.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=JoshuaDelRosario'
+    'https://randomuser.me/api/portraits/men/33.jpg'
   ),
   (
     'cand-sec-1',
@@ -44,7 +44,7 @@ VALUES
     'Grade 11 - STEM-A',
     16,
     'Accurate Meeting Documentation, Open Student Records, and Timely Digital Announcement Updates.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=AngelicaMendoza'
+    'https://randomuser.me/api/portraits/women/5.jpg'
   ),
   (
     'cand-sec-2',
@@ -53,7 +53,7 @@ VALUES
     'Grade 11 - GAS-A',
     17,
     'Streamlined Communication Channels, Prompt Student Inquiries Response, and Organized Archiving.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=GabrielTorralba'
+    'https://randomuser.me/api/portraits/men/25.jpg'
   ),
   (
     'cand-treas-1',
@@ -62,7 +62,7 @@ VALUES
     'Grade 11 - ABM-A',
     16,
     'Transparent Financial Accountability, Strict Budget Auditing, and Financial Support for Student Events.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=BeaLim'
+    'https://randomuser.me/api/portraits/women/7.jpg'
   ),
   (
     'cand-treas-2',
@@ -71,7 +71,7 @@ VALUES
     'Grade 11 - ABM-B',
     17,
     'Open Budget Reporting, Fair Resource Allocation, and Project Grants for Student Organizations.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=MarcusTan'
+    'https://randomuser.me/api/portraits/men/41.jpg'
   ),
   (
     'cand-pio-1',
@@ -80,7 +80,7 @@ VALUES
     'Grade 10 - Sampaguita',
     16,
     'Dynamic Social Media Information Drives, School Bulletin Graphics, and Real-Time Event Broadcasts.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=ChloeGarcia'
+    'https://randomuser.me/api/portraits/women/9.jpg'
   ),
   (
     'cand-pio-2',
@@ -89,7 +89,7 @@ VALUES
     'Grade 10 - Narra',
     15,
     'Interactive Campus Newsletters, Visual Infographics, and Accessible Information Outlets.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=DanielFernandez'
+    'https://randomuser.me/api/portraits/men/17.jpg'
   ),
   (
     'cand-po-1',
@@ -98,7 +98,7 @@ VALUES
     'Grade 10 - Kamagong',
     15,
     'Community Outreach Relations, Campus Cleanliness & Safety Campaigns, and Student Discipline Advocacy.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=RafaelRamos'
+    'https://randomuser.me/api/portraits/men/47.jpg'
   ),
   (
     'cand-po-2',
@@ -107,7 +107,7 @@ VALUES
     'Grade 10 - Yakal',
     16,
     'Peer Support Counseling, Anti-Bullying Initiatives, and Inclusive School Event Planning.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=HannahAquino'
+    'https://randomuser.me/api/portraits/women/19.jpg'
   ),
   (
     'cand-gr8-1',
@@ -116,7 +116,7 @@ VALUES
     'Grade 8 - Molave',
     14,
     'Dedicated Representation for Grade 8 Learners, Class Feedback Listening, and Academic Tutoring Circles.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=LucasValenzuela'
+    'https://randomuser.me/api/portraits/men/39.jpg'
   ),
   (
     'cand-gr9-1',
@@ -125,7 +125,7 @@ VALUES
     'Grade 9 - Banaba',
     15,
     'Active Grade 9 Student Representation, Orientation Mentorship, and Student Rights Defense.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=PatriciaNavarro'
+    'https://randomuser.me/api/portraits/women/25.jpg'
   ),
   (
     'cand-gr10-1',
@@ -134,7 +134,7 @@ VALUES
     'Grade 10 - Acacia',
     16,
     'Promoting Grade 10 Readiness, Moving-Up Ceremony Support, and Peer Academic Collaboration.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=KennethCastelo'
+    'https://randomuser.me/api/portraits/men/37.jpg'
   ),
   (
     'cand-gr11-1',
@@ -143,7 +143,7 @@ VALUES
     'Grade 11 - TVL-ICT',
     17,
     'Senior High Track Integration, Work Immersion Guidance, and Tech Skills Development Workshops.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=AlyssaMercado'
+    'https://randomuser.me/api/portraits/women/1.jpg'
   ),
   (
     'cand-gr12-1',
@@ -152,7 +152,7 @@ VALUES
     'Grade 12 - HUMSS-B',
     18,
     'Graduating Class Representation, College Entrance Exam Reviews, and Graduation Committee Coordination.',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=BenjaminSoriano'
+    'https://randomuser.me/api/portraits/men/3.jpg'
   )
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,

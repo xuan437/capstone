@@ -14,7 +14,7 @@ import {
 import { supabase } from "../supabase";
 import { POSITIONS } from "../types";
 import type { Candidate, User, Page, PartyList } from "../types";
-import { base64ToImageUrl } from "../utils/imageUtils";
+import { getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import { useLanguage } from "../context/LanguageContext";
 import { isCandidateDeactivated } from "../utils/candidateUtils";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
@@ -472,7 +472,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                     const posItems = results.filter((item) => item.candidate.position === r.candidate.position);
                     const rank = posItems.findIndex((item) => item.candidate.id === r.candidate.id) + 1;
                     const isLeader = rank === 1 && r.count > 0;
-                    const avatar = base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`;
+                    const avatar = getCandidatePhoto(r.candidate.image_url, r.candidate.name, r.candidate.id);
 
                     return (
                       <tr
@@ -517,7 +517,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                                 flexShrink: 0,
                                 border: `2px solid ${isLeader ? "var(--color-success)" : "var(--border-light)"}`,
                               }}
-                              onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`; }}
+                              onError={(e) => { e.currentTarget.src = getRealisticFallbackPhoto(r.candidate.name, r.candidate.id); }}
                             />
                             <div>
                               <div style={{ fontWeight: 600, color: "var(--text-main)", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -652,7 +652,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                   matrixCandidates.map((r) => {
                     const posTotal = positionTotals[r.candidate.position] || 0;
                     const pctLabel = formatPercent(r.count, posTotal);
-                    const avatar = base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`;
+                    const avatar = getCandidatePhoto(r.candidate.image_url, r.candidate.name, r.candidate.id);
                     const candGrades = candidateGradeBreakdown[r.candidate.id] || {};
 
                     // Determine grade with highest votes for this candidate
@@ -675,7 +675,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                               src={avatar}
                               alt={r.candidate.name}
                               style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1.5px solid var(--border-light)" }}
-                              onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`; }}
+                              onError={(e) => { e.currentTarget.src = getRealisticFallbackPhoto(r.candidate.name, r.candidate.id); }}
                             />
                             <div>
                               <div style={{ fontWeight: 600, color: "var(--text-main)", fontSize: "12.5px" }}>
@@ -781,7 +781,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {topOverallCandidates.map((r, idx) => {
                 const widthPercent = maxTopVotes > 0 ? getPercentNumber(r.count, maxTopVotes) : 0;
-                const topAvatar = base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`;
+                const topAvatar = getCandidatePhoto(r.candidate.image_url, r.candidate.name, r.candidate.id);
 
                 return (
                   <div key={r.candidate.id} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -799,7 +799,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                         flexShrink: 0,
                         border: `1.5px solid ${idx === 0 ? "var(--color-success)" : "var(--border-light)"}`,
                       }}
-                      onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`; }}
+                      onError={(e) => { e.currentTarget.src = getRealisticFallbackPhoto(r.candidate.name, r.candidate.id); }}
                     />
                     <div style={{ width: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-main)", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -879,7 +879,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                         const pctLabel = formatPercent(r.count, posTotalVotes);
                         const pctValue = getPercentNumber(r.count, posTotalVotes);
                         const isLeading = idx === 0 && r.count > 0;
-                        const avatar = base64ToImageUrl(r.candidate.image_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`;
+                        const avatar = getCandidatePhoto(r.candidate.image_url, r.candidate.name, r.candidate.id);
 
                         return (
                           <div
@@ -910,7 +910,7 @@ const ResultsDashboard: React.FC<{ currentUser: User | null; setPage: (p: Page) 
                                   boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
                                   display: "block",
                                 }}
-                                onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(r.candidate.name)}&background=E8F0FE&color=0A192F`; }}
+                                onError={(e) => { e.currentTarget.src = getRealisticFallbackPhoto(r.candidate.name, r.candidate.id); }}
                               />
                               {isLeading && (
                                 <span
