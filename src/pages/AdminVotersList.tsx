@@ -217,34 +217,123 @@ const AdminVotersList: React.FC<{
     if (!pdfPrintRef.current) return;
     setIsExporting(true);
     try {
-      const canvas = await html2canvas(pdfPrintRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.98);
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "in",
         format: "letter",
       });
 
-      const imgWidth = 8.5 - 0.8;
-      const pageHeight = 11 - 0.8;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const PAGE_W = 8.5;
+      const PAGE_H = 11;
+      const MARGIN = 0.4;
+      const CONTENT_W = PAGE_W - MARGIN * 2;
+      const CONTENT_H = PAGE_H - MARGIN * 2;
 
-      let heightLeft = imgHeight;
-      let position = 0.4;
+      // Render the entire hidden container as one high-res canvas
+      const fullCanvas = await html2canvas(pdfPrintRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#FFFFFF",
+      });
 
-      pdf.addImage(imgData, "JPEG", 0.4, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      const totalWidthPx = fullCanvas.width;
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 0.4;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0.4, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // How many inches does one pixel represent horizontally?
+      const pxPerInchW = totalWidthPx / CONTENT_W;
+
+      // Find all direct card children to calculate their pixel offsets
+      const grid = pdfPrintRef.current.querySelector(
+        "div[style*='grid-template-columns']"
+      ) as HTMLElement | null;
+
+      // Collect the top/bottom pixel positions of each grid row
+      const rowBoundaries: { topPx: number; bottomPx: number }[] = [];
+
+      if (grid) {
+        const gridChildren = Array.from(grid.children) as HTMLElement[];
+        const rootRect = pdfPrintRef.current.getBoundingClientRect();
+
+        for (let i = 0; i < gridChildren.length; i += 2) {
+          const leftCard = gridChildren[i];
+          const rightCard = gridChildren[i + 1] || leftCard;
+          const leftRect = leftCard.getBoundingClientRect();
+          const rightRect = rightCard.getBoundingClientRect();
+
+          // Offset relative to the container
+          const topPx = (Math.min(leftRect.top, rightRect.top) - rootRect.top) * 2; // *2 for scale:2
+          const bottomPx = (Math.max(leftRect.bottom, rightRect.bottom) - rootRect.top) * 2;
+          rowBoundaries.push({ topPx, bottomPx });
+        }
+      }
+
+      // If we couldn't find card rows, fall back to slicing by fixed page height
+      if (rowBoundaries.length === 0) {
+        const headerCanvas = await html2canvas(pdfPrintRef.current, {
+          scale: 2, useCORS: true, logging: false, backgroundColor: "#FFFFFF",
+        });
+        const imgData = headerCanvas.toDataURL("image/jpeg", 0.95);
+        const imgH = (headerCanvas.height * CONTENT_W) / headerCanvas.width;
+        let heightLeft = imgH;
+        let pos = MARGIN;
+        pdf.addImage(imgData, "JPEG", MARGIN, pos, CONTENT_W, imgH);
+        heightLeft -= CONTENT_H;
+        while (heightLeft > 0) {
+          pos = heightLeft - imgH + MARGIN;
+          pdf.addPage();
+          pdf.addImage(imgData, "JPEG", MARGIN, pos, CONTENT_W, imgH);
+          heightLeft -= CONTENT_H;
+        }
+      } else {
+        // Render the header separately (everything above first card row)
+        const headerHeightPx = rowBoundaries[0]?.topPx ?? 0;
+
+        // Group rows into pages
+        let currentPageRows: typeof rowBoundaries = [];
+        let currentPageHeightIn = headerHeightPx / pxPerInchW; // header height in inches
+        let isFirstPage = true;
+
+        const flushPage = async (rows: typeof rowBoundaries, includeHeader: boolean) => {
+          // Slice the fullCanvas for this set of rows
+          const topPx = includeHeader ? 0 : rows[0].topPx;
+          const bottomPx = rows[rows.length - 1].bottomPx;
+          const sliceH = Math.ceil(bottomPx - topPx);
+
+          const sliceCanvas = document.createElement("canvas");
+          sliceCanvas.width = totalWidthPx;
+          sliceCanvas.height = sliceH;
+          const ctx = sliceCanvas.getContext("2d")!;
+          ctx.drawImage(fullCanvas, 0, -topPx);
+
+          const sliceImgH = (sliceH * CONTENT_W) / totalWidthPx;
+          const imgData = sliceCanvas.toDataURL("image/jpeg", 0.95);
+          pdf.addImage(imgData, "JPEG", MARGIN, MARGIN, CONTENT_W, sliceImgH);
+        };
+
+        for (let ri = 0; ri < rowBoundaries.length; ri++) {
+          const row = rowBoundaries[ri];
+          const rowHeightIn = (row.bottomPx - row.topPx) / pxPerInchW;
+
+          if (
+            currentPageRows.length > 0 &&
+            currentPageHeightIn + rowHeightIn + 0.1 > CONTENT_H
+          ) {
+            // Flush current page
+            await flushPage(currentPageRows, isFirstPage);
+            pdf.addPage();
+            isFirstPage = false;
+            currentPageRows = [];
+            currentPageHeightIn = 0;
+          }
+
+          currentPageRows.push(row);
+          currentPageHeightIn += rowHeightIn + 0.1; // 0.1in gap between rows
+        }
+
+        // Flush last page
+        if (currentPageRows.length > 0) {
+          await flushPage(currentPageRows, isFirstPage);
+        }
       }
 
       const fileNameGrade = gradeFilter !== "All" ? `_${gradeFilter}` : "";
@@ -256,6 +345,7 @@ const AdminVotersList: React.FC<{
       setIsExporting(false);
     }
   };
+
 
   useEffect(() => {
     fetchStudentsWithVotes();
@@ -753,7 +843,7 @@ const AdminVotersList: React.FC<{
         </div>
 
         {/* 2-Column Grid of Individual Printable Ticket Pass Slips */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", alignItems: "stretch" }}>
           {filteredStudents.map((s) => {
             const displayPw = s.password && s.password.startsWith("$2a$") ? "123456" : (s.password || "Standard");
             const sectionStr = s.grade ? `${s.grade}${s.section ? `-${s.section}` : ""}` : (s.section || "N/A");
@@ -771,6 +861,9 @@ const AdminVotersList: React.FC<{
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
+                  breakInside: "avoid",
+                  pageBreakInside: "avoid",
+                  WebkitColumnBreakInside: "avoid",
                 }}
               >
                 {/* Cut Line Indicator Header */}

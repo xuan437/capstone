@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { Page } from "../types";
 import { logAuditAction } from "../utils/auditLogger";
+import { clearElectionExpiryFlag } from "../utils/electionExpiry";
 import { Clock, CheckCircle2, Trash2, AlertCircle, Calendar } from "lucide-react";
 
 const AdminElectionSettings: React.FC<{
@@ -55,6 +56,8 @@ const AdminElectionSettings: React.FC<{
       setError("Failed to save election timer: " + upsertError.message);
     } else {
       setElectionEndTime(utcDate);
+      // Reset expiry flag so passwords are scrambled again at the new deadline
+      clearElectionExpiryFlag();
       await logAuditAction("TIMER_UPDATED", "Admin", `Set election cutoff timer to ${new Date(utcDate).toLocaleString()}`);
       alert("Election countdown timer set successfully!");
     }

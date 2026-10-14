@@ -230,7 +230,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
               <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>{stats.totalRegistered}</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Votes Cast</div>
+              <div style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Ballot Cast</div>
               <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>{stats.totalVotesCast}</div>
             </div>
             <div style={{ textAlign: "center" }}>
@@ -321,7 +321,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
             </div>
             <div>
               <div style={{ borderBottom: "1px solid var(--border-subtle)", marginBottom: "4px", height: "24px" }}></div>
-              <strong style={{ fontSize: "11px", color: "var(--text-muted)" }}>School Adviser</strong>
+              <strong style={{ fontSize: "11px", color: "var(--text-muted)" }}>School Principal</strong>
             </div>
           </div>
         </div>
@@ -434,7 +434,7 @@ const DownloadResults: React.FC<{ setPage: (p: Page) => void }> = ({ setPage: _s
           </div>
           <div>
             <div style={{ borderBottom: "1px solid #0F172A", marginBottom: "8px", height: "40px" }}></div>
-            <strong style={{ fontSize: "12px", color: "#0F172A" }}>School Principal / Adviser</strong>
+            <strong style={{ fontSize: "12px", color: "#0F172A" }}>School Principal</strong>
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 import { Clock } from "lucide-react";
+import { scrambleAllStudentPasswords } from "../utils/electionExpiry";
+import { getCachedElectionSettings, cacheElectionSettings } from "../utils/cacheManager";
 
 interface CountdownTimerProps {
   onExpire?: () => void;
@@ -101,10 +103,18 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     seconds: number;
     totalMs: number;
   } | null>(null);
+  // Guard so the scramble only runs once even though the timer ticks every second
+  const hasScrambled = useRef(false);
 
   useEffect(() => {
     const fetchEndTime = async () => {
       try {
+        const cached = getCachedElectionSettings<{ end_time: string }>();
+        if (cached && cached.end_time) {
+          setEndTime(cached.end_time);
+          if (onTimerLoaded) onTimerLoaded(cached.end_time);
+        }
+
         const { data, error } = await supabase
           .from("election_settings")
           .select("end_time")
@@ -117,6 +127,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         }
 
         if (data && data.end_time) {
+          cacheElectionSettings({ end_time: data.end_time });
           setEndTime(data.end_time);
           if (onTimerLoaded) onTimerLoaded(data.end_time);
         } else if (!data) {
@@ -175,6 +186,10 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       const difference = +new Date(endTime) - +new Date();
       if (difference <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 });
+        if (!hasScrambled.current) {
+          hasScrambled.current = true;
+          scrambleAllStudentPasswords();
+        }
         if (onExpire) onExpire();
         return;
       }

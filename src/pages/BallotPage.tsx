@@ -39,6 +39,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 import { VoteSummaryModal } from "../components/voting/VoteSummaryModal";
 import { VoteLockInModal } from "../components/voting/VoteLockInModal";
+import { getCachedCandidates, cacheCandidates, getCachedPartyLists, cachePartyLists } from "../utils/cacheManager";
 
 interface BallotPageProps {
   setPage: (p: Page) => void;
@@ -118,6 +119,18 @@ const BallotPage: React.FC<BallotPageProps> = ({
           return;
         }
 
+        // Check local cache first for instant UI response
+        const cachedCandidates = getCachedCandidates<Candidate[]>();
+        if (cachedCandidates && cachedCandidates.length > 0) {
+          setCandidates(cachedCandidates.filter((c) => !isCandidateDeactivated(c)));
+          setLoading(false);
+        }
+
+        const cachedParties = getCachedPartyLists<PartyList[]>();
+        if (cachedParties && cachedParties.length > 0) {
+          setPartylists(cachedParties);
+        }
+
         let { data, error: fetchError } = await supabase
           .from("candidates")
           .select("*");
@@ -129,14 +142,20 @@ const BallotPage: React.FC<BallotPageProps> = ({
         }
 
         if (fetchError) {
-          setError("Unable to load ballot: " + fetchError.message);
-          setCandidates([]);
+          if (!cachedCandidates || cachedCandidates.length === 0) {
+            setError("Unable to load ballot: " + fetchError.message);
+            setCandidates([]);
+          }
         } else {
           const allCandidates = (data || []) as Candidate[];
+          cacheCandidates(allCandidates);
           setCandidates(allCandidates.filter((c) => !isCandidateDeactivated(c)));
         }
 
-        fetchPartyLists().then((list) => setPartylists(list));
+        fetchPartyLists().then((list) => {
+          cachePartyLists(list);
+          setPartylists(list);
+        });
       } catch (err: any) {
         console.error("Ballot loading error:", err);
         setError("Network connection issue. Please check your connection and refresh.");
@@ -429,8 +448,8 @@ const BallotPage: React.FC<BallotPageProps> = ({
         ]);
       }
 
-      // 10. Update local storage session
-      localStorage.setItem(
+      // 10. Update session storage session
+      sessionStorage.setItem(
         "currentUser",
         JSON.stringify({ ...currentUser, has_voted: true })
       );

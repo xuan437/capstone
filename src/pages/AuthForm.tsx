@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 import { User, Student, Admin, Page, ADMIN_IDENTIFIER, ADMIN_PASSWORD } from "../types";
 import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { logAuditAction } from "../utils/auditLogger";
+import { Captcha, CaptchaRef } from "../components/Captcha";
 import "./AuthForm.css";
 
 // Crisp 14px-16px SVG Micro Icons (Linear / Raycast Style)
@@ -110,6 +111,10 @@ const AuthForm: React.FC<{
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const [studentCaptcha, setStudentCaptcha] = useState("");
+  const [facultyCaptcha, setFacultyCaptcha] = useState("");
+  const studentCaptchaRef = useRef<CaptchaRef | null>(null);
+  const facultyCaptchaRef = useRef<CaptchaRef | null>(null);
 
   useEffect(() => {
     if (lockoutSeconds <= 0) return;
@@ -154,6 +159,13 @@ const AuthForm: React.FC<{
   const switchTab = (tab: "student" | "faculty") => {
     setActiveTab(tab);
     setError("");
+    if (tab === "student") {
+      studentCaptchaRef.current?.refresh();
+      setStudentCaptcha("");
+    } else {
+      facultyCaptchaRef.current?.refresh();
+      setFacultyCaptcha("");
+    }
   };
 
   const handleStudentLogin = async () => {
@@ -164,6 +176,18 @@ const AuthForm: React.FC<{
 
     if (lockoutSeconds > 0) {
       setError(`Too many failed login attempts. Please wait ${lockoutSeconds} seconds to try again.`);
+      return;
+    }
+
+    if (!studentCaptchaRef.current?.isValid()) {
+      setError("Please enter the correct security code (CAPTCHA).");
+      await logAuditAction(
+        "CAPTCHA_FAILED",
+        "Unauthenticated",
+        `Voter login blocked by invalid CAPTCHA for LRN: ${form.identifier.trim() || "(blank)"}`
+      );
+      studentCaptchaRef.current?.refresh();
+      setStudentCaptcha("");
       return;
     }
 
@@ -193,6 +217,8 @@ const AuthForm: React.FC<{
     }
 
     if (!student) {
+      studentCaptchaRef.current?.refresh();
+      setStudentCaptcha("");
       const nextAttempts = failedAttempts + 1;
       setFailedAttempts(nextAttempts);
 
@@ -232,17 +258,30 @@ const AuthForm: React.FC<{
       `Student voter signed in (LRN: ${studentUser.id}, Grade: ${studentUser.grade || "N/A"}${studentUser.section ? ` - ${studentUser.section}` : ""}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
     );
 
-    localStorage.setItem("currentUser", JSON.stringify(studentUser));
+    sessionStorage.setItem("currentUser", JSON.stringify(studentUser));
     setCurrentUser(studentUser);
     setPage(studentUser.has_voted ? "confirm" : "ballot");
     setLoading(false);
   };
 
   const handleFacultyLogin = async () => {
-    setLoading(true);
-    setError("");
     const { email, password } = facultyForm;
     const cleanEmail = email.trim().toLowerCase();
+
+    if (!facultyCaptchaRef.current?.isValid()) {
+      setError("Please enter the correct security code (CAPTCHA).");
+      await logAuditAction(
+        "CAPTCHA_FAILED",
+        "Unauthenticated",
+        `Faculty login blocked by invalid CAPTCHA for email: ${cleanEmail || "(blank)"}`
+      );
+      facultyCaptchaRef.current?.refresh();
+      setFacultyCaptcha("");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
 
     if (
       (cleanEmail === ADMIN_IDENTIFIER.toLowerCase() ||
@@ -257,11 +296,13 @@ const AuthForm: React.FC<{
         "Faculty Admin",
         `Administrator session started via ${cleanEmail}`
       );
-      localStorage.setItem("currentUser", JSON.stringify(adminUser));
+      sessionStorage.setItem("currentUser", JSON.stringify(adminUser));
       setCurrentUser(adminUser);
       setLoading(false);
       setPage("admin_setup");
     } else {
+      facultyCaptchaRef.current?.refresh();
+      setFacultyCaptcha("");
       await logAuditAction(
         "ADMIN_LOGIN_FAILED",
         "Unauthenticated",
@@ -395,6 +436,13 @@ const AuthForm: React.FC<{
                       </button>
                     </div>
                   </div>
+
+                  <Captcha
+                    ref={studentCaptchaRef}
+                    value={studentCaptcha}
+                    onChange={setStudentCaptcha}
+                    disabled={isTimerExpired || lockoutSeconds > 0}
+                  />
                 </div>
 
                 <button
@@ -463,6 +511,13 @@ const AuthForm: React.FC<{
                       </button>
                     </div>
                   </div>
+
+                  <Captcha
+                    ref={facultyCaptchaRef}
+                    value={facultyCaptcha}
+                    onChange={setFacultyCaptcha}
+                    disabled={loading}
+                  />
                 </div>
 
                 <button

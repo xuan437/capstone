@@ -43,7 +43,7 @@ const AppShell: React.FC = () => {
         logAuditAction("STUDENT_LOGOUT", student.name, `Student session ended (LRN: ${student.id})`);
       }
     }
-    localStorage.removeItem("currentUser");
+    sessionStorage.removeItem("currentUser");
     setCurrentUser(null);
     setPage("login");
     setSelectedStudentId(null);
@@ -60,7 +60,7 @@ const AppShell: React.FC = () => {
 
   useEffect(() => {
     const initSession = async () => {
-      const storedUser = localStorage.getItem("currentUser");
+      const storedUser = sessionStorage.getItem("currentUser");
       if (storedUser) {
         const user: User = JSON.parse(storedUser);
 
@@ -81,7 +81,7 @@ const AppShell: React.FC = () => {
             };
             setCurrentUser(studentUser);
             setPage(studentUser.has_voted ? "confirm" : "ballot");
-            localStorage.setItem("currentUser", JSON.stringify(studentUser));
+            sessionStorage.setItem("currentUser", JSON.stringify(studentUser));
           } else {
             handleLogout();
           }
