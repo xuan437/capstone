@@ -10,7 +10,6 @@ import {
   Zap,
   ArrowRight,
   ArrowLeft,
-  HardDrive,
   Wifi,
   Sparkles,
 } from "lucide-react";

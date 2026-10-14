@@ -863,7 +863,6 @@ const AdminVotersList: React.FC<{
                   justifyContent: "space-between",
                   breakInside: "avoid",
                   pageBreakInside: "avoid",
-                  WebkitColumnBreakInside: "avoid",
                 }}
               >
                 {/* Cut Line Indicator Header */}
