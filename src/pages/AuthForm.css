@@ -987,4 +987,55 @@
   .cd-dial-num { font-size: 17px; }
   .cd-dial-label { font-size: 9px; letter-spacing: 0.1em; }
   .cd-dials-row { gap: 8px; }
-}
+}
+
+/* Face ID Biometric Action & Divider */
+.linear-divider-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--linear-text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 6px 0 2px 0;
+}
+
+.linear-divider-or::before,
+.linear-divider-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--linear-border);
+}
+
+.linear-btn-face-id {
+  width: 100%;
+  height: 37px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  border-radius: var(--linear-radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: var(--linear-transition);
+}
+
+.linear-btn-face-id:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.linear-btn-face-id:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

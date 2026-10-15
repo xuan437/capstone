@@ -39,6 +39,8 @@ import { useLanguage } from "../context/LanguageContext";
 import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 import { VoteSummaryModal } from "../components/voting/VoteSummaryModal";
 import { VoteLockInModal } from "../components/voting/VoteLockInModal";
+import { FaceVerificationModal } from "../components/biometrics/FaceVerificationModal";
+import { FaceMatchResult } from "../utils/faceApi";
 import { getCachedCandidates, cacheCandidates, getCachedPartyLists, cachePartyLists } from "../utils/cacheManager";
 
 interface BallotPageProps {
@@ -78,6 +80,9 @@ const BallotPage: React.FC<BallotPageProps> = ({
   const [confirmationStep, setConfirmationStep] = useState<ConfirmationStep>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [biometricVerified, setBiometricVerified] = useState(false);
+  const [biometricConfidence, setBiometricConfidence] = useState<number | undefined>(undefined);
 
   // UI accordion, timer, and loading states
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
@@ -308,12 +313,21 @@ const BallotPage: React.FC<BallotPageProps> = ({
    * Step 3: Final Lock-In Submit.
    * Executes the actual backend Supabase submission, creates receipts, audit logs,
    * updates voter state, and navigates to confirmation.
+   * Verifies voter biometrically via Face-API if reference photo exists.
    */
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (matchOverride?: FaceMatchResult | null) => {
     if (isTimerExpired) {
       setSubmissionError("The election deadline has passed. Ballot submissions are locked.");
       return;
     }
+
+    // If biometric verification hasn't been completed yet and student has a photo, require/prompt face scan
+    if (!biometricVerified && matchOverride === undefined && currentUser.photo_url) {
+      setShowBiometricModal(true);
+      return;
+    }
+
+    const verifiedConfidence = matchOverride ? matchOverride.confidence : biometricConfidence;
 
     setIsSubmitting(true);
     setSubmissionError("");
@@ -409,11 +423,15 @@ const BallotPage: React.FC<BallotPageProps> = ({
       const receiptId = generateReceiptCode(currentUser.id, votedAt);
       await saveVoteReceipt(currentUser.id, receiptId, voteInsertsWithMeta.length);
 
-      // 8. Log audit entry
+      // 8. Log audit entry with biometric verification tag
+      const bioTag = verifiedConfidence !== undefined
+        ? ` [Biometric Face Verified: ${verifiedConfidence}% match]`
+        : ` [Biometric: PIN / Manual Verification]`;
+
       await logAuditAction(
         "VOTE_SUBMITTED",
         currentUser.name,
-        `Cast ballot with ${voteInsertsWithMeta.length} vote(s) across ${POSITIONS.length} positions. Receipt: ${receiptId}. Location: ${locationText}`
+        `Cast ballot with ${voteInsertsWithMeta.length} vote(s) across ${POSITIONS.length} positions. Receipt: ${receiptId}. Location: ${locationText}${bioTag}`
       );
 
       // 9. Insert into receipts table
@@ -1307,7 +1325,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
       <VoteLockInModal
         isOpen={confirmationStep === "lock_in"}
         onGoBack={handleGoBackToSummary}
-        onFinalSubmit={handleFinalSubmit}
+        onFinalSubmit={() => handleFinalSubmit()}
         isSubmitting={isSubmitting}
         submissionError={submissionError}
         voterName={currentUser.name}
@@ -1315,7 +1333,36 @@ const BallotPage: React.FC<BallotPageProps> = ({
         totalVotesCount={totalVotesCast}
         undervotedPositionsCount={undervotedPositions.length}
         totalPositions={totalPositions}
+        biometricStatus={biometricVerified ? { verified: true, confidence: biometricConfidence } : null}
       />
+
+      {/* -----------------------------------------------------------------------
+          Biometric Voter Verification (Face-API.js) Modal
+          ----------------------------------------------------------------------- */}
+      {showBiometricModal && (
+        <FaceVerificationModal
+          isOpen={showBiometricModal}
+          onClose={() => setShowBiometricModal(false)}
+          onVerified={(result) => {
+            setBiometricVerified(true);
+            setBiometricConfidence(result.confidence);
+            setShowBiometricModal(false);
+            handleFinalSubmit(result);
+          }}
+          referencePhotoUrl={currentUser.photo_url}
+          studentName={currentUser.name}
+          studentId={currentUser.id}
+          title="Biometric Voter Verification"
+          subtitle="Scan your face to verify your identity before permanently locking in your ballot."
+          allowBypass={true}
+          bypassLabel="Proceed with PIN Verification"
+          onBypass={() => {
+            setBiometricVerified(true);
+            setShowBiometricModal(false);
+            handleFinalSubmit(null);
+          }}
+        />
+      )}
     </div>
   );
 };

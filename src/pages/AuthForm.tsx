@@ -5,6 +5,8 @@ import { CountdownTimer } from "../components/CountdownTimer";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { logAuditAction } from "../utils/auditLogger";
 import { Captcha, CaptchaRef } from "../components/Captcha";
+import { FaceVerificationModal } from "../components/biometrics/FaceVerificationModal";
+import { FaceMatchResult } from "../utils/faceApi";
 import "./AuthForm.css";
 
 // Crisp 14px-16px SVG Micro Icons (Linear / Raycast Style)
@@ -95,6 +97,18 @@ const BanIcon = () => (
   </svg>
 );
 
+const ScanFaceIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+    <path d="M3 17v2a2 2 0 0 0 2 2h2" />
+    <path d="M9 10h.01" />
+    <path d="M15 10h.01" />
+    <path d="M9.5 15a3.5 3.5 0 0 0 5 0" />
+  </svg>
+);
+
 const AuthForm: React.FC<{
   setPage: (p: Page) => void;
   setCurrentUser: (u: User) => void;
@@ -113,6 +127,9 @@ const AuthForm: React.FC<{
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [studentCaptcha, setStudentCaptcha] = useState("");
   const [facultyCaptcha, setFacultyCaptcha] = useState("");
+  const [showFaceAuthModal, setShowFaceAuthModal] = useState(false);
+  const [faceAuthStudent, setFaceAuthStudent] = useState<Student | null>(null);
+  const [faceAuthLoading, setFaceAuthLoading] = useState(false);
   const studentCaptchaRef = useRef<CaptchaRef | null>(null);
   const facultyCaptchaRef = useRef<CaptchaRef | null>(null);
 
@@ -262,6 +279,73 @@ const AuthForm: React.FC<{
     setCurrentUser(studentUser);
     setPage(studentUser.has_voted ? "confirm" : "ballot");
     setLoading(false);
+  };
+
+  const handleStartFaceAuth = async () => {
+    if (isTimerExpired) {
+      setError("Election period has ended. Student voting is now closed.");
+      return;
+    }
+    if (lockoutSeconds > 0) {
+      setError(`Too many failed login attempts. Please wait ${lockoutSeconds} seconds to try again.`);
+      return;
+    }
+
+    const identifier = form.identifier.trim();
+    if (!/^\d{12}$/.test(identifier)) {
+      setError("Please enter your 12-digit LRN first to verify your face against your student record.");
+      return;
+    }
+
+    setFaceAuthLoading(true);
+    setError("");
+
+    try {
+      const { data: student, error: fetchErr } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", identifier)
+        .maybeSingle();
+
+      if (fetchErr) {
+        setError(`Unable to look up student: ${fetchErr.message}`);
+        setFaceAuthLoading(false);
+        return;
+      }
+
+      if (!student) {
+        setError("No student account found with this LRN.");
+        setFaceAuthLoading(false);
+        return;
+      }
+
+      setFaceAuthStudent(student as Student);
+      setShowFaceAuthModal(true);
+    } catch (err: any) {
+      setError(err?.message || "Failed to start Face ID verification.");
+    } finally {
+      setFaceAuthLoading(false);
+    }
+  };
+
+  const handleFaceAuthVerified = async (result: FaceMatchResult) => {
+    if (!faceAuthStudent) return;
+    setShowFaceAuthModal(false);
+
+    const studentUser: Student = {
+      ...faceAuthStudent,
+      id: String(faceAuthStudent.id),
+    };
+
+    await logAuditAction(
+      "STUDENT_FACE_LOGIN",
+      studentUser.name,
+      `Student voter signed in via Face ID (LRN: ${studentUser.id}, Confidence: ${result.confidence}%, Distance: ${result.distance.toFixed(3)}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
+    );
+
+    sessionStorage.setItem("currentUser", JSON.stringify(studentUser));
+    setCurrentUser(studentUser);
+    setPage(studentUser.has_voted ? "confirm" : "ballot");
   };
 
   const handleFacultyLogin = async () => {
@@ -458,6 +542,22 @@ const AuthForm: React.FC<{
                       : "Continue to Ballot"}
                   </span>
                   <ArrowRightIcon />
+                </button>
+
+                <div className="linear-divider-or">
+                  <span>or</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="linear-btn-face-id"
+                  onClick={handleStartFaceAuth}
+                  disabled={faceAuthLoading || loading || isTimerExpired || lockoutSeconds > 0}
+                >
+                  <ScanFaceIcon />
+                  <span>
+                    {faceAuthLoading ? "Looking up student..." : "Verify with Face ID"}
+                  </span>
                 </button>
               </>
             ) : (
@@ -678,8 +778,25 @@ const AuthForm: React.FC<{
           <span>Clipboard actions restricted for secure input fields</span>
         </div>
       )}
+
+      {/* Biometric Face ID Login Modal */}
+      {showFaceAuthModal && faceAuthStudent && (
+        <FaceVerificationModal
+          isOpen={showFaceAuthModal}
+          onClose={() => setShowFaceAuthModal(false)}
+          onVerified={handleFaceAuthVerified}
+          referencePhotoUrl={faceAuthStudent.photo_url}
+          studentName={faceAuthStudent.name}
+          studentId={faceAuthStudent.id}
+          title="Face ID Voter Login"
+          subtitle="Align your face with the camera to sign in and unlock your official ballot."
+          allowBypass={true}
+          bypassLabel="Use Password Instead"
+          onBypass={() => setShowFaceAuthModal(false)}
+        />
+      )}
     </div>
   );
 };
 
-export default AuthForm;
+export default AuthForm;

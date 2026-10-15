@@ -5,8 +5,10 @@ import { Page } from "../types";
 import { fileToBase64, base64ToImageUrl } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { useLanguage } from "../context/LanguageContext";
-import { UserPlus, UploadCloud, CheckCircle2, FileText, Download, Key, AlertCircle, List, UserCheck, Upload, User } from "lucide-react";
+import { UserPlus, UploadCloud, CheckCircle2, FileText, Download, Key, AlertCircle, List, UserCheck, Upload, User, Camera, Sparkles } from "lucide-react";
 import { getSectionsForGrade, FIXED_GRADE_LEVELS } from "../utils/sectionConstants";
+import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
+import { validatePhotoFaceQuality, PhotoFaceValidation } from "../utils/faceApi";
 
 interface ParsedCsvStudent {
   lrn: string;
@@ -37,6 +39,9 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [photoQuality, setPhotoQuality] = useState<PhotoFaceValidation | null>(null);
+  const [isAnalyzingFace, setIsAnalyzingFace] = useState(false);
 
   // Bulk Import State
   const [parsedStudents, setParsedStudents] = useState<ParsedCsvStudent[]>([]);
@@ -62,6 +67,19 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
     }
   };
 
+  const analyzePhoto = async (base64: string) => {
+    setIsAnalyzingFace(true);
+    setPhotoQuality(null);
+    try {
+      const result = await validatePhotoFaceQuality(base64);
+      setPhotoQuality(result);
+    } catch (err: any) {
+      console.error("Photo validation error:", err);
+    } finally {
+      setIsAnalyzingFace(false);
+    }
+  };
+
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -70,6 +88,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
       const base64 = await fileToBase64(file);
       setPhotoBase64(base64);
       setPreviewUrl(base64ToImageUrl(base64));
+      analyzePhoto(base64);
     } catch {
       setError("Failed to load photo preview.");
     }
@@ -671,41 +690,91 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
               {/* Profile Photo */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Profile Photo (Optional)
+                  Profile Photo (Optional - Used for Biometric Face ID)
                 </label>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
-                  {previewUrl ? (
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      style={{ width: "42px", height: "42px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--accent-primary)", flexShrink: 0 }}
-                    />
-                  ) : (
-                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-light)", flexShrink: 0 }}>
-                      <User size={20} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px 14px", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        style={{ width: "42px", height: "42px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--accent-primary)", flexShrink: 0 }}
+                      />
+                    ) : (
+                      <div style={{ width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-light)", flexShrink: 0 }}>
+                        <User size={20} />
+                      </div>
+                    )}
+
+                    <label
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        padding: "6px 14px",
+                        backgroundColor: "var(--accent-blue)",
+                        border: "1px solid var(--border-blue)",
+                        borderRadius: "6px",
+                        color: "var(--accent-primary)",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <Upload size={14} />
+                      <span>{photoBase64 ? "Change Photo" : "Upload Photo"}</span>
+                      <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCameraModal(true)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        padding: "6px 14px",
+                        backgroundColor: "rgba(16, 185, 129, 0.12)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        borderRadius: "6px",
+                        color: "#10B981",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <Camera size={14} />
+                      <span>Take with Camera</span>
+                    </button>
+                  </div>
+
+                  {/* AI Facial Quality Feedback Badge */}
+                  {isAnalyzingFace && (
+                    <div className="bio-quality-badge analyzing">
+                      <Sparkles size={13} className="spin" />
+                      <span>AI Face-API analyzing photo quality...</span>
                     </div>
                   )}
-                  <label
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      padding: "6px 14px",
-                      backgroundColor: "var(--accent-blue)",
-                      border: "1px solid var(--border-blue)",
-                      borderRadius: "6px",
-                      color: "var(--accent-primary)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                  >
-                    <Upload size={14} />
-                    <span>{photoBase64 ? "Photo Loaded" : "Choose Profile Photo"}</span>
-                    <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
-                  </label>
+
+                  {!isAnalyzingFace && photoQuality && (
+                    <div className={`bio-quality-badge ${photoQuality.isValid ? "valid" : "invalid"}`}>
+                      {photoQuality.isValid ? (
+                        <>
+                          <CheckCircle2 size={13} />
+                          <span>AI Face Quality: Single clear portrait detected (Face ID Enabled)</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle size={13} />
+                          <span>{photoQuality.message}</span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -905,8 +974,22 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
           )}
         </div>
       )}
+
+      {/* Live Camera Portrait Capture Modal */}
+      {showCameraModal && (
+        <FaceCaptureModal
+          isOpen={showCameraModal}
+          onClose={() => setShowCameraModal(false)}
+          onCapture={(base64) => {
+            setPhotoBase64(base64);
+            setPreviewUrl(base64ToImageUrl(base64));
+            analyzePhoto(base64);
+          }}
+          title="Capture Student Voter Portrait"
+        />
+      )}
     </div>
   );
 };
 
-export default AdminRegister;
+export default AdminRegister;
