@@ -640,7 +640,8 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
       {showPhotoViewer && (
         <PhotoViewerModal
           imageUrl={avatar}
-          title={`${candidate.name} — Candidate Photo`}
+          title={`${candidate.name}`}
+          subtitle={`${candidate.position || "Candidate"}${candidate.partylist_name ? ` • ${candidate.partylist_name}` : ""}`}
           onClose={() => setShowPhotoViewer(false)}
         />
       )}

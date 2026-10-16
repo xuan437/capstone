@@ -1008,7 +1008,8 @@ const StudentProfile: React.FC<{
       {showPhotoViewer && (
         <PhotoViewerModal
           imageUrl={avatarUrl}
-          title={`${student.name} — Voter Photo`}
+          title={`${student.name}`}
+          subtitle={`LRN: ${student.id} • Grade ${student.grade}${student.section ? ` - ${student.section}` : ""}`}
           onClose={() => setShowPhotoViewer(false)}
         />
       )}

@@ -22,6 +22,7 @@ import "./AdminVotersList.css";
 import type { Student, Page } from "../types";
 import { getStudentPhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import BubbleLoader from "../components/BubbleLoader";
+import PhotoViewerModal from "../components/PhotoViewerModal";
 import { useLanguage } from "../context/LanguageContext";
 import { logAuditAction } from "../utils/auditLogger";
 
@@ -48,6 +49,7 @@ const AdminVotersList: React.FC<{
   const [pdfAuthError, setPdfAuthError] = useState("");
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [isExporting, setIsExporting] = useState(false);
+  const [viewingPhotoStudent, setViewingPhotoStudent] = useState<Student | null>(null);
   const pdfPrintRef = useRef<HTMLDivElement>(null);
 
   // View password authorization states
@@ -511,6 +513,8 @@ const AdminVotersList: React.FC<{
                           src={getStudentPhoto(student.photo_url, student.name, student.id)}
                           alt={student.name}
                           className="voter-avatar-img"
+                          onClick={() => setViewingPhotoStudent(student)}
+                          title="Click to view full photo"
                           onError={(e) => {
                             e.currentTarget.src = getRealisticFallbackPhoto(student.name, student.id);
                           }}
@@ -807,6 +811,16 @@ const AdminVotersList: React.FC<{
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Full Photo Viewer Modal for Admin Inspection */}
+      {viewingPhotoStudent && (
+        <PhotoViewerModal
+          imageUrl={getStudentPhoto(viewingPhotoStudent.photo_url, viewingPhotoStudent.name, viewingPhotoStudent.id)}
+          title={viewingPhotoStudent.name}
+          subtitle={`LRN: ${viewingPhotoStudent.id} • Grade ${viewingPhotoStudent.grade}${viewingPhotoStudent.section ? ` - ${viewingPhotoStudent.section}` : ""}`}
+          onClose={() => setViewingPhotoStudent(null)}
+        />
       )}
 
       {/* Hidden PDF Printable Container - Printable Voter Access Pass Tickets */}
