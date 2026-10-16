@@ -132,6 +132,7 @@ const AuthForm: React.FC<{
   const [faceAuthLoading, setFaceAuthLoading] = useState(false);
   const studentCaptchaRef = useRef<CaptchaRef | null>(null);
   const facultyCaptchaRef = useRef<CaptchaRef | null>(null);
+  const [isTabAnimating, setIsTabAnimating] = useState(false);
 
   useEffect(() => {
     if (lockoutSeconds <= 0) return;
@@ -193,15 +194,21 @@ const AuthForm: React.FC<{
     setFacultyForm({ ...facultyForm, [e.target.name]: e.target.value });
 
   const switchTab = (tab: "student" | "faculty") => {
-    setActiveTab(tab);
+    if (tab === activeTab || isTabAnimating) return;
+    setIsTabAnimating(true);
     setError("");
-    if (tab === "student") {
-      studentCaptchaRef.current?.refresh();
-      setStudentCaptcha("");
-    } else {
-      facultyCaptchaRef.current?.refresh();
-      setFacultyCaptcha("");
-    }
+    // Let exit animation play for 160ms, then swap content
+    setTimeout(() => {
+      setActiveTab(tab);
+      if (tab === "student") {
+        studentCaptchaRef.current?.refresh();
+        setStudentCaptcha("");
+      } else {
+        facultyCaptchaRef.current?.refresh();
+        setFacultyCaptcha("");
+      }
+      setIsTabAnimating(false);
+    }, 160);
   };
 
   const handleStudentLogin = async () => {
@@ -507,7 +514,7 @@ const AuthForm: React.FC<{
               e.preventDefault();
               activeTab === "student" ? handleStudentLogin() : handleFacultyLogin();
             }}
-            className="linear-form-body"
+            className={`linear-form-body${isTabAnimating ? " tab-exit" : " tab-enter"}`}
           >
             {activeTab === "student" ? (
               <>

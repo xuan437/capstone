@@ -197,6 +197,63 @@
   gap: 12px;
 }
 
+/* Tab Switch Animations */
+@keyframes tabSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes tabSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.99);
+    filter: blur(1px);
+  }
+}
+
+.linear-form-body.tab-enter {
+  animation: tabSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.linear-form-body.tab-exit {
+  animation: tabSlideOut 0.16s cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none;
+}
+
+/* Smooth active tab indicator slide */
+.linear-tab-item {
+  position: relative;
+}
+
+.linear-tab-item.active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--linear-radius-sm);
+  background: var(--linear-tab-active);
+  z-index: -1;
+  animation: tabPillIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tabPillIn {
+  from { opacity: 0.4; transform: scaleX(0.92); }
+  to   { opacity: 1;   transform: scaleX(1); }
+}
+
+
 .linear-field-stack {
   display: flex;
   flex-direction: column;
