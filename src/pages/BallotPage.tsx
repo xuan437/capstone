@@ -1312,10 +1312,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
           ) : (
             <>
               <Send size={16} />
-              <span>
-                {t.reviewConfirmBtn || "Review & Submit Ballot"}
-                {totalVotesCast > 0 ? ` (${totalVotesCast} Selected)` : " (Blank Ballot)"}
-              </span>
+              <span>Submit Official Ballot</span>
             </>
           )}
         </button>
