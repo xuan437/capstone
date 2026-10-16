@@ -608,7 +608,7 @@ const StudentProfile: React.FC<{
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
           <div className={`profile-voted-pill ${student.has_voted ? "voted" : "pending"}`} style={{ padding: "4px 12px", fontSize: "12px", borderRadius: "12px" }}>
             {student.has_voted ? <CheckCircle2 size={13} /> : <Clock size={13} />}
-            {student.has_voted ? "Official Vote Cast" : "Voting Pending"}
+            {student.has_voted ? "Official Vote Cast" : "Not Voted"}
           </div>
 
           <button className="btn-secondary" onClick={fetchStudentProfile} style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "11.5px", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -648,7 +648,7 @@ const StudentProfile: React.FC<{
               Status
             </div>
             <div style={{ fontSize: "13px", fontWeight: 600, color: student.has_voted ? "#10B981" : "#F59E0B" }}>
-              {student.has_voted ? "Voted" : "Pending"}
+              {student.has_voted ? "Voted" : "Not Voted"}
             </div>
           </div>
         </div>

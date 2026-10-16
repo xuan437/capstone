@@ -415,7 +415,7 @@ const AdminVotersList: React.FC<{
           </div>
           <div className="stat-box light">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span className="overline" style={{ color: "var(--color-warning)", marginBottom: "2px" }}>Pending</span>
+              <span className="overline" style={{ color: "var(--color-warning)", marginBottom: "2px" }}>Not Voted</span>
               <Clock size={15} style={{ color: "var(--color-warning)", opacity: 0.7 }} />
             </div>
             <h1 style={{ fontSize: "24px", margin: 0, fontWeight: 600 }}>{students.filter((s) => !s.has_voted).length}</h1>
@@ -561,7 +561,7 @@ const AdminVotersList: React.FC<{
                       ) : (
                         <span className="badge-pill pending">
                           <Clock3 size={12} />
-                          Pending
+                          Not Voted
                         </span>
                       )}
                     </td>
