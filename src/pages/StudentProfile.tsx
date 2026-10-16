@@ -22,7 +22,6 @@ import {
   Check,
   Lock,
   ScanFace,
-  Sparkles,
 } from "lucide-react";
 import { logAuditAction } from "../utils/auditLogger";
 import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
