@@ -216,11 +216,11 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
             matchResult = compareFaceDescriptors(detection.descriptor, refDescriptor, 0.58);
             setCurrentMatch(matchResult);
 
-            if (matchResult.isMatch && matchResult.confidence >= 65) {
+            if (matchResult.isMatch && matchResult.confidence >= 60) {
               consecutiveMatches.current += 1;
 
-              // Require 3 consecutive confident frames to avoid false positives
-              if (consecutiveMatches.current >= 3 && !verificationSuccess) {
+              // Require 2 consecutive confident frames to avoid false positives
+              if (consecutiveMatches.current >= 2 && !verificationSuccess) {
                 setVerificationSuccess(true);
 
                 // Capture snapshot for receipt audit
@@ -248,7 +248,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
                     ...matchResult!,
                     snapshot: snapshotBase64,
                   });
-                }, 800);
+                }, 300);
                 return;
               }
             } else {

@@ -38,30 +38,25 @@ export async function loadFaceApiModels(): Promise<boolean> {
   if (modelsLoadingPromise) return modelsLoadingPromise;
 
   modelsLoadingPromise = (async () => {
+    // Load only 3 essential models: TinyFaceDetector + Landmarks + Recognition
+    // Skipping ssdMobilenetv1 (heavy, ~6 MB) and faceExpressionNet (not needed)
+    const REQUIRED_MODELS = [
+      (path: string) => faceapi.nets.tinyFaceDetector.loadFromUri(path),
+      (path: string) => faceapi.nets.faceLandmark68Net.loadFromUri(path),
+      (path: string) => faceapi.nets.faceRecognitionNet.loadFromUri(path),
+    ];
     try {
-      console.log('[FaceAPI] Loading neural network models from local path:', LOCAL_MODELS_PATH);
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(LOCAL_MODELS_PATH),
-        faceapi.nets.ssdMobilenetv1.loadFromUri(LOCAL_MODELS_PATH),
-        faceapi.nets.faceLandmark68Net.loadFromUri(LOCAL_MODELS_PATH),
-        faceapi.nets.faceRecognitionNet.loadFromUri(LOCAL_MODELS_PATH),
-        faceapi.nets.faceExpressionNet.loadFromUri(LOCAL_MODELS_PATH),
-      ]);
+      console.log('[FaceAPI] Loading 3 essential models from local path:', LOCAL_MODELS_PATH);
+      await Promise.all(REQUIRED_MODELS.map(fn => fn(LOCAL_MODELS_PATH)));
       modelsLoaded = true;
-      console.log('[FaceAPI] Neural models loaded successfully from local storage.');
+      console.log('[FaceAPI] Essential models loaded successfully from local storage.');
       return true;
     } catch (localErr) {
       console.warn('[FaceAPI] Failed to load models locally, attempting CDN fallback:', localErr);
       try {
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(CDN_MODELS_PATH),
-          faceapi.nets.ssdMobilenetv1.loadFromUri(CDN_MODELS_PATH),
-          faceapi.nets.faceLandmark68Net.loadFromUri(CDN_MODELS_PATH),
-          faceapi.nets.faceRecognitionNet.loadFromUri(CDN_MODELS_PATH),
-          faceapi.nets.faceExpressionNet.loadFromUri(CDN_MODELS_PATH),
-        ]);
+        await Promise.all(REQUIRED_MODELS.map(fn => fn(CDN_MODELS_PATH)));
         modelsLoaded = true;
-        console.log('[FaceAPI] Neural models loaded successfully from CDN fallback.');
+        console.log('[FaceAPI] Essential models loaded successfully from CDN fallback.');
         return true;
       } catch (cdnErr) {
         console.error('[FaceAPI] Failed to load models from both local and CDN sources:', cdnErr);
@@ -103,19 +98,22 @@ export async function extractDescriptorFromPhoto(photoUrl: string): Promise<Floa
   try {
     const img = await createHtmlImage(photoUrl);
 
-    // First try high-accuracy SSD Mobilenet V1
+    // Use TinyFaceDetector (fast, ~190 KB) — sufficient for reference photo extraction
     let detection = await faceapi
-      .detectSingleFace(img, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.3 }))
       .withFaceLandmarks()
       .withFaceDescriptor();
 
-    // Fallback to TinyFaceDetector if SSD Mobilenet didn't catch (e.g. low-res photo)
-    if (!detection) {
-      detection = await faceapi
-        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.3 }))
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+    if (detection && detection.descriptor) {
+      descriptorCache.set(photoUrl, detection.descriptor);
+      return detection.descriptor;
     }
+
+    // Retry with lower threshold for low-res or poorly-lit photos
+    detection = await faceapi
+      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.2 }))
+      .withFaceLandmarks()
+      .withFaceDescriptor();
 
     if (detection && detection.descriptor) {
       descriptorCache.set(photoUrl, detection.descriptor);
@@ -195,15 +193,17 @@ export async function detectSingleFaceFromVideo(videoEl: HTMLVideoElement) {
   if (!videoEl || videoEl.readyState < 2 || videoEl.paused || videoEl.ended) return null;
 
   try {
+    // inputSize 160: fastest inference (~2x faster than 224) with acceptable accuracy
+    // scoreThreshold 0.35: catch faces quickly without waiting for high-confidence frame
     const options = new faceapi.TinyFaceDetectorOptions({
-      inputSize: 224, // Fast 224x224 input for real-time webcam frame rate
-      scoreThreshold: 0.45,
+      inputSize: 160,
+      scoreThreshold: 0.35,
     });
 
+    // Skip withFaceExpressions — not needed and adds ~15ms per frame
     const detection = await faceapi
       .detectSingleFace(videoEl, options)
       .withFaceLandmarks()
-      .withFaceExpressions()
       .withFaceDescriptor();
 
     return detection || null;
