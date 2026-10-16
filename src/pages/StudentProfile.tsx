@@ -889,36 +889,7 @@ const StudentProfile: React.FC<{
             </div>
           </div>
 
-          {votes.length > 0 && (
-            <button
-              type="button"
-              className={showVotesCast ? "btn-secondary" : "btn-primary"}
-              onClick={handleToggleVotesCast}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                fontSize: "12px",
-                fontWeight: 600,
-                padding: "5px 12px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                ...(showVotesCast ? {} : { background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }),
-              }}
-            >
-              {showVotesCast ? (
-                <>
-                  <EyeOff size={13} />
-                  <span>Hide Votes</span>
-                </>
-              ) : (
-                <>
-                  <Lock size={13} />
-                  <span>View Votes Record</span>
-                </>
-              )}
-            </button>
-          )}
+
         </div>
 
         {votes.length === 0 ? (
