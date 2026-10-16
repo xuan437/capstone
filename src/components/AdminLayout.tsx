@@ -21,6 +21,7 @@ import {
   FileText,
   X,
   Flag,
+  Stamp,
 } from "lucide-react";
 import { Page, User } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
@@ -216,6 +217,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
     { label: t.navAuditLogs || "Audit Logs", page: "admin_audit_logs", IconComponent: ShieldAlert },
     { label: t.navLiveResults || "Live Standings", page: "results", IconComponent: BarChart3 },
     { label: t.navDownloadPdf || "Export Results", page: "download_results", IconComponent: FileSpreadsheet },
+    { label: "Digital Seal", page: "admin_digital_seal", IconComponent: Stamp },
   ];
 
   const activeModalDetails = activeModalType ? modalConfig[activeModalType] : null;

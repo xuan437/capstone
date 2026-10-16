@@ -53,7 +53,8 @@ export type Page =
   | "admin_edit_candidate"
   | "admin_election_settings"
   | "admin_audit_logs"
-  | "admin_partylists";
+  | "admin_partylists"
+  | "admin_digital_seal";
 
 export const POSITIONS = [
   "President",

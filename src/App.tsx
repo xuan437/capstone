@@ -20,6 +20,7 @@ import AdminEditCandidate from "./pages/AdminEditCandidate";
 import AdminElectionSettings from "./pages/AdminElectionSettings";
 import { AdminAuditLogs } from "./pages/AdminAuditLogs";
 import AdminPartylists from "./pages/AdminPartylists";
+import AdminDigitalSeal from "./pages/AdminDigitalSeal";
 import PrivacyModal from "./components/PrivacyModal";
 import AdminLayout from "./components/AdminLayout";
 import VoterLayout from "./components/VoterLayout";
@@ -110,6 +111,7 @@ const AppShell: React.FC = () => {
     "download_results",
     "student_profile",
     "candidate_profile",
+    "admin_digital_seal",
   ].includes(page);
 
   const renderContent = () => {
@@ -222,6 +224,9 @@ const AppShell: React.FC = () => {
 
       case "download_results":
         return <DownloadResults setPage={handleNavigate} />;
+
+      case "admin_digital_seal":
+        return <AdminDigitalSeal setPage={handleNavigate} />;
 
       default:
         return null;
