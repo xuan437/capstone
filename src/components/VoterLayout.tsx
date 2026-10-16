@@ -257,7 +257,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             <span>Official Ballot</span>
           </button>
 
-          {/* Student Voter Dashboard Item */}
+          {/* Voters Profile Navigation Item */}
           <button
             className={`admin-nav-item ${activePage === "student_profile" ? "active" : ""}`}
             onClick={() => {
@@ -266,7 +266,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             }}
           >
             <UserCheck size={15} />
-            <span>Voter Dashboard</span>
+            <span>Voters Profile</span>
           </button>
 
           {/* Settings Section Navigation Item */}
@@ -358,7 +358,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               setSidebarOpen(false);
             }}
             style={{ cursor: "pointer" }}
-            title="Open Student Voter Dashboard"
+            title="Open Voters Profile"
           >
             {currentUser ? (
               <img
@@ -422,7 +422,7 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
                 {activePage === "ballot"
                   ? "Official Electronic Ballot"
                   : activePage === "student_profile"
-                  ? "Student Voter Dashboard"
+                  ? "Voters Profile"
                   : activePage === "confirm"
                   ? "Vote Submitted"
                   : "Live Standings"}
