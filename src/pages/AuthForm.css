@@ -86,7 +86,7 @@
   flex-direction: row;
   width: 100%;
   max-width: 880px;
-  min-height: 480px;
+  min-height: 590px;
   background: var(--linear-bg-card);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
@@ -105,7 +105,7 @@
   padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0;
   box-sizing: border-box;
 }
@@ -195,6 +195,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 325px;
 }
 
 /* Tab Switch Animations */
@@ -395,7 +396,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: auto;
   padding: 5px 10px;
   background: var(--linear-panel-bg);
   border: 1px solid var(--linear-border);
@@ -1116,4 +1117,36 @@
   height: 15px;
   color: #10b981;
 }
+
+.linear-security-badge-mandatory.faculty-notice {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #818cf8;
+}
+
+.linear-security-badge-mandatory.faculty-notice svg {
+  color: #818cf8;
+}
+
+.linear-faculty-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--linear-radius-md);
+  font-size: 11px;
+  color: var(--linear-text-secondary);
+  background: var(--linear-panel-bg);
+  border: 1px solid var(--linear-border);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.linear-faculty-hint svg {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  color: var(--linear-text-tertiary);
+}
+
 

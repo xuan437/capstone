@@ -646,6 +646,11 @@ const AuthForm: React.FC<{
               </>
             ) : (
               <>
+                <div className="linear-security-badge-mandatory faculty-notice">
+                  <ShieldBadgeIcon />
+                  <span>Authorized election administrator & faculty credentials only</span>
+                </div>
+
                 <div className="linear-field-stack">
                   <div className="linear-field-group">
                     <label className="linear-field-label">Faculty / Admin Email</label>
@@ -709,9 +714,15 @@ const AuthForm: React.FC<{
                   className="linear-btn-primary"
                   disabled={loading}
                 >
+                  <ShieldBadgeIcon />
                   <span>{loading ? "Authenticating..." : "Access Admin Console"}</span>
                   <ArrowRightIcon />
                 </button>
+
+                <div className="linear-faculty-hint">
+                  <LockIcon />
+                  <span>Protected SSLG administration console. Sessions are securely audited.</span>
+                </div>
               </>
             )}
           </form>
