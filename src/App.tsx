@@ -210,8 +210,12 @@ const AppShell: React.FC = () => {
       case "results":
         return <ResultsDashboard currentUser={currentUser} setPage={handleNavigate} searchTerm={searchTerm} />;
 
-      case "student_profile":
-        return selectedStudentId ? <StudentProfile setPage={handleNavigate} studentId={selectedStudentId} /> : null;
+      case "student_profile": {
+        const studentIdToLoad =
+          selectedStudentId ||
+          (currentUser && "id" in currentUser && !("isAdmin" in currentUser) ? String(currentUser.id) : null);
+        return studentIdToLoad ? <StudentProfile setPage={handleNavigate} studentId={studentIdToLoad} /> : null;
+      }
 
       case "candidate_profile":
         return selectedCandidateId ? (

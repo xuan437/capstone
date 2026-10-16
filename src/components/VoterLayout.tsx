@@ -12,6 +12,7 @@ import {
   Menu,
   Search,
   X,
+  UserCheck,
 } from "lucide-react";
 import { Page, User, Student } from "../types";
 import { ThemeToggle } from "./ThemeToggle";
@@ -256,6 +257,18 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
             <span>Official Ballot</span>
           </button>
 
+          {/* Student Voter Dashboard Item */}
+          <button
+            className={`admin-nav-item ${activePage === "student_profile" ? "active" : ""}`}
+            onClick={() => {
+              setPage("student_profile");
+              setSidebarOpen(false);
+            }}
+          >
+            <UserCheck size={15} />
+            <span>Voter Dashboard</span>
+          </button>
+
           {/* Settings Section Navigation Item */}
           <button
             className={`admin-nav-item ${settingsOpen ? "active" : ""}`}
@@ -338,7 +351,15 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
         {/* Sidebar Footer: Student Profile Badge + Theme Toggle + Logout */}
         <div className="admin-sidebar-footer">
           {/* Student Profile Chip inside Sidebar */}
-          <div className="admin-user-badge-sidebar">
+          <div
+            className="admin-user-badge-sidebar"
+            onClick={() => {
+              setPage("student_profile");
+              setSidebarOpen(false);
+            }}
+            style={{ cursor: "pointer" }}
+            title="Open Student Voter Dashboard"
+          >
             {currentUser ? (
               <img
                 src={getStudentPhoto(
@@ -398,7 +419,13 @@ const VoterLayout: React.FC<VoterLayoutProps> = ({
               </button>
 
               <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
-                {activePage === "ballot" ? "Official Electronic Ballot" : activePage === "confirm" ? "Vote Submitted" : "Live Standings"}
+                {activePage === "ballot"
+                  ? "Official Electronic Ballot"
+                  : activePage === "student_profile"
+                  ? "Student Voter Dashboard"
+                  : activePage === "confirm"
+                  ? "Vote Submitted"
+                  : "Live Standings"}
               </div>
             </div>
 
