@@ -401,12 +401,7 @@ const AdminDigitalSeal: React.FC<{ setPage: (p: Page) => void }> = () => {
                 type="text"
                 value={sealerName}
                 onChange={(e) => setSealerName(e.target.value)}
-                style={{
-                  width: "100%", boxSizing: "border-box", padding: "8px 12px",
-                  borderRadius: "8px", border: "1px solid var(--border-subtle)",
-                  background: "var(--bg-main)", color: "var(--text-main)",
-                  fontSize: "12.5px", marginBottom: "12px", fontFamily: "inherit",
-                }}
+                className="seal-input"
               />
 
               {keyPair && (
@@ -662,10 +657,10 @@ const AdminDigitalSeal: React.FC<{ setPage: (p: Page) => void }> = () => {
       )}
 
       {/* Info footer */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "12px 16px", background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: 10, fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.6 }}>
-        <Info size={14} style={{ color: "var(--text-light)", flexShrink: 0, marginTop: 1 }} />
+      <div className="seal-info-notice">
+        <Info size={15} />
         <span>
-          This system uses <strong>ECDSA P-256</strong> via the browser Web Crypto API. Private keys are generated in-session and never transmitted. The public key and signature are stored in the seal package for independent verification.
+          This system uses <strong>ECDSA P-256</strong> asymmetric cryptography via the browser Web Crypto API. Private keys are generated in-session and never transmitted. The public key and signature are stored in the seal package for independent verification.
         </span>
       </div>
     </div>
