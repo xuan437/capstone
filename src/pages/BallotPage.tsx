@@ -42,6 +42,7 @@ import { VoteLockInModal } from "../components/voting/VoteLockInModal";
 import { FaceVerificationModal } from "../components/biometrics/FaceVerificationModal";
 import { FaceMatchResult } from "../utils/faceApi";
 import { getCachedCandidates, cacheCandidates, getCachedPartyLists, cachePartyLists } from "../utils/cacheManager";
+import { GeofenceBlocker } from "../components/geofencing/GeofenceBlocker";
 
 interface BallotPageProps {
   setPage: (p: Page) => void;
@@ -83,6 +84,14 @@ const BallotPage: React.FC<BallotPageProps> = ({
   const [showBiometricModal, setShowBiometricModal] = useState(false);
   const [biometricVerified, setBiometricVerified] = useState(false);
   const [biometricConfidence, setBiometricConfidence] = useState<number | undefined>(undefined);
+
+  // ---------------------------------------------------------------------------
+  // Geofencing State
+  // ---------------------------------------------------------------------------
+  // "checking" = blocker modal is open running GPS/IP check
+  // "allowed"  = check passed, ballot is accessible
+  // "blocked"  = user is outside Negros Oriental (hard block)
+  const [geoStatus, setGeoStatus] = useState<"checking" | "allowed" | "blocked">("checking");
 
   // UI accordion, timer, and loading states
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
@@ -521,6 +530,19 @@ const BallotPage: React.FC<BallotPageProps> = ({
       <div className="screen-content flex-center" style={{ fontSize: "13px", color: "var(--text-muted)" }}>
         Loading electronic ballot...
       </div>
+    );
+  }
+
+  // Show geofence blocker until location check resolves
+  if (geoStatus === "checking") {
+    return (
+      <GeofenceBlocker
+        onAllowed={() => setGeoStatus("allowed")}
+        onBlocked={() => {
+          setGeoStatus("blocked");
+          setPage("profile");
+        }}
+      />
     );
   }
 
