@@ -21,8 +21,13 @@ import {
   Upload,
   Check,
   Lock,
+  ScanFace,
+  Sparkles,
 } from "lucide-react";
 import { logAuditAction } from "../utils/auditLogger";
+import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
+import { FaceVerificationModal } from "../components/biometrics/FaceVerificationModal";
+import { validatePhotoFaceQuality } from "../utils/faceApi";
 
 const StudentProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -41,6 +46,11 @@ const StudentProfile: React.FC<{
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Biometric Face Registration & Verification Test States
+  const [showFaceCaptureModal, setShowFaceCaptureModal] = useState(false);
+  const [showFaceTestModal, setShowFaceTestModal] = useState(false);
+  const [faceTestResult, setFaceTestResult] = useState<string | null>(null);
 
   // Resolved vote metadata: prefer student record, fall back to first vote row
   const [resolvedVotedAt, setResolvedVotedAt] = useState<string | null>(null);
@@ -240,6 +250,21 @@ const StudentProfile: React.FC<{
 
     try {
       const base64 = await fileToBase64(file);
+
+      // Automated Face Quality Check
+      try {
+        const quality = await validatePhotoFaceQuality(base64);
+        if (!quality.isValid) {
+          if (!window.confirm(`${quality.message}\n\nDo you still want to proceed with this photo?`)) {
+            setUploadingPhoto(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
+          }
+        }
+      } catch (validationErr) {
+        console.warn("Face validation check warning:", validationErr);
+      }
+
       const { error: updateErr } = await supabase
         .from("students")
         .update({ photo_url: base64 })
@@ -248,6 +273,15 @@ const StudentProfile: React.FC<{
       if (updateErr) throw updateErr;
 
       setStudent((prev) => (prev ? { ...prev, photo_url: base64 } : null));
+
+      if (student) {
+        await logAuditAction(
+          "VOTER_BIOMETRIC_UPDATED",
+          "Admin",
+          `Updated portrait photo for voter ${student.name} (LRN: ${student.id})`
+        );
+      }
+
       setPhotoToast("Voter photo updated successfully!");
       setTimeout(() => setPhotoToast(null), 3500);
     } catch (err: any) {
@@ -256,6 +290,44 @@ const StudentProfile: React.FC<{
       setUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleFaceCaptured = async (capturedBase64: string) => {
+    if (!student) return;
+    setShowFaceCaptureModal(false);
+    setUploadingPhoto(true);
+    setPhotoError(null);
+
+    try {
+      const { error: updateErr } = await supabase
+        .from("students")
+        .update({ photo_url: capturedBase64 })
+        .eq("id", student.id);
+
+      if (updateErr) throw updateErr;
+
+      setStudent((prev) => (prev ? { ...prev, photo_url: capturedBase64 } : null));
+
+      await logAuditAction(
+        "VOTER_BIOMETRIC_REGISTERED",
+        "Admin",
+        `Biometric face portrait enrolled via webcam for voter ${student.name} (LRN: ${student.id})`
+      );
+
+      setPhotoToast("Face ID registered successfully!");
+      setTimeout(() => setPhotoToast(null), 4000);
+    } catch (err: any) {
+      console.error("Error saving captured face:", err);
+      setPhotoError(err.message || "Failed to save captured face.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleFaceTestVerified = (result: any) => {
+    setShowFaceTestModal(false);
+    setFaceTestResult(`Verified! Match Confidence: ${result.confidence}%`);
+    setTimeout(() => setFaceTestResult(null), 6000);
   };
 
   const handleRemovePhoto = async () => {
@@ -272,7 +344,16 @@ const StudentProfile: React.FC<{
       if (updateErr) throw updateErr;
 
       setStudent((prev) => (prev ? { ...prev, photo_url: undefined } : null));
-      setPhotoToast("Voter photo removed.");
+
+      if (student) {
+        await logAuditAction(
+          "VOTER_BIOMETRIC_REMOVED",
+          "Admin",
+          `Removed biometric photo for voter ${student.name} (LRN: ${student.id})`
+        );
+      }
+
+      setPhotoToast("Voter photo removed. Default fallback portrait active.");
       setTimeout(() => setPhotoToast(null), 3500);
     } catch (err: any) {
       setPhotoError(err.message || "Failed to remove photo.");
@@ -383,10 +464,10 @@ const StudentProfile: React.FC<{
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                fileInputRef.current?.click();
+                setShowFaceCaptureModal(true);
               }}
               disabled={uploadingPhoto}
-              title="Change voter photo"
+              title="Register / Update Face ID with Camera"
               style={{
                 position: "absolute",
                 bottom: "-2px",
@@ -394,7 +475,7 @@ const StudentProfile: React.FC<{
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                backgroundColor: student.has_voted ? "#10B981" : "var(--accent-primary, #6366F1)",
+                backgroundColor: student.photo_url ? "#10B981" : "var(--accent-primary, #6366F1)",
                 color: "#ffffff",
                 border: "2px solid var(--bg-surface)",
                 display: "flex",
@@ -417,82 +498,58 @@ const StudentProfile: React.FC<{
             type="file"
             ref={fileInputRef}
             onChange={handlePhotoUpload}
-            accept="image/png, image/jpeg, image/webp, image/gif"
+            accept="image/png, image/jpeg, image/webp"
             style={{ display: "none" }}
           />
 
-          {/* Quick Photo Actions Buttons */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "10px" }}>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingPhoto}
-              style={{
-                background: "var(--bg-subtle, rgba(99, 102, 241, 0.08))",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "14px",
-                padding: "3px 10px",
-                fontSize: "11px",
-                fontWeight: 500,
-                color: "var(--accent-primary)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
-            >
-              <Upload size={11} />
-              {student.photo_url ? "Change Photo" : "Upload Photo"}
-            </button>
-
-            {student.photo_url && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowPhotoViewer(true)}
-                  style={{
-                    background: "var(--bg-subtle, rgba(0,0,0,0.04))",
-                    border: "1px solid var(--border-subtle)",
-                    borderRadius: "14px",
-                    padding: "3px 8px",
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "3px",
-                  }}
-                  title="View full resolution"
-                >
-                  <Maximize2 size={11} />
-                  View
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRemovePhoto}
-                  disabled={uploadingPhoto}
-                  style={{
-                    background: "transparent",
-                    border: "1px solid var(--border-subtle)",
-                    borderRadius: "14px",
-                    padding: "3px 8px",
-                    fontSize: "11px",
-                    fontWeight: 500,
-                    color: "#EF4444",
-                    cursor: "pointer",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "3px",
-                  }}
-                  title="Remove voter photo"
-                >
-                  <Trash2 size={11} />
-                  Remove
-                </button>
-              </>
-            )}
-          </div>
+          {/* Quick Photo Actions Buttons (View & Remove only if photo exists) */}
+          {student.photo_url && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", marginTop: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => setShowPhotoViewer(true)}
+                style={{
+                  background: "var(--bg-subtle, rgba(0,0,0,0.04))",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "14px",
+                  padding: "3px 8px",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "3px",
+                }}
+                title="View full resolution"
+              >
+                <Maximize2 size={11} />
+                View
+              </button>
+              <button
+                type="button"
+                onClick={handleRemovePhoto}
+                disabled={uploadingPhoto}
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "14px",
+                  padding: "3px 8px",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "#EF4444",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "3px",
+                }}
+                title="Remove voter photo"
+              >
+                <Trash2 size={11} />
+                Remove
+              </button>
+            </div>
+          )}
 
           {/* Toast / Feedback Message */}
           {photoToast && (
@@ -663,6 +720,141 @@ const StudentProfile: React.FC<{
                 <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not Voted</span>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Biometric Face ID Registration Card */}
+      <div
+        style={{
+          backgroundColor: "var(--bg-surface)",
+          border: "1px solid var(--border-subtle)",
+          borderRadius: "8px",
+          padding: "16px",
+          marginBottom: "16px",
+          boxShadow: "0 1px 2px 0 rgba(0,0,0,0.05)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "12px",
+            paddingBottom: "10px",
+            borderBottom: "1px solid var(--border-subtle)",
+            flexWrap: "wrap",
+            gap: "8px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <ScanFace size={18} style={{ color: "#10B981" }} />
+            <div>
+              <h3 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--text-main)" }}>
+                Biometric Face Registration
+              </h3>
+              <p style={{ margin: 0, fontSize: "11.5px", color: "var(--text-muted)" }}>
+                Facial recognition profile used for voter portal sign-in and ballot verification.
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              padding: "3px 10px",
+              borderRadius: "12px",
+              fontSize: "11.5px",
+              fontWeight: 600,
+              background: student.photo_url ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.12)",
+              color: student.photo_url ? "#10B981" : "#F59E0B",
+              border: `1px solid ${student.photo_url ? "rgba(16, 185, 129, 0.25)" : "rgba(245, 158, 11, 0.25)"}`,
+            }}
+          >
+            {student.photo_url ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+            <span>{student.photo_url ? "Face ID Enrolled" : "Not Enrolled (Fallback)"}</span>
+          </div>
+        </div>
+
+        {/* Info & Action Row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+          <div style={{ flex: 1, minWidth: "220px", fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+            {student.photo_url ? (
+              <span>
+                Official facial biometric portrait is active. The voter can sign in to the portal and lock in their ballot using Face ID.
+              </span>
+            ) : (
+              <span>
+                No official facial biometrics are enrolled for this student. Click <strong>Register Face ID</strong> to capture their face via webcam or upload a portrait.
+              </span>
+            )}
+            {faceTestResult && (
+              <div style={{ marginTop: "6px", color: "#10B981", fontWeight: 600, fontSize: "12px", display: "flex", alignItems: "center", gap: "4px" }}>
+                <CheckCircle2 size={13} /> {faceTestResult}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => setShowFaceCaptureModal(true)}
+              style={{
+                padding: "6px 14px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                cursor: "pointer",
+              }}
+            >
+              <Camera size={13} />
+              <span>{student.photo_url ? "Re-register Face" : "Register Face ID"}</span>
+            </button>
+
+            {student.photo_url && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setShowFaceTestModal(true)}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  cursor: "pointer",
+                }}
+                title="Test live webcam face match against enrolled photo"
+              >
+                <ScanFace size={13} />
+                <span>Test Face Match</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                cursor: "pointer",
+              }}
+            >
+              <Upload size={13} />
+              <span>Upload Photo</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1027,6 +1219,31 @@ const StudentProfile: React.FC<{
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Biometric Face ID Capture Modal */}
+      {showFaceCaptureModal && student && (
+        <FaceCaptureModal
+          isOpen={showFaceCaptureModal}
+          onClose={() => setShowFaceCaptureModal(false)}
+          onCapture={handleFaceCaptured}
+          title={`Register Face ID • ${student.name}`}
+        />
+      )}
+
+      {/* Biometric Face ID Verification Test Modal */}
+      {showFaceTestModal && student && (
+        <FaceVerificationModal
+          isOpen={showFaceTestModal}
+          onClose={() => setShowFaceTestModal(false)}
+          onVerified={handleFaceTestVerified}
+          referencePhotoUrl={student.photo_url}
+          studentName={student.name}
+          studentId={student.id}
+          title="Test Biometric Face Match"
+          subtitle="Align your face with the camera to test recognition against the enrolled portrait."
+          allowBypass={false}
+        />
       )}
 
     </div>

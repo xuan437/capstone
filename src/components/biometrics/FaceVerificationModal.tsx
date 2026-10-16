@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Eye,
   KeyRound,
+  SwitchCamera,
 } from 'lucide-react';
 import {
   loadFaceApiModels,
@@ -54,6 +55,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
 
   const [modelsReady, setModelsReady] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [refDescriptor, setRefDescriptor] = useState<Float32Array | null>(null);
   const [currentMatch, setCurrentMatch] = useState<FaceMatchResult | null>(null);
@@ -75,6 +77,73 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
     }
     setCameraActive(false);
   }, []);
+
+  const startCamera = useCallback(async (mode: 'user' | 'environment') => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+    setErrorMsg(null);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: { ideal: mode },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        setCameraActive(true);
+      }
+    } catch (err: any) {
+      console.error('[FaceAPI] Camera error:', err);
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        streamRef.current = fallbackStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+          await videoRef.current.play();
+          setCameraActive(true);
+        }
+      } catch (fbErr: any) {
+        if (fbErr.name === 'NotAllowedError' || fbErr.name === 'PermissionDeniedError') {
+          setErrorMsg(
+            allowBypass
+              ? 'Camera access was denied. Please allow camera permissions or use password verification.'
+              : 'Camera access was denied. Please allow camera permissions in your browser to complete required face verification.'
+          );
+        } else if (fbErr.name === 'NotFoundError' || fbErr.name === 'DevicesNotFoundError') {
+          setErrorMsg(
+            allowBypass
+              ? 'No camera device found on your system. Please use password verification.'
+              : 'No camera device found on your system. A working camera is required for student biometric verification.'
+          );
+        } else {
+          setErrorMsg(fbErr.message || 'Unable to access camera or load facial models.');
+        }
+      }
+    }
+  }, [allowBypass]);
+
+  const handleToggleCamera = () => {
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
+    startCamera(nextMode);
+  };
 
   // Initialize camera and extract reference descriptor
   useEffect(() => {
@@ -110,36 +179,11 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
         }
 
         // 3. Request webcam stream
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            facingMode: 'user',
-          },
-          audio: false,
-        });
-
-        if (!isMounted) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraActive(true);
-        }
+        await startCamera(facingMode);
       } catch (err: any) {
         if (!isMounted) return;
         console.error('[FaceAPI] Initialization error:', err);
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          setErrorMsg('Camera access was denied. Please allow camera permissions or use password verification.');
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          setErrorMsg('No camera device found on your system. Please use password verification.');
-        } else {
-          setErrorMsg(err.message || 'Unable to access camera or load facial models.');
-        }
+        setErrorMsg(err.message || 'Unable to access camera or load facial models.');
       }
     };
 
@@ -149,7 +193,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
       isMounted = false;
       stopCamera();
     };
-  }, [isOpen, effectivePhotoUrl, stopCamera]);
+  }, [isOpen, effectivePhotoUrl, stopCamera, startCamera, facingMode]);
 
   // Real-time video detection loop
   useEffect(() => {
@@ -248,21 +292,37 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
               <ShieldCheck size={20} />
             </div>
             <div>
-              <h3 className="biometric-modal-title">{title}</h3>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <h3 className="biometric-modal-title">{title}</h3>
+                {!allowBypass && (
+                  <span className="biometric-mandatory-badge">Required</span>
+                )}
+              </div>
               <p className="biometric-modal-subtitle">{subtitle}</p>
             </div>
           </div>
-          <button
-            type="button"
-            className="biometric-close-btn"
-            onClick={() => {
-              stopCamera();
-              onClose();
-            }}
-            title="Close"
-          >
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="biometric-camera-switch-btn"
+              onClick={handleToggleCamera}
+              title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+            >
+              <SwitchCamera size={14} />
+              <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
+            </button>
+            <button
+              type="button"
+              className="biometric-close-btn"
+              onClick={() => {
+                stopCamera();
+                onClose();
+              }}
+              title="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -280,7 +340,18 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
 
             {/* Glowing Scan Laser while searching */}
             {cameraActive && !verificationSuccess && (
-              <div className="biometric-scan-laser" />
+              <>
+                <div className="biometric-scan-laser" />
+                <button
+                  type="button"
+                  className="biometric-viewport-flip-btn"
+                  onClick={handleToggleCamera}
+                  title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+                >
+                  <SwitchCamera size={14} />
+                  <span>{facingMode === 'user' ? 'Back Cam' : 'Front Cam'}</span>
+                </button>
+              </>
             )}
 
             {/* Loading / Error Overlay */}

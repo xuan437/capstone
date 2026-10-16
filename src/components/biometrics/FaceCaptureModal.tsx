@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Camera, X, Check, RefreshCw, AlertTriangle, Sparkles } from 'lucide-react';
+import { Camera, X, Check, RefreshCw, AlertTriangle, Sparkles, SwitchCamera } from 'lucide-react';
 import {
   loadFaceApiModels,
   detectSingleFaceFromVideo,
@@ -28,6 +28,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
 
   const [modelsReady, setModelsReady] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [faceDetected, setFaceDetected] = useState(false);
@@ -44,6 +45,63 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
     }
     setCameraActive(false);
   }, []);
+
+  const startCamera = useCallback(async (mode: 'user' | 'environment') => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraActive(false);
+    setErrorMsg(null);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: { ideal: mode },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+        setCameraActive(true);
+      }
+    } catch (err: any) {
+      console.error('[FaceAPI Capture] Camera error:', err);
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        streamRef.current = fallbackStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+          await videoRef.current.play();
+          setCameraActive(true);
+        }
+      } catch (fbErr: any) {
+        if (fbErr.name === 'NotAllowedError' || fbErr.name === 'PermissionDeniedError') {
+          setErrorMsg('Camera access was denied. Please grant camera permissions.');
+        } else {
+          setErrorMsg(fbErr.message || 'Unable to open camera.');
+        }
+      }
+    }
+  }, []);
+
+  const handleToggleCamera = () => {
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
+    startCamera(nextMode);
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -62,27 +120,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
         await loadFaceApiModels();
         if (!isMounted) return;
         setModelsReady(true);
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-            facingMode: 'user',
-          },
-          audio: false,
-        });
-
-        if (!isMounted) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraActive(true);
-        }
+        await startCamera(facingMode);
       } catch (err: any) {
         if (!isMounted) return;
         console.error('[FaceAPI Capture] Init error:', err);
@@ -96,7 +134,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
       isMounted = false;
       stopCamera();
     };
-  }, [isOpen, stopCamera]);
+  }, [isOpen, stopCamera, startCamera]);
 
   // Detection loop
   useEffect(() => {
@@ -214,16 +252,28 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            className="biometric-close-btn"
-            onClick={() => {
-              stopCamera();
-              onClose();
-            }}
-          >
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="biometric-camera-switch-btn"
+              onClick={handleToggleCamera}
+              title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+            >
+              <SwitchCamera size={14} />
+              <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
+            </button>
+            <button
+              type="button"
+              className="biometric-close-btn"
+              onClick={() => {
+                stopCamera();
+                onClose();
+              }}
+              title="Close"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -245,6 +295,18 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
                   autoPlay
                 />
                 <canvas ref={canvasRef} className="biometric-camera-canvas" />
+
+                {cameraActive && !capturedImage && (
+                  <button
+                    type="button"
+                    className="biometric-viewport-flip-btn"
+                    onClick={handleToggleCamera}
+                    title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+                  >
+                    <SwitchCamera size={14} />
+                    <span>{facingMode === 'user' ? 'Back Cam' : 'Front Cam'}</span>
+                  </button>
+                )}
 
                 {(!cameraActive || errorMsg) && (
                   <div className="biometric-camera-loader">

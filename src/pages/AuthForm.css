@@ -1038,4 +1038,25 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.linear-security-badge-mandatory {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--linear-radius-md);
+  font-size: 11.5px;
+  font-weight: 500;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  margin-bottom: 4px;
+}
+
+.linear-security-badge-mandatory svg {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: #10b981;
+}
 

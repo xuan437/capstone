@@ -170,6 +170,25 @@ const AuthForm: React.FC<{
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleLrnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Automatically sanitize and extract digits only (max 12 digits)
+    const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 12);
+    setForm((prev) => ({ ...prev, identifier: digitsOnly }));
+    if (error && (error.includes("LRN") || error.includes("digit"))) {
+      setError("");
+    }
+  };
+
+  const handleLrnPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text") || "";
+    const digitsOnly = pasted.replace(/\D/g, "").slice(0, 12);
+    setForm((prev) => ({ ...prev, identifier: digitsOnly }));
+    if (error && (error.includes("LRN") || error.includes("digit"))) {
+      setError("");
+    }
+  };
+
   const handleFacultyChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFacultyForm({ ...facultyForm, [e.target.name]: e.target.value });
 
@@ -196,12 +215,25 @@ const AuthForm: React.FC<{
       return;
     }
 
-    if (!studentCaptchaRef.current?.isValid()) {
+    // Clean LRN: extract all digits and trim whitespace
+    const identifier = form.identifier.replace(/\D/g, "").trim();
+
+    if (!identifier) {
+      setError("Please enter your 12-digit Learner Reference Number (LRN).");
+      return;
+    }
+
+    if (identifier.length !== 12) {
+      setError(`LRN must be exactly 12 digits. You entered ${identifier.length} digit${identifier.length === 1 ? "" : "s"}.`);
+      return;
+    }
+
+    if (studentCaptchaRef.current && !studentCaptchaRef.current.isValid()) {
       setError("Please enter the correct security code (CAPTCHA).");
       await logAuditAction(
         "CAPTCHA_FAILED",
         "Unauthenticated",
-        `Voter login blocked by invalid CAPTCHA for LRN: ${form.identifier.trim() || "(blank)"}`
+        `Voter login blocked by invalid CAPTCHA for LRN: ${identifier}`
       );
       studentCaptchaRef.current?.refresh();
       setStudentCaptcha("");
@@ -210,75 +242,91 @@ const AuthForm: React.FC<{
 
     setLoading(true);
     setError("");
-    const identifier = form.identifier.trim();
-    const password = form.password.trim();
 
-    if (!/^\d{12}$/.test(identifier)) {
-      setError("LRN must be exactly 12 digits (numbers only).");
-      setLoading(false);
-      return;
-    }
+    try {
+      const password = form.password.trim();
 
-    const { data: student, error: fetchError } = await supabase
-      .from("students")
-      .select("*")
-      .eq("id", identifier)
-      .eq("password", password)
-      .maybeSingle();
+      // Look up student record by LRN
+      const { data: student, error: fetchError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", identifier)
+        .maybeSingle();
 
-    if (fetchError) {
-      console.error("Student login error:", fetchError);
-      setError(`Login failed: ${fetchError.message}`);
-      setLoading(false);
-      return;
-    }
-
-    if (!student) {
-      studentCaptchaRef.current?.refresh();
-      setStudentCaptcha("");
-      const nextAttempts = failedAttempts + 1;
-      setFailedAttempts(nextAttempts);
-
-      await logAuditAction(
-        "STUDENT_LOGIN_FAILED",
-        "Unauthenticated",
-        `Failed voter login attempt for LRN ${identifier} (Attempt ${nextAttempts}/3)`
-      );
-
-      if (nextAttempts >= 3) {
-        setLockoutSeconds(15);
-        setError("Too many failed password attempts. Please wait 15 seconds to try again.");
-        await logAuditAction(
-          "SECURITY_LOCKOUT",
-          "System",
-          `Temporary 15-second lockout enforced for LRN ${identifier} after 3 failed attempts`
-        );
-      } else {
-        const remaining = 3 - nextAttempts;
-        setError(`Invalid LRN or password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before temporary 15s lockout.`);
+      if (fetchError) {
+        console.error("Student login error:", fetchError);
+        setError(`Unable to read LRN: ${fetchError.message}`);
+        setLoading(false);
+        return;
       }
+
+      if (!student) {
+        studentCaptchaRef.current?.refresh();
+        setStudentCaptcha("");
+        const nextAttempts = failedAttempts + 1;
+        setFailedAttempts(nextAttempts);
+
+        await logAuditAction(
+          "STUDENT_LOGIN_FAILED",
+          "Unauthenticated",
+          `Failed voter login attempt: LRN ${identifier} not found in database (Attempt ${nextAttempts}/3)`
+        );
+
+        if (nextAttempts >= 3) {
+          setLockoutSeconds(15);
+          setError("Too many failed attempts. Please wait 15 seconds to try again.");
+          await logAuditAction(
+            "SECURITY_LOCKOUT",
+            "System",
+            `Temporary 15-second lockout enforced for LRN ${identifier} after 3 failed attempts`
+          );
+        } else {
+          setError(`No student record found with LRN: ${identifier}. Please double-check your 12-digit number.`);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // If student entered a password, check if it matches
+      if (password && student.password && student.password !== password) {
+        studentCaptchaRef.current?.refresh();
+        setStudentCaptcha("");
+        const nextAttempts = failedAttempts + 1;
+        setFailedAttempts(nextAttempts);
+
+        await logAuditAction(
+          "STUDENT_LOGIN_FAILED",
+          student.name,
+          `Failed voter password attempt for LRN ${identifier} (Attempt ${nextAttempts}/3)`
+        );
+
+        if (nextAttempts >= 3) {
+          setLockoutSeconds(15);
+          setError("Too many failed password attempts. Please wait 15 seconds to try again.");
+        } else {
+          setError("Incorrect password. Leave password blank for direct Face ID verification, or re-enter your password.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      setFailedAttempts(0);
+      setLockoutSeconds(0);
+
+      const studentUser: Student = {
+        ...student,
+        id: String(student.id),
+      };
+
+      // Successfully read LRN! Launch mandatory biometric face verification
+      setFaceAuthStudent(studentUser);
+      setShowFaceAuthModal(true);
       setLoading(false);
-      return;
+    } catch (err: any) {
+      console.error("Student login error:", err);
+      setError(err?.message || "Failed to read student record. Please try again.");
+      setLoading(false);
     }
-
-    setFailedAttempts(0);
-    setLockoutSeconds(0);
-
-    const studentUser: Student = {
-      ...student,
-      id: String(student.id),
-    };
-
-    await logAuditAction(
-      "STUDENT_LOGIN",
-      studentUser.name,
-      `Student voter signed in (LRN: ${studentUser.id}, Grade: ${studentUser.grade || "N/A"}${studentUser.section ? ` - ${studentUser.section}` : ""}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
-    );
-
-    sessionStorage.setItem("currentUser", JSON.stringify(studentUser));
-    setCurrentUser(studentUser);
-    setPage(studentUser.has_voted ? "confirm" : "ballot");
-    setLoading(false);
   };
 
   const handleStartFaceAuth = async () => {
@@ -291,9 +339,9 @@ const AuthForm: React.FC<{
       return;
     }
 
-    const identifier = form.identifier.trim();
-    if (!/^\d{12}$/.test(identifier)) {
-      setError("Please enter your 12-digit LRN first to verify your face against your student record.");
+    const identifier = form.identifier.replace(/\D/g, "").trim();
+    if (identifier.length !== 12) {
+      setError(`Please enter your complete 12-digit LRN first (${identifier.length}/12 entered).`);
       return;
     }
 
@@ -314,7 +362,7 @@ const AuthForm: React.FC<{
       }
 
       if (!student) {
-        setError("No student account found with this LRN.");
+        setError(`No student account found with LRN: ${identifier}. Please verify your 12-digit number.`);
         setFaceAuthLoading(false);
         return;
       }
@@ -330,22 +378,31 @@ const AuthForm: React.FC<{
 
   const handleFaceAuthVerified = async (result: FaceMatchResult) => {
     if (!faceAuthStudent) return;
+    const studentToLogin = faceAuthStudent;
     setShowFaceAuthModal(false);
+    setFaceAuthStudent(null);
 
     const studentUser: Student = {
-      ...faceAuthStudent,
-      id: String(faceAuthStudent.id),
+      ...studentToLogin,
+      id: String(studentToLogin.id),
     };
 
     await logAuditAction(
       "STUDENT_FACE_LOGIN",
       studentUser.name,
-      `Student voter signed in via Face ID (LRN: ${studentUser.id}, Confidence: ${result.confidence}%, Distance: ${result.distance.toFixed(3)}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
+      `Student voter verified via Face ID and signed in (LRN: ${studentUser.id}, Confidence: ${result.confidence}%, Distance: ${result.distance.toFixed(3)}, Status: ${studentUser.has_voted ? "Already Voted" : "Ballot Pending"})`
     );
 
     sessionStorage.setItem("currentUser", JSON.stringify(studentUser));
+    sessionStorage.setItem("biometricVerified", "true");
     setCurrentUser(studentUser);
     setPage(studentUser.has_voted ? "confirm" : "ballot");
+  };
+
+  const handleFaceAuthClose = () => {
+    setShowFaceAuthModal(false);
+    setFaceAuthStudent(null);
+    setError("Biometric face verification is required to log in. Please allow camera access and look directly into the camera to complete authentication.");
   };
 
   const handleFacultyLogin = async () => {
@@ -466,31 +523,50 @@ const AuthForm: React.FC<{
                   </div>
                 ) : null}
 
+                <div className="linear-security-badge-mandatory">
+                  <ScanFaceIcon />
+                  <span>Biometric face verification is required for student login</span>
+                </div>
+
                 <div className="linear-field-stack">
                   <div className="linear-field-group">
-                    <label className="linear-field-label">
-                      Learner Reference Number (LRN)
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <label className="linear-field-label" style={{ margin: 0 }}>
+                        Learner Reference Number (LRN)
+                      </label>
+                      <span style={{ fontSize: "11px", color: form.identifier.length === 12 ? "#10b981" : "var(--linear-text-tertiary)", fontWeight: 600 }}>
+                        {form.identifier.length}/12 digits
+                      </span>
+                    </div>
                     <div className="linear-input-wrapper">
                       <span className="linear-input-icon">
                         <UserIcon />
                       </span>
                       <input
                         name="identifier"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         aria-label="LRN Identifier"
-                        placeholder="Enter 12-digit LRN"
+                        placeholder="Enter 12-digit LRN (e.g. 120550140001)"
                         className="linear-input"
                         value={form.identifier}
-                        onChange={handleChange}
+                        onChange={handleLrnChange}
+                        onPaste={handleLrnPaste}
                         disabled={isTimerExpired || lockoutSeconds > 0}
                         autoComplete="off"
-                        maxLength={12}
+                        maxLength={14}
                       />
                     </div>
                   </div>
 
                   <div className="linear-field-group">
-                    <label className="linear-field-label">Password</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                      <label className="linear-field-label" style={{ margin: 0 }}>Password</label>
+                      <span style={{ fontSize: "11px", color: "var(--linear-text-tertiary)" }}>
+                        Optional for Face ID
+                      </span>
+                    </div>
                     <div className="linear-input-wrapper">
                       <span className="linear-input-icon">
                         <LockIcon />
@@ -499,7 +575,7 @@ const AuthForm: React.FC<{
                         name="password"
                         type={showPassword ? "text" : "password"}
                         aria-label="Student Password"
-                        placeholder="Enter password"
+                        placeholder="Enter password (or leave blank)"
                         className="linear-input"
                         value={form.password}
                         onChange={handleChange}
@@ -534,18 +610,19 @@ const AuthForm: React.FC<{
                   className="linear-btn-primary"
                   disabled={loading || isTimerExpired || lockoutSeconds > 0}
                 >
+                  <ScanFaceIcon />
                   <span>
                     {lockoutSeconds > 0
                       ? `Locked Out (${lockoutSeconds}s)`
                       : loading
                       ? "Authenticating..."
-                      : "Continue to Ballot"}
+                      : "Verify Face & Enter Portal"}
                   </span>
                   <ArrowRightIcon />
                 </button>
 
                 <div className="linear-divider-or">
-                  <span>or</span>
+                  <span>or quick face scan</span>
                 </div>
 
                 <button
@@ -556,7 +633,7 @@ const AuthForm: React.FC<{
                 >
                   <ScanFaceIcon />
                   <span>
-                    {faceAuthLoading ? "Looking up student..." : "Verify with Face ID"}
+                    {faceAuthLoading ? "Looking up student..." : "Verify with Face ID (LRN Only)"}
                   </span>
                 </button>
               </>
@@ -783,16 +860,14 @@ const AuthForm: React.FC<{
       {showFaceAuthModal && faceAuthStudent && (
         <FaceVerificationModal
           isOpen={showFaceAuthModal}
-          onClose={() => setShowFaceAuthModal(false)}
+          onClose={handleFaceAuthClose}
           onVerified={handleFaceAuthVerified}
           referencePhotoUrl={faceAuthStudent.photo_url}
           studentName={faceAuthStudent.name}
           studentId={faceAuthStudent.id}
-          title="Face ID Voter Login"
-          subtitle="Align your face with the camera to sign in and unlock your official ballot."
-          allowBypass={true}
-          bypassLabel="Use Password Instead"
-          onBypass={() => setShowFaceAuthModal(false)}
+          title="Mandatory Face Verification"
+          subtitle="Identity verification is required. Align your face with the camera to sign in and unlock your official ballot."
+          allowBypass={false}
         />
       )}
     </div>
