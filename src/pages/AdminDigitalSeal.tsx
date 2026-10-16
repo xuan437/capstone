@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Stamp,
   ShieldCheck,
@@ -27,7 +27,6 @@ import {
   ElectionResultsPayload,
   VerificationResult,
   SealKeyPair,
-  sha256Hex,
   parseSealPackage,
 } from "../utils/digitalSeal";
 import "../components/seal/DigitalSeal.css";
@@ -70,8 +69,6 @@ async function fetchElectionResults(): Promise<ElectionResultsPayload | null> {
       }))
       .sort((a, b) => b.vote_count - a.vote_count);
   });
-
-  const uniqueVoters = new Set(votes.map((v) => v.student_id)).size;
 
   return {
     candidates: tallied,

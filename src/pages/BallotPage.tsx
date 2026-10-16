@@ -35,7 +35,6 @@ import { CountdownTimer } from "../components/CountdownTimer";
 import { generateReceiptCode, saveVoteReceipt } from "../utils/receiptVerifier";
 import { logAuditAction } from "../utils/auditLogger";
 import { captureVoterLocation } from "../utils/locationCapture";
-import { useLanguage } from "../context/LanguageContext";
 import { seedSampleCandidatesIfEmpty } from "../utils/seedCandidates";
 import { VoteSummaryModal } from "../components/voting/VoteSummaryModal";
 import { VoteLockInModal } from "../components/voting/VoteLockInModal";
@@ -59,8 +58,6 @@ const BallotPage: React.FC<BallotPageProps> = ({
   setSearchTerm,
   onViewCandidate,
 }) => {
-  const { t } = useLanguage();
-
   // ---------------------------------------------------------------------------
   // Candidate & Ballot Selection State
   // ---------------------------------------------------------------------------
