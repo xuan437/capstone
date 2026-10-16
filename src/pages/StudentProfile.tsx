@@ -27,6 +27,7 @@ import {
   ExternalLink,
   AlertTriangle,
   Globe,
+  Receipt,
 } from "lucide-react";
 import { logAuditAction } from "../utils/auditLogger";
 import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
@@ -791,6 +792,31 @@ const StudentProfile: React.FC<{
             </div>
           </div>
         </div>
+
+        {student.has_voted && (
+          <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--border-subtle)", display: "flex", justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setPage("confirm")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "12px",
+                padding: "5px 12px",
+                borderRadius: "6px",
+                color: "var(--primary-navy)",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+              title="Open full official digital voting receipt"
+            >
+              <Receipt size={13} />
+              <span>View Official Digital Receipt</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Geofencing & Real-Time Location Card */}

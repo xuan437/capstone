@@ -205,7 +205,7 @@ const AppShell: React.FC = () => {
         ) : null;
 
       case "confirm":
-        return <ConfirmationScreen handleLogout={handleLogout} />;
+        return <ConfirmationScreen handleLogout={handleLogout} setPage={handleNavigate} currentUser={currentUser} />;
 
       case "results":
         return <ResultsDashboard currentUser={currentUser} setPage={handleNavigate} searchTerm={searchTerm} />;

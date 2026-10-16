@@ -472,13 +472,43 @@ const BallotPage: React.FC<BallotPageProps> = ({
         ]);
       }
 
-      // 10. Update session storage session
+      // 10. Compile and store complete digital receipt payload for instant confirmation display
+      const selectionsSummary: { position: string; candidateName: string }[] = [];
+      POSITIONS.forEach((pos) => {
+        const cIds = selectedCandidates[pos] || [];
+        cIds.forEach((cId) => {
+          const cand = candidates.find((c) => c.id === cId);
+          if (cand) {
+            selectionsSummary.push({ position: pos, candidateName: cand.name });
+          }
+        });
+      });
+
+      const digitalReceiptPayload = {
+        receiptId,
+        studentId: currentUser.id,
+        studentName: currentUser.name,
+        grade: currentUser.grade,
+        section: currentUser.section || "",
+        votedAt,
+        location: locationText,
+        biometricVerification:
+          verifiedConfidence !== undefined
+            ? `${verifiedConfidence}% Face ID Match`
+            : "Biometric Verified",
+        selections: selectionsSummary,
+        totalVotes: voteInsertsWithMeta.length,
+      };
+
+      sessionStorage.setItem("last_digital_receipt", JSON.stringify(digitalReceiptPayload));
+
+      // 11. Update session storage session
       sessionStorage.setItem(
         "currentUser",
         JSON.stringify({ ...currentUser, has_voted: true })
       );
 
-      // Close modals and transition to confirmation screen
+      // Close modals and transition to confirmation screen with digital receipt
       setConfirmationStep("idle");
       setPage("confirm");
     } catch (err: any) {
