@@ -540,7 +540,7 @@ const BallotPage: React.FC<BallotPageProps> = ({
         onAllowed={() => setGeoStatus("allowed")}
         onBlocked={() => {
           setGeoStatus("blocked");
-          setPage("profile");
+          setPage("student_profile");
         }}
       />
     );
