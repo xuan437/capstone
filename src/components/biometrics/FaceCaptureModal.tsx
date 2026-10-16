@@ -160,7 +160,8 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
             video,
             detection,
             null,
-            'FACE DETECTED • READY TO CAPTURE'
+            'FACE DETECTED • READY TO CAPTURE',
+            facingMode === 'user'
           );
         } else if (active && canvas) {
           setFaceDetected(false);
@@ -182,7 +183,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isOpen, cameraActive, modelsReady, capturedImage]);
+  }, [isOpen, cameraActive, modelsReady, capturedImage, facingMode]);
 
   const handleTakeSnapshot = () => {
     const video = videoRef.current;
@@ -195,9 +196,11 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
       const ctx = snapCanvas.getContext('2d');
       if (!ctx) return;
 
-      // Draw mirrored video frame for natural portrait orientation
-      ctx.translate(snapCanvas.width, 0);
-      ctx.scale(-1, 1);
+      // Only mirror front camera (user) for natural portrait orientation; keep rear camera unreversed!
+      if (facingMode === 'user') {
+        ctx.translate(snapCanvas.width, 0);
+        ctx.scale(-1, 1);
+      }
       ctx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
 
       const base64 = snapCanvas.toDataURL('image/jpeg', 0.88);
@@ -208,23 +211,10 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
     }
   };
 
-  const handleRetake = async () => {
+  const handleRetake = () => {
     setCapturedImage(null);
     setFaceDetected(false);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        setCameraActive(true);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Unable to restart camera.');
-    }
+    startCamera(facingMode);
   };
 
   const handleConfirm = () => {
@@ -245,40 +235,31 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
             <div className="biometric-modal-icon-badge">
               <Camera size={20} />
             </div>
-            <div>
-              <h3 className="biometric-modal-title">{title}</h3>
+            <div className="biometric-modal-header-text">
+              <div className="biometric-modal-title-wrapper">
+                <h3 className="biometric-modal-title">{title}</h3>
+              </div>
               <p className="biometric-modal-subtitle">
                 Align student face inside the guide frame and snap a portrait.
               </p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              className="biometric-camera-switch-btn"
-              onClick={handleToggleCamera}
-              title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
-            >
-              <SwitchCamera size={14} />
-              <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
-            </button>
-            <button
-              type="button"
-              className="biometric-close-btn"
-              onClick={() => {
-                stopCamera();
-                onClose();
-              }}
-              title="Close"
-            >
-              <X size={18} />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="biometric-close-btn"
+            onClick={() => {
+              stopCamera();
+              onClose();
+            }}
+            title="Close"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Body */}
         <div className="biometric-modal-body">
-          <div className="biometric-camera-viewport">
+          <div className={`biometric-camera-viewport ${facingMode === 'environment' ? 'is-environment' : 'is-user'}`}>
             {capturedImage ? (
               <img
                 src={capturedImage}
@@ -289,14 +270,26 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
               <>
                 <video
                   ref={videoRef}
-                  className="biometric-camera-video"
+                  className={`biometric-camera-video ${facingMode === 'environment' ? 'environment' : 'user'}`}
+                  style={{ transform: facingMode === 'environment' ? 'none' : 'scaleX(-1)' }}
                   playsInline
+                  disablePictureInPicture
                   muted
                   autoPlay
                 />
-                <canvas ref={canvasRef} className="biometric-camera-canvas" />
+                <canvas
+                  ref={canvasRef}
+                  className={`biometric-camera-canvas ${facingMode === 'environment' ? 'environment' : 'user'}`}
+                  style={{ transform: facingMode === 'environment' ? 'none' : 'scaleX(-1)' }}
+                />
 
+                {/* Cyber Biometric Face Alignment Reticle */}
                 {cameraActive && !capturedImage && (
+                  <div className="biometric-camera-reticle" aria-hidden="true" />
+                )}
+
+                {/* Floating Camera Flip Control */}
+                {!capturedImage && (
                   <button
                     type="button"
                     className="biometric-viewport-flip-btn"
@@ -304,7 +297,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
                     title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
                   >
                     <SwitchCamera size={14} />
-                    <span>{facingMode === 'user' ? 'Back Cam' : 'Front Cam'}</span>
+                    <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
                   </button>
                 )}
 
@@ -330,21 +323,21 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
           </div>
 
           {/* Quality Indicator Bar */}
-          <div className="biometric-comparison-card" style={{ justifyContent: 'center' }}>
+          <div className="biometric-comparison-card biometric-capture-status-card">
             {capturedImage ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34D399', fontSize: '13px', fontWeight: 600 }}>
+              <div className="biometric-status-text success">
                 <Check size={16} />
                 <span>Photo captured successfully! Ready to use as official profile.</span>
               </div>
             ) : faceDetected ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#34D399', fontSize: '13px', fontWeight: 600 }}>
+              <div className="biometric-status-text active">
                 <Sparkles size={16} />
                 <span>Clear face detected! You can take the photo now.</span>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94A3B8', fontSize: '13px' }}>
+              <div className="biometric-status-text idle">
                 <RefreshCw size={14} className="spin" />
-                <span>Please position face clearly in front of the camera...</span>
+                <span>Position face clearly inside the guide frame...</span>
               </div>
             )}
           </div>
@@ -364,7 +357,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
           </button>
 
           {capturedImage ? (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="biometric-footer-actions">
               <button
                 type="button"
                 className="biometric-btn-secondary"

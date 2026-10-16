@@ -193,7 +193,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
       isMounted = false;
       stopCamera();
     };
-  }, [isOpen, effectivePhotoUrl, stopCamera, startCamera, facingMode]);
+  }, [isOpen, effectivePhotoUrl, stopCamera, startCamera]);
 
   // Real-time video detection loop
   useEffect(() => {
@@ -227,11 +227,15 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
                 let snapshotBase64: string | undefined = undefined;
                 try {
                   const snapCanvas = document.createElement('canvas');
-                  snapCanvas.width = video.videoWidth;
-                  snapCanvas.height = video.videoHeight;
+                  snapCanvas.width = video.videoWidth || 640;
+                  snapCanvas.height = video.videoHeight || 480;
                   const snapCtx = snapCanvas.getContext('2d');
                   if (snapCtx) {
-                    snapCtx.drawImage(video, 0, 0);
+                    if (facingMode === 'user') {
+                      snapCtx.translate(snapCanvas.width, 0);
+                      snapCtx.scale(-1, 1);
+                    }
+                    snapCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
                     snapshotBase64 = snapCanvas.toDataURL('image/jpeg', 0.8);
                   }
                 } catch {
@@ -252,7 +256,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
             }
           }
 
-          drawBiometricOverlay(canvas, video, detection, matchResult);
+          drawBiometricOverlay(canvas, video, detection, matchResult, undefined, facingMode === 'user');
         } else if (active && canvas) {
           // Clear overlay if no face detected
           const ctx = canvas.getContext('2d');
@@ -275,7 +279,7 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isOpen, cameraActive, modelsReady, refDescriptor, verificationSuccess, onVerified, stopCamera]);
+  }, [isOpen, cameraActive, modelsReady, refDescriptor, verificationSuccess, onVerified, stopCamera, facingMode]);
 
   if (!isOpen) return null;
 
@@ -291,8 +295,8 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
             <div className="biometric-modal-icon-badge">
               <ShieldCheck size={20} />
             </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="biometric-modal-header-text">
+              <div className="biometric-modal-title-wrapper">
                 <h3 className="biometric-modal-title">{title}</h3>
                 {!allowBypass && (
                   <span className="biometric-mandatory-badge">Required</span>
@@ -301,57 +305,59 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
               <p className="biometric-modal-subtitle">{subtitle}</p>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              className="biometric-camera-switch-btn"
-              onClick={handleToggleCamera}
-              title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
-            >
-              <SwitchCamera size={14} />
-              <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
-            </button>
-            <button
-              type="button"
-              className="biometric-close-btn"
-              onClick={() => {
-                stopCamera();
-                onClose();
-              }}
-              title="Close"
-            >
-              <X size={18} />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="biometric-close-btn"
+            onClick={() => {
+              stopCamera();
+              onClose();
+            }}
+            title="Close"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Body */}
         <div className="biometric-modal-body">
           {/* Camera Viewport */}
-          <div className="biometric-camera-viewport">
+          <div className={`biometric-camera-viewport ${facingMode === 'environment' ? 'is-environment' : 'is-user'}`}>
             <video
               ref={videoRef}
-              className="biometric-camera-video"
+              className={`biometric-camera-video ${facingMode === 'environment' ? 'environment' : 'user'}`}
+              style={{ transform: facingMode === 'environment' ? 'none' : 'scaleX(-1)' }}
               playsInline
+              disablePictureInPicture
               muted
               autoPlay
             />
-            <canvas ref={canvasRef} className="biometric-camera-canvas" />
+            <canvas
+              ref={canvasRef}
+              className={`biometric-camera-canvas ${facingMode === 'environment' ? 'environment' : 'user'}`}
+              style={{ transform: facingMode === 'environment' ? 'none' : 'scaleX(-1)' }}
+            />
+
+            {/* Cyber Biometric Face Alignment Reticle */}
+            {cameraActive && !verificationSuccess && (
+              <div className="biometric-camera-reticle" aria-hidden="true" />
+            )}
 
             {/* Glowing Scan Laser while searching */}
             {cameraActive && !verificationSuccess && (
-              <>
-                <div className="biometric-scan-laser" />
-                <button
-                  type="button"
-                  className="biometric-viewport-flip-btn"
-                  onClick={handleToggleCamera}
-                  title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
-                >
-                  <SwitchCamera size={14} />
-                  <span>{facingMode === 'user' ? 'Back Cam' : 'Front Cam'}</span>
-                </button>
-              </>
+              <div className="biometric-scan-laser" />
+            )}
+
+            {/* Floating Camera Flip Control */}
+            {!verificationSuccess && (
+              <button
+                type="button"
+                className="biometric-viewport-flip-btn"
+                onClick={handleToggleCamera}
+                title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+              >
+                <SwitchCamera size={14} />
+                <span>{facingMode === 'user' ? 'Back Camera' : 'Front Camera'}</span>
+              </button>
             )}
 
             {/* Loading / Error Overlay */}
@@ -377,25 +383,14 @@ export const FaceVerificationModal: React.FC<FaceVerificationModalProps> = ({
 
             {/* Success Animation Overlay */}
             {verificationSuccess && (
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'rgba(6, 78, 59, 0.85)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  zIndex: 30,
-                  animation: 'bioFadeIn 0.3s ease',
-                }}
-              >
-                <CheckCircle2 size={48} style={{ color: '#34D399' }} />
-                <div style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: 700 }}>
+              <div className="biometric-success-overlay">
+                <div className="biometric-success-icon-pulse">
+                  <CheckCircle2 size={46} />
+                </div>
+                <div className="biometric-success-title">
                   Face Verified Successfully!
                 </div>
-                <div style={{ color: '#A7F3D0', fontSize: '12px' }}>
+                <div className="biometric-success-sub">
                   Match Confidence: {confidenceScore}%
                 </div>
               </div>

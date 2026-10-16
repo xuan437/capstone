@@ -249,7 +249,8 @@ export function drawBiometricOverlay(
   video: HTMLVideoElement,
   detection: any,
   matchResult?: FaceMatchResult | null,
-  statusText?: string
+  statusText?: string,
+  isMirrored?: boolean
 ) {
   if (!canvas || !video) return;
 
@@ -345,7 +346,17 @@ export function drawBiometricOverlay(
   ctx.stroke();
 
   ctx.fillStyle = primaryColor;
-  ctx.fillText(text, chipX + paddingX, chipY);
+  if (isMirrored) {
+    const textCenterX = chipX + chipWidth / 2;
+    ctx.save();
+    ctx.translate(textCenterX, 0);
+    ctx.scale(-1, 1);
+    ctx.translate(-textCenterX, 0);
+    ctx.fillText(text, chipX + paddingX, chipY);
+    ctx.restore();
+  } else {
+    ctx.fillText(text, chipX + paddingX, chipY);
+  }
 }
 
 // Re-export core faceapi object in case direct access is needed
