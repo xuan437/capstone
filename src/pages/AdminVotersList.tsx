@@ -12,8 +12,6 @@ import {
   X,
   CheckCircle2,
   Clock3,
-  Eye,
-  EyeOff,
   Lock,
   UserSearch,
 } from "lucide-react";
@@ -48,7 +46,7 @@ const AdminVotersList: React.FC<{
   const [showPdfAuth, setShowPdfAuth] = useState(false);
   const [pdfAuthInput, setPdfAuthInput] = useState("");
   const [pdfAuthError, setPdfAuthError] = useState("");
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+
   const [isExporting, setIsExporting] = useState(false);
   const [viewingPhotoStudent, setViewingPhotoStudent] = useState<Student | null>(null);
   const pdfPrintRef = useRef<HTMLDivElement>(null);

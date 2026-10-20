@@ -1,11 +1,5 @@
 import React from "react";
 import {
-  MessageCircle,
-  Camera,
-  Globe,
-  BadgeCheck,
-  ExternalLink,
-  Eye,
   Edit3,
   PowerOff,
   CheckCircle2,

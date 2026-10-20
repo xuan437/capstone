@@ -4,7 +4,7 @@ import { Candidate, Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
-import { ALL_CANDIDATE_SECTIONS, getSectionsForGrade, FIXED_GRADE_LEVELS, formatGradeSection, normalizeStrand } from "../utils/sectionConstants";
+import { getSectionsForGrade, FIXED_GRADE_LEVELS, formatGradeSection, normalizeStrand } from "../utils/sectionConstants";
 import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
 import {
   Edit3,

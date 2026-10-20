@@ -3,7 +3,7 @@ import { supabase } from "../supabase";
 import { Page } from "../types";
 import { logAuditAction } from "../utils/auditLogger";
 import { clearElectionExpiryFlag } from "../utils/electionExpiry";
-import { Clock, CheckCircle2, Trash2, AlertCircle, Calendar, RefreshCw, Zap } from "lucide-react";
+import { Clock, Trash2, AlertCircle, Calendar, RefreshCw, Zap } from "lucide-react";
 
 const AdminElectionSettings: React.FC<{
   setPage: (p: Page) => void;
