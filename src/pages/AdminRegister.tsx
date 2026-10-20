@@ -27,11 +27,13 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
 
   // Single Registration State
   const [form, setForm] = useState({
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     lrn: "",
     grade: "G7",
     section: "Lopez",
-    age: "",
+    age: "15",
     password: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -43,14 +45,14 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   const [photoQuality, setPhotoQuality] = useState<PhotoFaceValidation | null>(null);
   const [isAnalyzingFace, setIsAnalyzingFace] = useState(false);
 
-  // Bulk Import State
-  const [parsedStudents, setParsedStudents] = useState<ParsedCsvStudent[]>([]);
-  const [bulkLoading, setBulkLoading] = useState(false);
-  const [bulkError, setBulkError] = useState("");
-  const [bulkSuccessMsg, setBulkSuccessMsg] = useState("");
-
   const blockClipboard = (e: React.ClipboardEvent) => {
     e.preventDefault();
+  };
+
+  const getCombinedFullName = () => {
+    return [form.firstName.trim(), form.middleName.trim(), form.lastName.trim()]
+      .filter(Boolean)
+      .join(" ");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -108,50 +110,75 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
     setForm((prev) => ({ ...prev, password: pwd }));
   };
 
+  // Bulk Import State
+  const [parsedStudents, setParsedStudents] = useState<ParsedCsvStudent[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkError, setBulkError] = useState("");
+  const [bulkSuccessMsg, setBulkSuccessMsg] = useState("");
+
   const handleSingleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
 
-    if (!form.name.trim() || !form.lrn.trim() || !form.section.trim()) {
-      setError("Please fill in all required fields (Name, LRN, Section).");
+    const fullName = getCombinedFullName();
+    if (!form.lastName.trim() || !form.firstName.trim()) {
+      setError("Please fill in both Last Name and First Name.");
+      return;
+    }
+
+    if (!form.lrn.trim() || !form.section.trim()) {
+      setError("Please fill in all required fields (LRN and Section).");
       return;
     }
 
     if (!/^\d{12}$/.test(form.lrn.trim())) {
-      setError("Learner Reference Number (LRN) must be exactly 12 digits.");
+      setError("Learner Reference Number (LRN) must be exactly 12 numeric digits.");
       return;
     }
 
     const ageNum = parseInt(form.age, 10);
-    if (form.age && (isNaN(ageNum) || ageNum < 10 || ageNum > 30)) {
-      setError("Please enter a valid age between 10 and 30.");
+    if (!form.age || isNaN(ageNum) || ageNum < 10 || ageNum > 25) {
+      setError("Please enter a valid age between 10 and 25.");
       return;
     }
 
     setLoading(true);
 
     try {
+      // Check for duplicate LRN in Supabase
+      const { data: existingStudent, error: checkErr } = await supabase
+        .from("students")
+        .select("id, name")
+        .eq("id", form.lrn.trim())
+        .maybeSingle();
+
+      if (!checkErr && existingStudent) {
+        setError(`A student with LRN ${form.lrn.trim()} is already registered (${existingStudent.name}). Duplicate LRNs are not permitted.`);
+        setLoading(false);
+        return;
+      }
+
       const pwd = form.password || generatePassword(6);
 
       const record = {
         id: form.lrn.trim(),
-        name: form.name.trim(),
+        name: fullName,
         password: pwd,
         grade: form.grade,
         section: form.section.trim(),
-        age: ageNum || 15,
+        age: ageNum,
         photo_url: photoBase64 || undefined,
         has_voted: false,
       };
 
-      const { error: insertErr } = await supabase.from("students").upsert([record]);
+      const { error: insertErr } = await supabase.from("students").insert([record]);
 
       if (insertErr) {
-        console.warn("Supabase insert warning:", insertErr.message);
+        throw new Error(insertErr.message);
       }
 
-      await logAuditAction("VOTER_REGISTERED", "Admin", `Registered student ${form.name} (LRN: ${form.lrn})`);
+      await logAuditAction("VOTER_REGISTERED", "Admin", `Registered student ${fullName} (LRN: ${form.lrn.trim()})`);
 
       setSuccess(true);
     } catch (err: unknown) {
@@ -223,6 +250,8 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
         }
 
         const rows: ParsedCsvStudent[] = [];
+        const seenLrns = new Set<string>();
+
         for (let i = 1; i < jsonData.length; i++) {
           const rowArray = jsonData[i] as any[];
           if (!rowArray || rowArray.length === 0) continue;
@@ -237,6 +266,11 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
 
           const lrnClean = lrnRaw.replace(/\D/g, "");
           const isValidLrn = /^\d{12}$/.test(lrnClean);
+          const isDuplicateInFile = seenLrns.has(lrnClean);
+          if (isValidLrn) {
+            seenLrns.add(lrnClean);
+          }
+
           const ageNum = parseInt(ageRaw || "16", 10);
           const pwd = generatePassword(6);
 
@@ -248,6 +282,15 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             allowedSections[0] ||
             "Lopez";
 
+          let rowError: string | undefined = undefined;
+          if (!isValidLrn) {
+            rowError = "LRN must be exactly 12 digits";
+          } else if (isDuplicateInFile) {
+            rowError = "Duplicate LRN in spreadsheet";
+          } else if (!nameRaw) {
+            rowError = "Full name required";
+          }
+
           rows.push({
             lrn: lrnClean || lrnRaw,
             name: nameRaw || `Student ${i}`,
@@ -255,8 +298,8 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             section: matchedSection,
             age: isNaN(ageNum) ? 16 : ageNum,
             password: pwd,
-            valid: isValidLrn && !!nameRaw,
-            error: !isValidLrn ? "LRN must be 12 digits" : !nameRaw ? "Name required" : undefined,
+            valid: isValidLrn && !isDuplicateInFile && !!nameRaw,
+            error: rowError,
           });
         }
 
@@ -343,7 +386,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   };
 
   const resetForm = () => {
-    setForm({ name: "", lrn: "", grade: "G7", section: "Lopez", age: "", password: "" });
+    setForm({ firstName: "", middleName: "", lastName: "", lrn: "", grade: "G7", section: "Lopez", age: "15", password: "" });
     setPreviewUrl(null);
     setPhotoBase64(null);
     setSuccess(false);
@@ -381,7 +424,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             Student Registered Successfully!
           </h2>
           <p style={{ color: "var(--text-muted)", marginBottom: "20px", fontSize: "13px" }}>
-            Student account for <strong>{form.name}</strong> (LRN: <code style={{ fontFamily: "monospace" }}>{form.lrn}</code>) is ready.
+            Student account for <strong>{getCombinedFullName()}</strong> (LRN: <code style={{ fontFamily: "monospace" }}>{form.lrn}</code>) is ready.
           </p>
 
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
@@ -391,7 +434,7 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             </button>
             <button className="btn-secondary" onClick={() => setPage("admin_voters")} style={{ padding: "8px 16px", borderRadius: "6px", fontSize: "12.5px", display: "flex", alignItems: "center", gap: "6px" }}>
               <List size={14} />
-              Voters Roster
+              Students List
             </button>
           </div>
         </div>
@@ -400,13 +443,13 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
   }
 
   return (
-    <div style={{ maxWidth: "860px", margin: "0 auto", padding: "16px 20px" }}>
+    <div style={{ maxWidth: "820px", margin: "0 auto", padding: "16px 20px" }}>
       <div style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
             <div style={{
-              width: "26px",
-              height: "26px",
+              width: "28px",
+              height: "28px",
               borderRadius: "6px",
               backgroundColor: "rgba(99, 102, 241, 0.12)",
               border: "1px solid rgba(99, 102, 241, 0.2)",
@@ -415,14 +458,14 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
               justifyContent: "center",
               color: "var(--accent-primary)"
             }}>
-              <UserPlus size={14} />
+              <UserPlus size={15} />
             </div>
             <h1 style={{ margin: 0, fontSize: "18px", fontWeight: 600, color: "var(--text-main)", letterSpacing: "-0.01em" }}>
-              Register Student Voters
+              Register Student
             </h1>
           </div>
           <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
-            Add individual student accounts or bulk import entire class rosters via Excel/CSV spreadsheets.
+            Register eligible students individually or bulk import entire class rosters via Excel/CSV spreadsheets.
           </p>
         </div>
 
@@ -499,67 +542,107 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px", alignItems: "start" }}>
-            {/* Left Column */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", alignItems: "start" }}>
+            {/* Left Column: Basic Student Identity */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <div style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--text-muted)", paddingBottom: "6px", borderBottom: "1px solid var(--border-subtle)" }}>
                 Basic Student Identity
               </div>
 
+              {/* 3-Box Structured Name Inputs */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Full Name *
+                  Student Name <span style={{ color: "#ef4444" }}>*</span>
                 </label>
-                <input
-                  name="name"
-                  placeholder="e.g. Juan dela Cruz"
-                  value={form.name}
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid var(--border-subtle)",
-                    backgroundColor: "var(--bg-main)",
-                    color: "var(--text-main)",
-                    fontSize: "13px"
-                  }}
-                />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", alignItems: "end" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "3px", fontSize: "11px", color: "var(--text-light)", height: "16px", lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Last Name">
+                      Last Name <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="lastName"
+                      placeholder="e.g. dela Cruz"
+                      value={form.lastName}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border-subtle)",
+                        backgroundColor: "var(--bg-main)",
+                        color: "var(--text-main)",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "3px", fontSize: "11px", color: "var(--text-light)", height: "16px", lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="First Name">
+                      First Name <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="firstName"
+                      placeholder="e.g. Juan"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border-subtle)",
+                        backgroundColor: "var(--bg-main)",
+                        color: "var(--text-main)",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "3px", fontSize: "11px", color: "var(--text-light)", height: "16px", lineHeight: "16px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title="Middle Name (Optional)">
+                      Middle Name <span style={{ color: "var(--text-light)", fontWeight: 400 }}>(Opt)</span>
+                    </label>
+                    <input
+                      name="middleName"
+                      placeholder="e.g. Santos"
+                      value={form.middleName}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border-subtle)",
+                        backgroundColor: "var(--bg-main)",
+                        color: "var(--text-main)",
+                        fontSize: "13px",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {(form.firstName || form.lastName) && (
+                  <div style={{ marginTop: "6px", fontSize: "11.5px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>Full Name Preview:</span>
+                    <span style={{ fontWeight: 600, color: "var(--accent-primary)", background: "var(--accent-blue)", padding: "1px 8px", borderRadius: "4px" }}>
+                      {getCombinedFullName()}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Learner Reference Number (LRN) *
-                </label>
-                <input
-                  name="lrn"
-                  placeholder="12-digit LRN (e.g. 109876543210)"
-                  value={form.lrn}
-                  onChange={handleChange}
-                  maxLength={12}
-                  autoComplete="off"
-                  style={{
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid var(--border-subtle)",
-                    backgroundColor: "var(--bg-main)",
-                    color: "var(--text-main)",
-                    fontFamily: "monospace",
-                    fontSize: "13px"
-                  }}
-                />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {/* LRN & Age in one balanced row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1.8fr 1fr", gap: "10px", alignItems: "start" }}>
                 <div>
                   <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                    Grade Level *
+                    LRN (12 Digits) <span style={{ color: "#ef4444" }}>*</span>
                   </label>
-                  <select
-                    name="grade"
-                    value={form.grade}
+                  <input
+                    name="lrn"
+                    placeholder="12-digit numeric LRN"
+                    value={form.lrn}
                     onChange={handleChange}
+                    maxLength={12}
+                    autoComplete="off"
                     style={{
                       width: "100%",
                       padding: "7px 10px",
@@ -567,26 +650,21 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
                       border: "1px solid var(--border-subtle)",
                       backgroundColor: "var(--bg-main)",
                       color: "var(--text-main)",
-                      fontSize: "12.5px"
+                      fontFamily: "monospace",
+                      fontSize: "13px",
+                      boxSizing: "border-box"
                     }}
-                  >
-                    <option value="G7">Grade 7</option>
-                    <option value="G8">Grade 8</option>
-                    <option value="G9">Grade 9</option>
-                    <option value="G10">Grade 10</option>
-                    <option value="G11">Grade 11</option>
-                    <option value="G12">Grade 12</option>
-                  </select>
+                  />
                 </div>
                 <div>
                   <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                    Age *
+                    Age <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <input
                     name="age"
                     type="number"
-                    min={5}
-                    max={100}
+                    min={10}
+                    max={25}
                     placeholder="e.g. 15"
                     value={form.age}
                     onChange={handleChange}
@@ -597,72 +675,107 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
                       border: "1px solid var(--border-subtle)",
                       backgroundColor: "var(--bg-main)",
                       color: "var(--text-main)",
-                      fontSize: "13px"
+                      fontSize: "13px",
+                      boxSizing: "border-box"
                     }}
                   />
                 </div>
               </div>
 
+              {/* Grade Level & Official Section in one row */}
               <div>
-                <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Official Section *
-                </label>
-                <select
-                  name="section"
-                  value={form.section}
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid var(--border-subtle)",
-                    backgroundColor: "var(--bg-main)",
-                    color: "var(--text-main)",
-                    fontSize: "12.5px"
-                  }}
-                >
-                  {getSectionsForGrade(form.grade).map((sec) => (
-                    <option key={sec} value={sec}>
-                      {sec}
-                    </option>
-                  ))}
-                </select>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", alignItems: "start" }}>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
+                      Grade Level <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="grade"
+                      value={form.grade}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border-subtle)",
+                        backgroundColor: "var(--bg-main)",
+                        color: "var(--text-main)",
+                        fontSize: "12.5px",
+                        boxSizing: "border-box"
+                      }}
+                    >
+                      <option value="G7">Grade 7</option>
+                      <option value="G8">Grade 8</option>
+                      <option value="G9">Grade 9</option>
+                      <option value="G10">Grade 10</option>
+                      <option value="G11">Grade 11</option>
+                      <option value="G12">Grade 12</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
+                      Official Section <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="section"
+                      value={form.section}
+                      onChange={handleChange}
+                      style={{
+                        width: "100%",
+                        padding: "7px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border-subtle)",
+                        backgroundColor: "var(--bg-main)",
+                        color: "var(--text-main)",
+                        fontSize: "12.5px",
+                        boxSizing: "border-box"
+                      }}
+                    >
+                      {getSectionsForGrade(form.grade).map((sec) => (
+                        <option key={sec} value={sec}>
+                          {sec}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "4px", display: "block" }}>
                   Fixed sections for {FIXED_GRADE_LEVELS.find((g) => g.code === form.grade)?.label || form.grade}: {getSectionsForGrade(form.grade).join(", ")}
                 </span>
               </div>
             </div>
 
-            {/* Right Column */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {/* Right Column: Account Passcode & Photo */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               <div style={{ fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em", color: "var(--text-muted)", paddingBottom: "6px", borderBottom: "1px solid var(--border-subtle)" }}>
                 Account Passcode & Photo
               </div>
 
+              {/* Password with Auto-Generate */}
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                   <label style={{ margin: 0, fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                    Access Password *
+                    Access Password <span style={{ color: "#ef4444" }}>*</span>
                   </label>
                   <button
                     type="button"
                     onClick={handleAutoGeneratePassword}
                     className="btn-secondary"
                     style={{
-                      padding: "4px 10px",
-                      borderRadius: "6px",
-                      fontSize: "11.5px",
+                      padding: "3px 8px",
+                      borderRadius: "5px",
+                      fontSize: "11px",
                       fontWeight: 600,
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "5px",
+                      gap: "4px",
                       backgroundColor: "var(--accent-blue)",
                       borderColor: "var(--border-blue)",
                       color: "var(--accent-primary)",
                       cursor: "pointer",
                     }}
                   >
-                    <Key size={13} />
+                    <Key size={12} />
                     <span>Auto-Generate</span>
                   </button>
                 </div>
@@ -680,9 +793,8 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
                     border: "1px solid var(--border-subtle)",
                     backgroundColor: "var(--bg-main)",
                     color: "var(--text-main)",
-                    fontFamily: "monospace",
                     fontSize: "13px",
-                    fontWeight: 600
+                    boxSizing: "border-box"
                   }}
                 />
               </div>
@@ -690,66 +802,73 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
               {/* Profile Photo */}
               <div>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 500, color: "var(--text-muted)" }}>
-                  Profile Photo (Optional - Used for Biometric Face ID)
+                  Profile Photo <span style={{ color: "#ef4444" }}>*</span>
                 </label>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "10px 14px", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "12px 14px", backgroundColor: "var(--bg-main)", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                     {previewUrl ? (
                       <img
                         src={previewUrl}
                         alt="Preview"
-                        style={{ width: "42px", height: "42px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--accent-primary)", flexShrink: 0 }}
+                        style={{ width: "48px", height: "48px", objectFit: "cover", borderRadius: "50%", border: "2px solid var(--accent-primary)", flexShrink: 0 }}
                       />
                     ) : (
-                      <div style={{ width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-light)", flexShrink: 0 }}>
-                        <User size={20} />
+                      <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-light)", flexShrink: 0, border: "1px dashed var(--border-light)" }}>
+                        <User size={22} />
                       </div>
                     )}
 
-                    <label
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        padding: "6px 14px",
-                        backgroundColor: "var(--accent-blue)",
-                        border: "1px solid var(--border-blue)",
-                        borderRadius: "6px",
-                        color: "var(--accent-primary)",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                      }}
-                    >
-                      <Upload size={14} />
-                      <span>{photoBase64 ? "Change Photo" : "Upload Photo"}</span>
-                      <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
-                    </label>
+                    {/* Perfectly Aligned Action Buttons */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1, minWidth: 0 }}>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          padding: "6px 12px",
+                          backgroundColor: "var(--accent-blue)",
+                          border: "1px solid var(--border-blue)",
+                          borderRadius: "5px",
+                          color: "var(--accent-primary)",
+                          fontSize: "11.5px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          width: "100%",
+                          boxSizing: "border-box",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <Upload size={13} />
+                        <span>{photoBase64 ? "Change Photo" : "Upload Photo"}</span>
+                        <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} />
+                      </label>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowCameraModal(true)}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        padding: "6px 14px",
-                        backgroundColor: "rgba(16, 185, 129, 0.12)",
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
-                        borderRadius: "6px",
-                        color: "#10B981",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                      }}
-                    >
-                      <Camera size={14} />
-                      <span>Take with Camera</span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCameraModal(true)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          padding: "6px 12px",
+                          backgroundColor: "rgba(16, 185, 129, 0.12)",
+                          border: "1px solid rgba(16, 185, 129, 0.3)",
+                          borderRadius: "5px",
+                          color: "#10B981",
+                          fontSize: "11.5px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          width: "100%",
+                          boxSizing: "border-box",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <Camera size={13} />
+                        <span>Take with Camera</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* AI Facial Quality Feedback Badge */}
@@ -777,19 +896,31 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
                   )}
                 </div>
               </div>
-
-              <div style={{ marginTop: "12px" }}>
-                <button
-                  onClick={handleSingleSubmit}
-                  disabled={loading}
-                  className="btn-primary"
-                  style={{ width: "100%", padding: "8px 14px", fontSize: "13px", fontWeight: 500, borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
-                >
-                  <UserPlus size={14} />
-                  {loading ? "Registering..." : "Submit Registration"}
-                </button>
-              </div>
             </div>
+          </div>
+
+          {/* Full-Width Anchored Action Footer */}
+          <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid var(--border-subtle)" }}>
+            <button
+              onClick={handleSingleSubmit}
+              disabled={loading}
+              className="btn-primary"
+              style={{
+                width: "100%",
+                padding: "10px 16px",
+                fontSize: "13px",
+                fontWeight: 600,
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                cursor: "pointer"
+              }}
+            >
+              <UserPlus size={15} />
+              {loading ? "Registering..." : "Submit Registration"}
+            </button>
           </div>
         </div>
       ) : (

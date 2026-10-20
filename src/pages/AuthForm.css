@@ -195,7 +195,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 325px;
+  flex: 1;
 }
 
 /* Tab Switch Animations */
@@ -395,14 +395,15 @@
 .linear-status-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-top: auto;
-  padding: 5px 10px;
+  margin-top: 10px;
+  padding: 5px 12px;
   background: var(--linear-panel-bg);
   border: 1px solid var(--linear-border);
   border-radius: var(--linear-radius-sm);
-  width: fit-content;
-  align-self: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .linear-status-pulse {
@@ -439,8 +440,8 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--linear-border);
 }
 

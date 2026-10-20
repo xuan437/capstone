@@ -17,6 +17,7 @@ import {
   getCleanCampaignText,
 } from "../utils/candidateUtils";
 import { getPartyListBadgeDetails } from "../utils/partylistUtils";
+import { formatGradeSection } from "../utils/sectionConstants";
 import "./CandidateProfileCard.css";
 
 interface CandidateProfileCardProps {
@@ -153,21 +154,13 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
         {candidate.name}
       </h3>
 
-      {/* Role / Position Subtitle with Partylist */}
+      {/* Role / Position Subtitle: Position • Partylist • Grade & Section */}
       <div className="showcase-role">
         <span>{candidate.position}</span>
-        {candidate.partylist && !badge.isIndependent && (
-          <>
-            <span>•</span>
-            <span className="showcase-party-tag">{badge.name}</span>
-          </>
-        )}
-        {candidate.section && (
-          <>
-            <span>•</span>
-            <span style={{ opacity: 0.85 }}>{candidate.section}</span>
-          </>
-        )}
+        <span>•</span>
+        <span className="showcase-party-tag">{candidate.partylist && !badge.isIndependent ? badge.name : "Independent"}</span>
+        <span>•</span>
+        <span style={{ opacity: 0.9 }}>{formatGradeSection(undefined, candidate.section)}</span>
       </div>
 
       {/* Bio / Campaign Text (with highlighted terms in dark mode) */}
@@ -185,69 +178,7 @@ export const CandidateProfileCard: React.FC<CandidateProfileCardProps> = ({
         <span>{nickname}</span>
       </button>
 
-      {/* Bottom Row of 6 Social / Action Icons Matching Reference Mockup */}
-      <div className="showcase-icons-row">
-        {/* 1. Message / Advocacy */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title={`Message: ${candidate.name}`}
-          onClick={() => onViewCandidate(candidate.id)}
-        >
-          <MessageCircle size={16} />
-        </button>
 
-        {/* 2. Photo Gallery */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title="Candidate Photo & Gallery"
-          onClick={() => onViewCandidate(candidate.id)}
-        >
-          <Camera size={16} />
-        </button>
-
-        {/* 3. Globe / Platform */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title="Campaign Platform & Manifesto"
-          onClick={() => onViewCandidate(candidate.id)}
-        >
-          <Globe size={16} />
-        </button>
-
-        {/* 4. Verified / Credentials */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title="Student Credentials & Academic Honors"
-          onClick={() => onViewCandidate(candidate.id)}
-        >
-          <BadgeCheck size={16} />
-        </button>
-
-        {/* 5. GitHub / Portfolio */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title="Student Portfolio & Project Submissions"
-          onClick={() => onViewCandidate(candidate.id)}
-        >
-          <ExternalLink size={16} />
-        </button>
-
-        {/* 6. View Profile (Primary View Action) */}
-        <button
-          type="button"
-          className="showcase-icon-btn"
-          title="View Full Candidate Profile"
-          onClick={() => onViewCandidate(candidate.id)}
-          style={{ color: "var(--primary-navy)" }}
-        >
-          <Eye size={16} />
-        </button>
-      </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import {
   Search,
   X,
   Flag,
+  Award,
 } from "lucide-react";
 import { supabase } from "../supabase";
 import { Candidate, Page, POSITIONS, PartyList } from "../types";
@@ -175,10 +176,27 @@ const AdminSetup: React.FC<AdminSetupProps> = ({
       {/* Header Bar */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <span className="overline">Console Management</span>
-          <h1 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: "var(--text-main)" }}>
-            Candidate Roster & Profiles
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+            <div style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              backgroundColor: "rgba(99, 102, 241, 0.12)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--accent-primary)"
+            }}>
+              <Award size={15} />
+            </div>
+            <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-main)" }}>
+              Candidates List
+            </h1>
+          </div>
+          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+            Official SSLG election candidate roster and profiles.
+          </p>
         </div>
 
         {/* Status, Section & Partylist Filters */}

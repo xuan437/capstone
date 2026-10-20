@@ -34,6 +34,7 @@ import {
 } from "../utils/candidateUtils";
 import { PartyList } from "../types";
 import { fetchPartyLists, getPartyListBadgeDetails, removeCandidatePartylist } from "../utils/partylistUtils";
+import { formatGradeSection } from "../utils/sectionConstants";
 
 interface CandidateProfileProps {
   setPage: (p: Page) => void;
@@ -276,7 +277,7 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
           }}
         >
           <ArrowLeft size={15} />
-          <span>{isAdmin ? "Back to Candidate Roster" : "Back to Official Ballot"}</span>
+          <span>{isAdmin ? "Back to Candidates List" : "Back to Official Ballot"}</span>
         </button>
 
         <span className="cp-topnav-badge">
@@ -540,9 +541,9 @@ const CandidateProfile: React.FC<CandidateProfileProps> = ({
             <div className="cp-stat-card">
               <div className="cp-stat-label">
                 <BookOpen size={11} style={{ color: "var(--primary-navy)" }} />
-                Section / Strand
+                Grade & Section
               </div>
-              <div className="cp-stat-value">{candidate.section || "—"}</div>
+              <div className="cp-stat-value">{candidate.section ? formatGradeSection(undefined, candidate.section) : "—"}</div>
             </div>
 
             {/* Age */}

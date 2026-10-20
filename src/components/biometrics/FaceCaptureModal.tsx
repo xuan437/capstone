@@ -13,6 +13,7 @@ export interface FaceCaptureModalProps {
   onClose: () => void;
   onCapture: (capturedBase64: string, descriptor?: Float32Array) => void;
   title?: string;
+  subtitle?: string;
 }
 
 export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
@@ -20,6 +21,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
   onClose,
   onCapture,
   title = 'Capture Student Portrait Photo',
+  subtitle,
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -240,7 +242,7 @@ export const FaceCaptureModal: React.FC<FaceCaptureModalProps> = ({
                 <h3 className="biometric-modal-title">{title}</h3>
               </div>
               <p className="biometric-modal-subtitle">
-                Align student face inside the guide frame and snap a portrait.
+                {subtitle || "Align student face inside the guide frame and snap a portrait."}
               </p>
             </div>
           </div>

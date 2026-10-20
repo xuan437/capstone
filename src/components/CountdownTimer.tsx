@@ -24,11 +24,11 @@ const CircularDial: React.FC<CircularDialProps> = ({ value, max, label }) => {
 
   return (
     <div className="cd-dial" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
-      <div className="cd-dial-ring">
+      <div className="cd-dial-ring" style={{ position: "relative", width: "110px", height: "110px", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <svg
           className="cd-dial-svg"
           viewBox="0 0 110 110"
-          style={{ transform: "rotate(-90deg)", overflow: "visible" }}
+          style={{ width: "110px", height: "110px", transform: "rotate(-90deg)", overflow: "visible" }}
         >
           {/* Background Dotted Ring */}
           <circle
@@ -241,8 +241,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "24px",
-        padding: "0",
+        gap: "16px",
+        padding: "24px 16px 20px",
         background: "transparent",
         border: "none",
         borderRadius: "0",
@@ -250,7 +250,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         width: "100%",
         maxWidth: "540px",
         boxSizing: "border-box",
-        margin: "0 auto",
+        margin: "0 auto 16px",
         transition: "all 0.3s ease",
         textAlign: "center",
       }}
@@ -273,7 +273,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       </div>
 
       {!isExpired && (
-        <div className="cd-dials-row">
+        <div className="cd-dials-row" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: "28px", flexWrap: "wrap", width: "100%" }}>
           <CircularDial value={timeLeft.days} max={30} label="DAYS" />
           <CircularDial value={timeLeft.hours} max={24} label="HOURS" />
           <CircularDial value={timeLeft.minutes} max={60} label="MINUTES" />

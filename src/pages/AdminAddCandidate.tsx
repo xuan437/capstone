@@ -11,9 +11,12 @@ import {
   ArrowLeft,
   Save,
   Upload,
+  Camera,
   Flag,
   X,
 } from "lucide-react";
+import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
+import { getSectionsForGrade, FIXED_GRADE_LEVELS, formatGradeSection } from "../utils/sectionConstants";
 
 interface AdminAddCandidateProps {
   setPage: (p: Page) => void;
@@ -28,13 +31,15 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     partylist: "Independent",
     image_url: "",
     campaign_text: "",
-    age: "",
-    section: "Grade 12 - GAS",
+    age: "17",
+    grade: "G12",
+    section: "GAS",
   });
   const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   useEffect(() => {
     fetchPartyLists().then((list) => setPartylists(list));
@@ -44,20 +49,46 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    if (name === "position") {
-      let defaultSec = form.section;
-      if (value.includes("Gr 8") || value.includes("Grade 8")) defaultSec = "Grade 8 - Sapa";
-      else if (value.includes("Gr 9") || value.includes("Grade 9")) defaultSec = "Grade 9 - Libaton";
-      else if (value.includes("Gr 10") || value.includes("Grade 10")) defaultSec = "Grade 10 - Timowain";
-      else if (value.includes("Gr 11") || value.includes("Grade 11")) defaultSec = "Grade 11 - TechPro";
-      else if (value.includes("Gr 12") || value.includes("Grade 12")) defaultSec = "Grade 12 - GAS";
-
-      setForm({ ...form, position: value, section: defaultSec });
+    if (name === "grade") {
+      const allowed = getSectionsForGrade(value);
+      setForm((prev) => ({
+        ...prev,
+        grade: value,
+        section: allowed[0] || "",
+      }));
       setError("");
       return;
     }
 
-    setForm({ ...form, [name]: value });
+    if (name === "position") {
+      let defaultGrade = form.grade;
+      let defaultSec = form.section;
+      if (value.includes("Gr 7") || value.includes("Grade 7")) {
+        defaultGrade = "G7";
+        defaultSec = "Lopez";
+      } else if (value.includes("Gr 8") || value.includes("Grade 8")) {
+        defaultGrade = "G8";
+        defaultSec = "Sapa";
+      } else if (value.includes("Gr 9") || value.includes("Grade 9")) {
+        defaultGrade = "G9";
+        defaultSec = "Libaton";
+      } else if (value.includes("Gr 10") || value.includes("Grade 10")) {
+        defaultGrade = "G10";
+        defaultSec = "Timowain";
+      } else if (value.includes("Gr 11") || value.includes("Grade 11")) {
+        defaultGrade = "G11";
+        defaultSec = "TECHPRO";
+      } else if (value.includes("Gr 12") || value.includes("Grade 12")) {
+        defaultGrade = "G12";
+        defaultSec = "GAS";
+      }
+
+      setForm((prev) => ({ ...prev, position: value, grade: defaultGrade, section: defaultSec }));
+      setError("");
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
@@ -92,12 +123,9 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
     if (!form.position) {
       return setError("Candidate Position is required.");
     }
-    if (!form.age.trim()) {
-      return setError("Age is required.");
-    }
     const parsedAge = parseInt(form.age, 10);
-    if (isNaN(parsedAge) || parsedAge < 5 || parsedAge > 100) {
-      return setError("Please enter a valid age between 5 and 100.");
+    if (!form.age.trim() || isNaN(parsedAge) || parsedAge < 10 || parsedAge > 25) {
+      return setError("Please enter a valid age between 10 and 25.");
     }
     if (!form.section.trim()) {
       return setError("Section is required.");
@@ -105,6 +133,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
 
     const finalFullName = getCombinedFullName();
     const assignedPartylist = form.partylist === "Independent" ? null : form.partylist.trim();
+    const fullGradeSection = formatGradeSection(form.grade, form.section.trim());
 
     setIsSubmitting(true);
     setError("");
@@ -118,7 +147,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
           image_url: form.image_url,
           campaign_text: form.campaign_text.trim(),
           age: parsedAge,
-          section: form.section.trim(),
+          section: fullGradeSection,
         },
       ]);
 
@@ -131,7 +160,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             image_url: form.image_url,
             campaign_text: form.campaign_text.trim(),
             age: parsedAge,
-            section: form.section.trim(),
+            section: fullGradeSection,
           },
         ]);
         if (fallbackRes.error) {
@@ -209,8 +238,9 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                   partylist: "Independent",
                   image_url: "",
                   campaign_text: "",
-                  age: "",
-                  section: "",
+                  age: "17",
+                  grade: "G12",
+                  section: "GAS",
                 });
                 setSuccess(false);
               }}
@@ -236,7 +266,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
   };
 
   return (
-    <div style={{ maxWidth: "680px", margin: "0 auto", padding: "16px 20px" }}>
+    <div style={{ maxWidth: "820px", margin: "0 auto", padding: "16px 20px" }}>
       <div style={{ marginBottom: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
           <div
@@ -322,37 +352,61 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 e.currentTarget.src = getRealisticFallbackPhoto(candidateDisplayName);
               }}
             />
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
               <label style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)" }}>
-                Candidate Photo
+                Candidate Photo <span style={{ color: "#ef4444" }}>*</span>
               </label>
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  backgroundColor: "var(--color-success-bg)",
-                  border: "1px solid var(--color-success-border)",
-                  borderRadius: "6px",
-                  color: "var(--primary-navy)",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  width: "fit-content",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <Upload size={14} />
-                <span>{form.image_url ? "Change Photo" : "Upload Candidate Photo"}</span>
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg, image/webp"
-                  onChange={handleFileChange}
-                  style={{ display: "none" }}
-                />
-              </label>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    backgroundColor: "var(--color-success-bg)",
+                    border: "1px solid var(--color-success-border)",
+                    borderRadius: "6px",
+                    color: "var(--primary-navy)",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Upload size={14} />
+                  <span>{form.image_url ? "Change Photo" : "Upload Candidate Photo"}</span>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCameraModal(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    backgroundColor: "rgba(16, 185, 129, 0.12)",
+                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                    borderRadius: "6px",
+                    color: "#10B981",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Camera size={14} />
+                  <span>Take with Camera</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -374,6 +428,7 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
                 gap: "10px",
+                alignItems: "end",
               }}
             >
               <div>
@@ -384,7 +439,13 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="Last Name"
                 >
                   Last Name *
                 </label>
@@ -406,7 +467,13 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="First Name"
                 >
                   First Name *
                 </label>
@@ -428,9 +495,15 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="Middle Name (Optional)"
                 >
-                  Middle Name <span style={{ color: "var(--text-light)", fontWeight: 400 }}>(Optional)</span>
+                  Middle Name <span style={{ color: "var(--text-light)", fontWeight: 400 }}>(Opt)</span>
                 </label>
                 <input
                   name="middleName"
@@ -559,11 +632,11 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
             </span>
           </div>
 
-          {/* Age & Section Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "10px" }}>
+          {/* Age & Dependent Grade/Section Row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-                Age *
+                Age <span style={{ color: "#ef4444" }}>*</span>
               </label>
               <input
                 type="number"
@@ -571,14 +644,33 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 placeholder="e.g. 17"
                 value={form.age}
                 onChange={handleInputChange}
-                min="5"
-                max="100"
+                min={10}
+                max={25}
                 style={inputStyle}
               />
             </div>
+
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-                Official Grade & Section *
+                Grade Level <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <select
+                name="grade"
+                value={form.grade}
+                onChange={handleInputChange}
+                style={inputStyle}
+              >
+                {FIXED_GRADE_LEVELS.map((g) => (
+                  <option key={g.code} value={g.code}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
+                Official Section <span style={{ color: "#ef4444" }}>*</span>
               </label>
               <select
                 name="section"
@@ -586,34 +678,17 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
                 onChange={handleInputChange}
                 style={inputStyle}
               >
-                <option value="">-- Choose Official Section --</option>
-                <optgroup label="Grade 7">
-                  <option value="Grade 7 - Lopez">Gr. 7 - Lopez</option>
-                  <option value="Grade 7 - Ebora">Gr. 7 - Ebora</option>
-                </optgroup>
-                <optgroup label="Grade 8">
-                  <option value="Grade 8 - Sapa">Gr. 8 - Sapa</option>
-                  <option value="Grade 8 - Bautista">Gr. 8 - Bautista</option>
-                </optgroup>
-                <optgroup label="Grade 9">
-                  <option value="Grade 9 - Libaton">Gr. 9 - Libaton</option>
-                  <option value="Grade 9 - Fuentes">Gr. 9 - Fuentes</option>
-                </optgroup>
-                <optgroup label="Grade 10">
-                  <option value="Grade 10 - Timowain">Gr. 10 - Timowain</option>
-                  <option value="Grade 10 - Ambot">Gr. 10 - Ambot</option>
-                </optgroup>
-                <optgroup label="Grade 11">
-                  <option value="Grade 11 - TechPro">Gr. 11 - TechPro</option>
-                  <option value="Grade 11 - ACADS">Gr. 11 - ACADS</option>
-                </optgroup>
-                <optgroup label="Grade 12">
-                  <option value="Grade 12 - GAS">Gr. 12 - GAS</option>
-                  <option value="Grade 12 - TVL">Gr. 12 - TVL</option>
-                </optgroup>
+                {getSectionsForGrade(form.grade).map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+          <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "-6px", display: "block" }}>
+            Fixed sections for {FIXED_GRADE_LEVELS.find((g) => g.code === form.grade)?.label || form.grade}: {getSectionsForGrade(form.grade).join(", ")}
+          </span>
 
           {/* Campaign Platform / Bio */}
           <div>
@@ -683,6 +758,20 @@ const AdminAddCandidate: React.FC<AdminAddCandidateProps> = ({ setPage }) => {
           </div>
         </div>
       </div>
+
+      {/* Camera Capture Modal */}
+      {showCameraModal && (
+        <FaceCaptureModal
+          isOpen={showCameraModal}
+          onClose={() => setShowCameraModal(false)}
+          onCapture={(base64) => {
+            setForm((prev) => ({ ...prev, image_url: base64 }));
+            setShowCameraModal(false);
+          }}
+          title="Capture Candidate Portrait"
+          subtitle="Align candidate face with the camera to capture official election portrait."
+        />
+      )}
     </div>
   );
 };

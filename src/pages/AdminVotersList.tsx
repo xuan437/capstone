@@ -25,6 +25,7 @@ import BubbleLoader from "../components/BubbleLoader";
 import PhotoViewerModal from "../components/PhotoViewerModal";
 import { useLanguage } from "../context/LanguageContext";
 import { logAuditAction } from "../utils/auditLogger";
+import { formatGradeSection } from "../utils/sectionConstants";
 
 const AdminVotersList: React.FC<{
   setPage: (p: Page) => void;
@@ -52,10 +53,12 @@ const AdminVotersList: React.FC<{
   const [viewingPhotoStudent, setViewingPhotoStudent] = useState<Student | null>(null);
   const pdfPrintRef = useRef<HTMLDivElement>(null);
 
-  // View password authorization states
-  const [viewPasswordStudentId, setViewPasswordStudentId] = useState<string | null>(null);
-  const [viewPasswordAuthInput, setViewPasswordAuthInput] = useState("");
-  const [viewPasswordAuthError, setViewPasswordAuthError] = useState("");
+  // Reset passcode authorization states
+  const [resetPasscodeStudent, setResetPasscodeStudent] = useState<Student | null>(null);
+  const [resetPasscodeAuthInput, setResetPasscodeAuthInput] = useState("");
+  const [resetPasscodeAuthError, setResetPasscodeAuthError] = useState("");
+  const [newlyGeneratedPassword, setNewlyGeneratedPassword] = useState<{ student: Student; pass: string } | null>(null);
+  const [isResettingPasscode, setIsResettingPasscode] = useState(false);
 
   // Reset vote status authorization states
   const [resetVoteStudent, setResetVoteStudent] = useState<Student | null>(null);
@@ -63,39 +66,54 @@ const AdminVotersList: React.FC<{
   const [resetVoteAuthError, setResetVoteAuthError] = useState("");
   const [isResettingVote, setIsResettingVote] = useState(false);
 
-  const toggleShowPassword = (id: string) => {
-    if (showPasswords[id]) {
-      setShowPasswords((prev) => ({ ...prev, [id]: false }));
-    } else {
-      setViewPasswordStudentId(id);
-      setViewPasswordAuthInput("");
-      setViewPasswordAuthError("");
-    }
-  };
-
-  const handleViewPasswordAuthSubmit = async () => {
+  const handleResetPasscodeSubmit = async () => {
+    if (!resetPasscodeStudent) return;
     const { ADMIN_PASSWORD } = await import("../types");
-    const targetStudent = students.find((s) => s.id === viewPasswordStudentId);
-    if (viewPasswordAuthInput !== ADMIN_PASSWORD) {
-      setViewPasswordAuthError("Incorrect admin password. Access denied.");
+    if (resetPasscodeAuthInput !== ADMIN_PASSWORD) {
+      setResetPasscodeAuthError("Incorrect admin password. Access denied.");
       await logAuditAction(
         "SECURITY_ACCESS_KEY_DENIED",
         "Admin",
-        `Denied unauthorized attempt to reveal access password for voter ${targetStudent?.name || viewPasswordStudentId} (LRN: ${viewPasswordStudentId})`
+        `Denied unauthorized password reset attempt for ${resetPasscodeStudent.name} (LRN: ${resetPasscodeStudent.id})`
       );
       return;
     }
-    if (viewPasswordStudentId) {
-      setShowPasswords((prev) => ({ ...prev, [viewPasswordStudentId]: true }));
-      await logAuditAction(
-        "SECURITY_ACCESS_KEY_REVEALED",
-        "Admin",
-        `Administrator revealed access passcode for voter ${targetStudent?.name || viewPasswordStudentId} (LRN: ${viewPasswordStudentId})`
-      );
+
+    setIsResettingPasscode(true);
+    setResetPasscodeAuthError("");
+
+    const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+    let newPass = "";
+    for (let i = 0; i < 6; i++) {
+      newPass += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    setViewPasswordStudentId(null);
-    setViewPasswordAuthInput("");
-    setViewPasswordAuthError("");
+
+    try {
+      const { error: updateErr } = await supabase
+        .from("students")
+        .update({ password: newPass })
+        .eq("id", resetPasscodeStudent.id);
+
+      if (updateErr) throw updateErr;
+
+      setStudents((prev) =>
+        prev.map((s) => (s.id === resetPasscodeStudent.id ? { ...s, password: newPass } : s))
+      );
+
+      await logAuditAction(
+        "VOTER_PASSWORD_RESET",
+        "Admin",
+        `Admin generated new passcode for student ${resetPasscodeStudent.name} (LRN: ${resetPasscodeStudent.id})`
+      );
+
+      setNewlyGeneratedPassword({ student: resetPasscodeStudent, pass: newPass });
+      setResetPasscodeStudent(null);
+      setResetPasscodeAuthInput("");
+    } catch (err: any) {
+      setResetPasscodeAuthError("Failed to update passcode: " + (err.message || "Unknown error"));
+    } finally {
+      setIsResettingPasscode(false);
+    }
   };
 
   const handleResetVoteSubmit = async () => {
@@ -167,17 +185,28 @@ const AdminVotersList: React.FC<{
         (votesData || []).map((v: any) => String(v.student_id)).filter(Boolean)
       );
 
-      const formatted: Student[] = (studentsData || []).map((s: any) => {
-        const studentIdStr = String(s.id);
-        const meta = votesMap[studentIdStr] || {};
-        return {
-          ...s,
-          id: studentIdStr,
-          has_voted: votedSet.has(studentIdStr) || !!s.has_voted,
-          voted_at: s.voted_at || meta.voted_at || undefined,
-          vote_location: s.vote_location || meta.location || undefined,
-        };
-      });
+      const formatted: Student[] = (studentsData || [])
+        .filter((s: any) => {
+          const id = String(s.id || "").toLowerCase().trim();
+          const name = String(s.name || "").toLowerCase().trim();
+          const email = String(s.email || "").toLowerCase().trim();
+          if (id === "admin" || id === "admin@gmail.com") return false;
+          if (name === "admin" || name === "administrator" || name === "faculty admin") return false;
+          if (email === "admin@gmail.com") return false;
+          if (s.isAdmin) return false;
+          return true;
+        })
+        .map((s: any) => {
+          const studentIdStr = String(s.id);
+          const meta = votesMap[studentIdStr] || {};
+          return {
+            ...s,
+            id: studentIdStr,
+            has_voted: votedSet.has(studentIdStr) || !!s.has_voted,
+            voted_at: s.voted_at || meta.voted_at || undefined,
+            vote_location: s.vote_location || meta.location || undefined,
+          };
+        });
 
       setStudents(formatted);
     } catch (err) {
@@ -383,8 +412,27 @@ const AdminVotersList: React.FC<{
       {/* Page Title & Navigation Actions */}
       <div className="flex-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
         <div>
-          <span className="overline">Student Registry</span>
-          <h1>Voters Registry</h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
+            <div style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              backgroundColor: "rgba(99, 102, 241, 0.12)",
+              border: "1px solid rgba(99, 102, 241, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--accent-primary)"
+            }}>
+              <Users size={15} />
+            </div>
+            <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "var(--text-main)" }}>
+              Students List
+            </h1>
+          </div>
+          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>
+            Official student voters directory and ballot participation status.
+          </p>
         </div>
         <div className="action-buttons" style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button className="btn-top-nav primary" onClick={handleDownloadClick}>
@@ -497,9 +545,8 @@ const AdminVotersList: React.FC<{
                 <tr>
                   <th>Student Name</th>
                   <th>LRN (ID)</th>
-                  <th>Grade</th>
-                  <th>Section</th>
-                  <th>Password</th>
+                  <th>Grade & Section</th>
+                  <th>Passcode</th>
                   <th>Status</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
@@ -519,9 +566,8 @@ const AdminVotersList: React.FC<{
                             e.currentTarget.src = getRealisticFallbackPhoto(student.name, student.id);
                           }}
                         />
-                        <div>
-                          <div className="voter-name-title">{student.name}</div>
-                          <div className="voter-lrn-code">{student.id}</div>
+                        <div className="voter-name-title">
+                          {student.name}
                         </div>
                       </div>
                     </td>
@@ -529,32 +575,37 @@ const AdminVotersList: React.FC<{
                       <span className="credential-chip">{student.id}</span>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: "12px" }}>{student.grade}</span>
+                      <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: "12px" }}>
+                        {formatGradeSection(student.grade, student.section)}
+                      </span>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 500, color: "var(--text-muted)", fontSize: "12px" }}>{student.section || "—"}</span>
-                    </td>
-                    <td>
-                      {(() => {
-                        const displayPw = student.password && student.password.startsWith("$2a$") ? "123456" : student.password;
-                        return displayPw ? (
-                          <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                            <span className="credential-chip" style={{ letterSpacing: showPasswords[student.id] ? "normal" : "0.12em" }}>
-                              {showPasswords[student.id] ? displayPw : "••••••••"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => toggleShowPassword(student.id)}
-                              style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", color: "var(--text-light)", display: "inline-flex", alignItems: "center" }}
-                              title={showPasswords[student.id] ? "Hide Password" : "Show Password"}
-                            >
-                              {showPasswords[student.id] ? <EyeOff size={13} /> : <Eye size={13} />}
-                            </button>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: "11px", color: "var(--text-light)", fontStyle: "italic" }}>—</span>
-                        );
-                      })()}
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <span className="credential-chip" style={{ letterSpacing: "0.15em" }}>
+                          ••••••••
+                        </span>
+                        <button
+                          type="button"
+                          className="btn-inner-action"
+                          onClick={() => {
+                            setResetPasscodeStudent(student);
+                            setResetPasscodeAuthInput("");
+                            setResetPasscodeAuthError("");
+                          }}
+                          style={{
+                            padding: "2px 7px",
+                            fontSize: "11px",
+                            backgroundColor: "var(--bg-subtle)",
+                            border: "1px solid var(--border-light)",
+                            color: "var(--text-muted)",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                          }}
+                          title={`Generate new temporary passcode for ${student.name}`}
+                        >
+                          Reset
+                        </button>
+                      </div>
                     </td>
                     <td>
                       {student.has_voted ? (
@@ -581,9 +632,11 @@ const AdminVotersList: React.FC<{
                           <button
                             className="btn-inner-action"
                             onClick={() => {
-                              setResetVoteStudent(student);
-                              setResetVoteAuthInput("");
-                              setResetVoteAuthError("");
+                              if (window.confirm(`Are you sure you want to reset the voting status for ${student.name}? This will erase their submitted votes.`)) {
+                                setResetVoteStudent(student);
+                                setResetVoteAuthInput("");
+                                setResetVoteAuthError("");
+                              }
                             }}
                             title="Reset Vote Status (Requires Admin Password)"
                             style={{
@@ -592,7 +645,7 @@ const AdminVotersList: React.FC<{
                               background: "var(--color-danger-bg, rgba(239, 68, 68, 0.05))",
                             }}
                           >
-                            Reset
+                            Reset Vote
                           </button>
                         )}
                       </div>
@@ -671,15 +724,15 @@ const AdminVotersList: React.FC<{
         document.body
       )}
 
-      {/* View Password Authorization Modal */}
-      {viewPasswordStudentId && typeof document !== "undefined" && createPortal(
+      {/* Reset Passcode Authorization Modal */}
+      {resetPasscodeStudent && typeof document !== "undefined" && createPortal(
         <div
           className="policy-modal-overlay"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
-              setViewPasswordStudentId(null);
-              setViewPasswordAuthInput("");
-              setViewPasswordAuthError("");
+              setResetPasscodeStudent(null);
+              setResetPasscodeAuthInput("");
+              setResetPasscodeAuthError("");
             }
           }}
         >
@@ -695,35 +748,35 @@ const AdminVotersList: React.FC<{
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-              <Lock size={18} style={{ color: "var(--primary-navy)" }} />
-              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reveal Voter Password</h3>
+              <Lock size={18} style={{ color: "var(--accent-primary)" }} />
+              <h3 style={{ margin: 0, color: "var(--text-main)", fontSize: "15px", fontWeight: 600 }}>Reset Voter Passcode</h3>
             </div>
             <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12px", lineHeight: "1.45" }}>
-              Enter administrator password to decrypt and view this student's access password.
+              Enter administrator password to generate a new temporary login passcode for <strong>{resetPasscodeStudent.name}</strong> ({resetPasscodeStudent.id}):
             </p>
             <input
               type="password"
               placeholder="Enter admin password"
-              value={viewPasswordAuthInput}
-              onChange={(e) => { setViewPasswordAuthInput(e.target.value); setViewPasswordAuthError(""); }}
-              onKeyDown={(e) => e.key === "Enter" && handleViewPasswordAuthSubmit()}
+              value={resetPasscodeAuthInput}
+              onChange={(e) => { setResetPasscodeAuthInput(e.target.value); setResetPasscodeAuthError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleResetPasscodeSubmit()}
               autoFocus
               style={{
-                width: "100%", padding: "9px 12px", border: `1px solid ${viewPasswordAuthError ? "var(--color-danger)" : "var(--border-subtle)"}`,
+                width: "100%", padding: "9px 12px", border: `1px solid ${resetPasscodeAuthError ? "var(--color-danger)" : "var(--border-subtle)"}`,
                 borderRadius: "6px", fontSize: "13px", boxSizing: "border-box",
                 outline: "none", marginBottom: "6px", background: "var(--bg-subtle)", color: "var(--text-main)"
               }}
             />
-            {viewPasswordAuthError && (
+            {resetPasscodeAuthError && (
               <p style={{ margin: "0 0 10px 0", color: "var(--color-danger)", fontSize: "11px", fontWeight: 500 }}>
-                {viewPasswordAuthError}
+                {resetPasscodeAuthError}
               </p>
             )}
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => { setViewPasswordStudentId(null); setViewPasswordAuthInput(""); setViewPasswordAuthError(""); }}
+                onClick={() => { setResetPasscodeStudent(null); setResetPasscodeAuthInput(""); setResetPasscodeAuthError(""); }}
                 style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
               >
                 Cancel
@@ -731,12 +784,105 @@ const AdminVotersList: React.FC<{
               <button
                 type="button"
                 className="btn-primary"
-                onClick={handleViewPasswordAuthSubmit}
-                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px", background: "var(--primary-navy)", borderColor: "var(--primary-navy)" }}
+                onClick={handleResetPasscodeSubmit}
+                disabled={isResettingPasscode}
+                style={{ flex: 1, padding: "8px 12px", borderRadius: "6px", fontSize: "12px" }}
               >
-                Reveal
+                {isResettingPasscode ? "Resetting..." : "Generate New"}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Newly Generated Passcode Display Modal */}
+      {newlyGeneratedPassword && typeof document !== "undefined" && createPortal(
+        <div
+          className="policy-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setNewlyGeneratedPassword(null);
+            }
+          }}
+        >
+          <div
+            className="policy-modal-content"
+            style={{
+              width: "100%",
+              maxWidth: "380px",
+              padding: "24px",
+              borderRadius: "10px",
+              background: "#FFFFFF",
+              backgroundColor: "#FFFFFF",
+              textAlign: "center",
+            }}
+          >
+            <div style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "50%",
+              background: "rgba(16, 185, 129, 0.12)",
+              color: "var(--color-success)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 12px auto"
+            }}>
+              <CheckCircle2 size={24} />
+            </div>
+            <h3 style={{ margin: "0 0 6px 0", color: "var(--text-main)", fontSize: "16px", fontWeight: 700 }}>
+              Passcode Reset Successful
+            </h3>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "12.5px" }}>
+              New temporary login passcode for <strong>{newlyGeneratedPassword.student.name}</strong>:
+            </p>
+            <div style={{
+              background: "var(--bg-subtle)",
+              border: "1px dashed var(--border-light)",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "10px"
+            }}>
+              <code style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "0.1em", color: "var(--accent-primary)" }}>
+                {newlyGeneratedPassword.pass}
+              </code>
+              <button
+                type="button"
+                className="btn-inner-action"
+                onClick={() => {
+                  navigator.clipboard.writeText(newlyGeneratedPassword.pass);
+                  alert("Passcode copied to clipboard!");
+                }}
+                style={{
+                  padding: "6px 12px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  backgroundColor: "var(--accent-primary)",
+                  color: "#FFFFFF",
+                  borderRadius: "5px",
+                  border: "none",
+                  cursor: "pointer"
+                }}
+              >
+                Copy
+              </button>
+            </div>
+            <p style={{ margin: "0 0 16px 0", color: "var(--text-muted)", fontSize: "11px" }}>
+              Please provide this passcode to the student. For security, it will not be displayed again.
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() => setNewlyGeneratedPassword(null)}
+              style={{ width: "100%", padding: "9px 16px", borderRadius: "6px", fontSize: "13px" }}
+            >
+              Done
+            </button>
           </div>
         </div>,
         document.body

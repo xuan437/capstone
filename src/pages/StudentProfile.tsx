@@ -28,6 +28,7 @@ import {
   AlertTriangle,
   Globe,
   Receipt,
+  ArrowLeft,
 } from "lucide-react";
 import { logAuditAction } from "../utils/auditLogger";
 import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
@@ -35,6 +36,7 @@ import { FaceVerificationModal } from "../components/biometrics/FaceVerification
 import { validatePhotoFaceQuality } from "../utils/faceApi";
 import { checkGeofence } from "../utils/geofencing";
 import { captureVoterLocation } from "../utils/locationCapture";
+import { formatGradeSection } from "../utils/sectionConstants";
 
 const StudentProfile: React.FC<{
   setPage: (p: Page) => void;
@@ -451,6 +453,29 @@ const StudentProfile: React.FC<{
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "16px 20px" }}>
+      {/* Top Navigation */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <button
+          type="button"
+          onClick={() => setPage("admin_voters")}
+          className="btn-secondary"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "6px 14px",
+            height: "34px",
+            fontSize: "12.5px",
+            fontWeight: 600,
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          <ArrowLeft size={15} />
+          <span>Back to Students List</span>
+        </button>
+      </div>
+
       {/* Modern Centered Student Voter Profile Card */}
       <div
         style={{
@@ -672,7 +697,7 @@ const StudentProfile: React.FC<{
           }}
         >
           <MapPin size={13} style={{ color: "var(--accent-primary)" }} />
-          <span>DLMHS Voter &bull; Grade {student.grade} {student.section ? `• Section ${student.section}` : ""}</span>
+          <span>DLMHS Voter &bull; {formatGradeSection(student.grade, student.section)}</span>
         </div>
 
         {/* Action Button & Status Pill Row */}

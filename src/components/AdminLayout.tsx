@@ -208,15 +208,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const navItems: { label: string; page: Page; IconComponent: React.ComponentType<{ size?: number }> }[] = [
-    { label: t.navDashboard || "Dashboard", page: "admin_setup", IconComponent: LayoutDashboard },
-    { label: t.navVotersList || "Voters Registry", page: "admin_voters", IconComponent: Users },
+    { label: t.navDashboard || "Candidates List", page: "admin_setup", IconComponent: LayoutDashboard },
+    { label: t.navVotersList || "Students List", page: "admin_voters", IconComponent: Users },
     { label: (t as any).navPartylists || "Partylists", page: "admin_partylists", IconComponent: Flag },
-    { label: t.navAddCandidate || "Add Candidate", page: "admin_add_candidate", IconComponent: UserPlus },
+    { label: t.navAddCandidate || "Register Candidate", page: "admin_add_candidate", IconComponent: UserPlus },
     { label: t.navRegisterStudent || "Register Student", page: "admin_register", IconComponent: UserCheck },
     { label: t.navCountdown || "Election Settings", page: "admin_election_settings", IconComponent: Clock },
     { label: t.navAuditLogs || "Audit Logs", page: "admin_audit_logs", IconComponent: ShieldAlert },
     { label: t.navLiveResults || "Live Standings", page: "results", IconComponent: BarChart3 },
-    { label: t.navDownloadPdf || "Export Results", page: "download_results", IconComponent: FileSpreadsheet },
+    { label: t.navDownloadPdf || "Results", page: "download_results", IconComponent: FileSpreadsheet },
     { label: "Digital Seal", page: "admin_digital_seal", IconComponent: Stamp },
   ];
 
@@ -394,37 +394,43 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
               <Menu size={18} />
             </button>
 
-            {/* Global Admin Search Bar */}
-            <div className="admin-search-wrapper" style={{ maxWidth: "300px" }}>
-              <Search size={14} style={{ color: "var(--text-light)", flexShrink: 0 }} />
-              <input
-                type="text"
-                placeholder="Search candidates or voters..."
-                value={searchTerm || ""}
-                onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape" && setSearchTerm) setSearchTerm("");
-                }}
-              />
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm && setSearchTerm("")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-light)",
-                    padding: "2px",
-                    display: "flex",
-                    alignItems: "center",
+            {/* Scoped Admin Search Bar (Only shown on pages without their own dedicated search controls) */}
+            {(activePage === "admin_setup" || activePage === "admin_partylists") && (
+              <div className="admin-search-wrapper" style={{ maxWidth: "320px" }}>
+                <Search size={14} style={{ color: "var(--text-light)", flexShrink: 0 }} />
+                <input
+                  type="text"
+                  placeholder={
+                    activePage === "admin_setup"
+                      ? "Search candidates by name, position, or section..."
+                      : "Search partylists or candidates..."
+                  }
+                  value={searchTerm || ""}
+                  onChange={(e) => setSearchTerm && setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape" && setSearchTerm) setSearchTerm("");
                   }}
-                  title="Clear search"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm && setSearchTerm("")}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--text-light)",
+                      padding: "2px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                    title="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </header>
 

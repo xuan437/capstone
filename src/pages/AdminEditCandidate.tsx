@@ -4,7 +4,8 @@ import { Candidate, Page, POSITIONS, PartyList } from "../types";
 import { fileToBase64, getCandidatePhoto, getRealisticFallbackPhoto } from "../utils/imageUtils";
 import { logAuditAction } from "../utils/auditLogger";
 import { fetchPartyLists, getPartyListBadgeDetails } from "../utils/partylistUtils";
-import { ALL_CANDIDATE_SECTIONS } from "../utils/sectionConstants";
+import { ALL_CANDIDATE_SECTIONS, getSectionsForGrade, FIXED_GRADE_LEVELS, formatGradeSection, normalizeStrand } from "../utils/sectionConstants";
+import { FaceCaptureModal } from "../components/biometrics/FaceCaptureModal";
 import {
   Edit3,
   CheckCircle2,
@@ -13,6 +14,7 @@ import {
   Save,
   User,
   Upload,
+  Camera,
   Eye,
   Flag,
   X,
@@ -38,13 +40,15 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
     image_url: "",
     campaign_text: "",
     age: "",
-    section: "",
+    grade: "G12",
+    section: "GAS",
   });
   const [partylists, setPartylists] = useState<PartyList[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   // Helper to parse existing single full name string into structured parts
   const parseCandidateName = (fullName: string) => {
@@ -96,6 +100,39 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
       } else {
         const c = data as Candidate;
         const parsed = parseCandidateName(c.name);
+        let loadedGrade = "G12";
+        let loadedSection = "GAS";
+
+        if (c.section) {
+          const raw = c.section.trim();
+          if (raw.includes(" - ")) {
+            const parts = raw.split(" - ");
+            const numMatch = parts[0].match(/\d+/);
+            if (numMatch) loadedGrade = `G${numMatch[0]}`;
+            loadedSection = normalizeStrand(parts[1].trim());
+          } else {
+            const normalized = normalizeStrand(raw);
+            const foundGrade = FIXED_GRADE_LEVELS.find((g) =>
+              getSectionsForGrade(g.code).some((s) => s.toLowerCase() === normalized.toLowerCase())
+            );
+            if (foundGrade) {
+              loadedGrade = foundGrade.code;
+              loadedSection = normalized;
+            } else {
+              loadedSection = normalized;
+            }
+          }
+        }
+
+        // Validate that loadedSection exists in allowed sections for loadedGrade
+        const allowed = getSectionsForGrade(loadedGrade);
+        const match = allowed.find((s) => s.toLowerCase() === loadedSection.toLowerCase());
+        if (match) {
+          loadedSection = match;
+        } else if (allowed.length > 0) {
+          loadedSection = allowed[0];
+        }
+
         setForm({
           lastName: parsed.lastName,
           firstName: parsed.firstName,
@@ -105,7 +142,8 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           image_url: c.image_url || "",
           campaign_text: c.campaign_text || "",
           age: c.age !== undefined && c.age !== null ? String(c.age) : "",
-          section: c.section || "",
+          grade: loadedGrade,
+          section: loadedSection,
         });
       }
       setIsLoading(false);
@@ -118,7 +156,47 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "grade") {
+      const allowed = getSectionsForGrade(value);
+      setForm((prev) => ({
+        ...prev,
+        grade: value,
+        section: allowed[0] || "",
+      }));
+      setError("");
+      return;
+    }
+
+    if (name === "position") {
+      let defaultGrade = form.grade;
+      let defaultSec = form.section;
+      if (value.includes("Gr 7") || value.includes("Grade 7")) {
+        defaultGrade = "G7";
+        defaultSec = "Lopez";
+      } else if (value.includes("Gr 8") || value.includes("Grade 8")) {
+        defaultGrade = "G8";
+        defaultSec = "Sapa";
+      } else if (value.includes("Gr 9") || value.includes("Grade 9")) {
+        defaultGrade = "G9";
+        defaultSec = "Libaton";
+      } else if (value.includes("Gr 10") || value.includes("Grade 10")) {
+        defaultGrade = "G10";
+        defaultSec = "Timowain";
+      } else if (value.includes("Gr 11") || value.includes("Grade 11")) {
+        defaultGrade = "G11";
+        defaultSec = "TECHPRO";
+      } else if (value.includes("Gr 12") || value.includes("Grade 12")) {
+        defaultGrade = "G12";
+        defaultSec = "GAS";
+      }
+
+      setForm((prev) => ({ ...prev, position: value, grade: defaultGrade, section: defaultSec }));
+      setError("");
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
@@ -155,12 +233,9 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
     if (!form.position) {
       return setError("Candidate Position is required.");
     }
-    if (!form.age.trim()) {
-      return setError("Age is required.");
-    }
     const parsedAge = parseInt(form.age, 10);
-    if (isNaN(parsedAge) || parsedAge < 5 || parsedAge > 100) {
-      return setError("Please enter a valid age between 5 and 100.");
+    if (!form.age.trim() || isNaN(parsedAge) || parsedAge < 10 || parsedAge > 25) {
+      return setError("Please enter a valid age between 10 and 25.");
     }
     if (!form.section.trim()) {
       return setError("Section is required.");
@@ -168,6 +243,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
 
     const finalFullName = getCombinedFullName();
     const assignedPartylist = form.partylist === "Independent" ? null : form.partylist.trim();
+    const fullGradeSection = formatGradeSection(form.grade, form.section.trim());
 
     setIsSubmitting(true);
     setError("");
@@ -182,7 +258,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           image_url: form.image_url,
           campaign_text: form.campaign_text.trim(),
           age: parsedAge,
-          section: form.section.trim(),
+          section: fullGradeSection,
         })
         .eq("id", candidateId);
 
@@ -196,7 +272,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
             image_url: form.image_url,
             campaign_text: form.campaign_text.trim(),
             age: parsedAge,
-            section: form.section.trim(),
+            section: fullGradeSection,
           })
           .eq("id", candidateId);
         if (fallbackRes.error) {
@@ -339,7 +415,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
   };
 
   return (
-    <div style={{ maxWidth: "680px", margin: "0 auto", padding: "16px 20px" }}>
+    <div style={{ maxWidth: "820px", margin: "0 auto", padding: "16px 20px" }}>
       <div style={{ marginBottom: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
           <div
@@ -425,37 +501,61 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 e.currentTarget.src = getRealisticFallbackPhoto(candidateDisplayName, candidateId || undefined);
               }}
             />
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
               <label style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--text-main)" }}>
-                Candidate Photo
+                Candidate Photo <span style={{ color: "#ef4444" }}>*</span>
               </label>
-              <label
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  padding: "6px 14px",
-                  backgroundColor: "var(--color-success-bg)",
-                  border: "1px solid var(--color-success-border)",
-                  borderRadius: "6px",
-                  color: "var(--primary-navy)",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  width: "fit-content",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <Upload size={14} />
-                <span>{form.image_url ? "Change Photo" : "Upload Candidate Photo"}</span>
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg, image/webp"
-                  onChange={handleFileChange}
-                  style={{ display: "none" }}
-                />
-              </label>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    backgroundColor: "var(--color-success-bg)",
+                    border: "1px solid var(--color-success-border)",
+                    borderRadius: "6px",
+                    color: "var(--primary-navy)",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Upload size={14} />
+                  <span>{form.image_url ? "Change Photo" : "Upload Candidate Photo"}</span>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCameraModal(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    backgroundColor: "rgba(16, 185, 129, 0.12)",
+                    border: "1px solid rgba(16, 185, 129, 0.3)",
+                    borderRadius: "6px",
+                    color: "#10B981",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <Camera size={14} />
+                  <span>Take with Camera</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -477,6 +577,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
                 gap: "10px",
+                alignItems: "end",
               }}
             >
               <div>
@@ -487,7 +588,13 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="Last Name"
                 >
                   Last Name *
                 </label>
@@ -509,7 +616,13 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="First Name"
                 >
                   First Name *
                 </label>
@@ -531,9 +644,15 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                     fontSize: "11px",
                     fontWeight: 500,
                     color: "var(--text-muted)",
+                    height: "16px",
+                    lineHeight: "16px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
+                  title="Middle Name (Optional)"
                 >
-                  Middle Name <span style={{ color: "var(--text-light)", fontWeight: 400 }}>(Optional)</span>
+                  Middle Name <span style={{ color: "var(--text-light)", fontWeight: 400 }}>(Opt)</span>
                 </label>
                 <input
                   name="middleName"
@@ -662,11 +781,11 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
             </span>
           </div>
 
-          {/* Age & Section Row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "10px" }}>
+          {/* Age & Dependent Grade/Section Row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-                Age *
+                Age <span style={{ color: "#ef4444" }}>*</span>
               </label>
               <input
                 type="number"
@@ -674,14 +793,33 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 placeholder="e.g. 17"
                 value={form.age}
                 onChange={handleInputChange}
-                min="5"
-                max="100"
+                min={10}
+                max={25}
                 style={inputStyle}
               />
             </div>
+
             <div>
               <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-                Official Grade & Section *
+                Grade Level <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <select
+                name="grade"
+                value={form.grade}
+                onChange={handleInputChange}
+                style={inputStyle}
+              >
+                {FIXED_GRADE_LEVELS.map((g) => (
+                  <option key={g.code} value={g.code}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
+                Official Section <span style={{ color: "#ef4444" }}>*</span>
               </label>
               <select
                 name="section"
@@ -689,37 +827,17 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 onChange={handleInputChange}
                 style={inputStyle}
               >
-                <option value="">-- Choose Official Section --</option>
-                <optgroup label="Grade 7">
-                  <option value="Grade 7 - Lopez">Gr. 7 - Lopez</option>
-                  <option value="Grade 7 - Ebora">Gr. 7 - Ebora</option>
-                </optgroup>
-                <optgroup label="Grade 8">
-                  <option value="Grade 8 - Sapa">Gr. 8 - Sapa</option>
-                  <option value="Grade 8 - Bautista">Gr. 8 - Bautista</option>
-                </optgroup>
-                <optgroup label="Grade 9">
-                  <option value="Grade 9 - Libaton">Gr. 9 - Libaton</option>
-                  <option value="Grade 9 - Fuentes">Gr. 9 - Fuentes</option>
-                </optgroup>
-                <optgroup label="Grade 10">
-                  <option value="Grade 10 - Timowain">Gr. 10 - Timowain</option>
-                  <option value="Grade 10 - Ambot">Gr. 10 - Ambot</option>
-                </optgroup>
-                <optgroup label="Grade 11">
-                  <option value="Grade 11 - TechPro">Gr. 11 - TechPro</option>
-                  <option value="Grade 11 - ACADS">Gr. 11 - ACADS</option>
-                </optgroup>
-                <optgroup label="Grade 12">
-                  <option value="Grade 12 - GAS">Gr. 12 - GAS</option>
-                  <option value="Grade 12 - TVL">Gr. 12 - TVL</option>
-                </optgroup>
-                {form.section && !ALL_CANDIDATE_SECTIONS.some((s) => s.value === form.section) && (
-                  <option value={form.section}>{form.section} (Custom / Previous)</option>
-                )}
+                {getSectionsForGrade(form.grade).map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+          <span style={{ fontSize: "11px", color: "var(--text-light)", marginTop: "-6px", display: "block" }}>
+            Fixed sections for {FIXED_GRADE_LEVELS.find((g) => g.code === form.grade)?.label || form.grade}: {getSectionsForGrade(form.grade).join(", ")}
+          </span>
 
           {/* Campaign Platform / Bio */}
           <div>
@@ -789,6 +907,20 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Camera Portrait Modal */}
+      {showCameraModal && (
+        <FaceCaptureModal
+          isOpen={showCameraModal}
+          onClose={() => setShowCameraModal(false)}
+          onCapture={(base64) => {
+            setForm((prev) => ({ ...prev, image_url: base64 }));
+            setShowCameraModal(false);
+          }}
+          title="Capture Candidate Portrait"
+          subtitle="Align candidate face with the camera to update official election portrait."
+        />
+      )}
     </div>
   );
 };
