@@ -542,6 +542,10 @@ const AdminRegister: React.FC<{ setPage: (p: Page) => void }> = ({ setPage }) =>
             </div>
           )}
 
+          <p style={{ margin: "0 0 12px 0", fontSize: "11.5px", color: "var(--text-muted)" }}>
+            Fields marked with <span style={{ color: "#ef4444", fontWeight: 600 }}>*</span> are required.
+          </p>
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", alignItems: "start" }}>
             {/* Left Column: Basic Student Identity */}
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>

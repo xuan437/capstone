@@ -472,6 +472,10 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           </div>
         )}
 
+        <p style={{ margin: "0 0 12px 0", fontSize: "11.5px", color: "var(--text-muted)" }}>
+          Fields marked with <span style={{ color: "#ef4444", fontWeight: 600 }}>*</span> are required.
+        </p>
+
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Avatar Preview & Upload */}
           <div
