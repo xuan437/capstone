@@ -574,7 +574,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                 color: "var(--text-main)",
               }}
             >
-              Candidate Name *
+              Candidate Name <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <div
               style={{
@@ -600,7 +600,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                   }}
                   title="Last Name"
                 >
-                  Last Name *
+                  Last Name <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   name="lastName"
@@ -628,7 +628,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
                   }}
                   title="First Name"
                 >
-                  First Name *
+                  First Name <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <input
                   name="firstName"
@@ -700,7 +700,7 @@ const AdminEditCandidate: React.FC<AdminEditCandidateProps> = ({
           {/* Position Selector */}
           <div>
             <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)" }}>
-              Position *
+              Position <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <select
               name="position"

@@ -23,10 +23,11 @@ const NEGROS_ORIENTAL_POLYGON: [number, number][] = [
   [9.8000,  123.4500],
   [9.6500,  123.4000],
   [9.5000,  123.3800],
-  [9.4000,  123.3200],
-  [9.3000,  123.2500],
-  [9.1500,  123.1500],
-  [9.0500,  123.0200],
+  [9.4000,  123.3500],  // extended east to cover coastal barangays
+  [9.3500,  123.3200],  // covers Dumaguete City northern edge
+  [9.2800,  123.3000],  // covers Dumaguete City proper (9.31°N, 123.31°E)
+  [9.1500,  123.2000],  // extended east from old 123.1500
+  [9.0500,  123.0500],  // extended east from old 123.0200
   [9.1000,  122.8000],
   [9.2000,  122.7200],
   [9.3500,  122.6800],
